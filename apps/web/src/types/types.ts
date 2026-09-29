@@ -1,4 +1,4 @@
-import { internalUtilEntrySchema } from '@homelab/api-contracts/schemas';
+import { internalUtilEntrySchema } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
 export type Entry = z.infer<typeof internalUtilEntrySchema>;

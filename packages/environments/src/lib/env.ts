@@ -3,7 +3,7 @@ import { envSchema } from '../conf/env-schema';
 
 const environmentSchema = z.enum(['development', 'staging', 'production']);
 
-type HomelabEnv = z.infer<typeof envSchema> & {
+type InventoryManagerEnv = z.infer<typeof envSchema> & {
   environment: z.infer<typeof environmentSchema>;
 };
 
@@ -21,4 +21,4 @@ if (!parsed.success) {
   throw new Error('Invalid environment variables');
 }
 
-export const env: HomelabEnv = { ...parsed.data, environment: environment.data };
+export const env: InventoryManagerEnv = { ...parsed.data, environment: environment.data };

@@ -1,5 +1,5 @@
 {
-  "name": "@homelab/api-contracts",
+  "name": "@invm/api-contracts",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/api-contracts/src",
   "projectType": "library",

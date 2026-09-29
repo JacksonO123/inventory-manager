@@ -6,7 +6,7 @@
     "lib": ["es2022"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "customConditions": ["@homelab/source"],
+    "customConditions": ["@invm/source"],
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -17,13 +17,13 @@
     "types": ["node"],
     "target": "es2022",
     "paths": {
-      "@homelab/core-db-utils": ["./packages/core-db-utils/src/index.ts"],
-      "@homelab/core-db-utils/db": ["./packages/core-db-utils/src/db.ts"],
-      "@homelab/core-db-utils/schema": ["./packages/core-db-utils/src/schema.ts"],
-      "@homelab/environments": ["./packages/environments/src/index.ts"],
-      "@homelab/api-contracts/web": ["./packages/api-contracts/src/web/index.ts"],
-      "@homelab/environments/db": ["./packages/environments/src/apps/db/index.ts"],
-      "@homelab/api-contracts/schemas": ["./packages/api-contracts/src/schemas/index.ts"]
+      "@invm/inventory-db-utils": ["./packages/inventory-db-utils/src/index.ts"],
+      "@invm/inventory-db-utils/db": ["./packages/inventory-db-utils/src/db.ts"],
+      "@invm/inventory-db-utils/schema": ["./packages/inventory-db-utils/src/schema.ts"],
+      "@invm/environments": ["./packages/environments/src/index.ts"],
+      "@invm/api-contracts/web": ["./packages/api-contracts/src/web/index.ts"],
+      "@invm/environments/db": ["./packages/environments/src/apps/db/index.ts"],
+      "@invm/api-contracts/schemas": ["./packages/api-contracts/src/schemas/index.ts"]
     }
   }
 }

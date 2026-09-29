@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../dist/packages/core-db-utils",
+    "outDir": "../../dist/packages/inventory-db-utils",
     "rootDir": "../../..",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

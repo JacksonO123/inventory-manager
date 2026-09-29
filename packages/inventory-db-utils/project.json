@@ -1,7 +1,7 @@
 {
-  "name": "@homelab/core-db-utils",
+  "name": "@invm/inventory-db-utils",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/core-db-utils/src",
+  "sourceRoot": "packages/inventory-db-utils/src",
   "projectType": "library",
   "targets": {
     "tsc": {
@@ -22,14 +22,14 @@
     "migrate:run": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsx packages/core-db-utils/src/migrate.ts",
+        "command": "tsx packages/inventory-db-utils/src/migrate.ts",
         "cwd": "{workspaceRoot}"
       }
     },
     "migrate:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "drizzle-kit generate --schema packages/core-db-utils/src/schema.ts --out packages/core-db-utils/migrations --dialect postgresql --casing snake_case",
+        "command": "drizzle-kit generate --schema packages/inventory-db-utils/src/schema.ts --out packages/inventory-db-utils/migrations --dialect postgresql --casing snake_case",
         "cwd": "{workspaceRoot}"
       }
     },

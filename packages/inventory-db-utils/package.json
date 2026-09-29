@@ -1,9 +1,9 @@
 {
-  "name": "@homelab/core-db-utils",
+  "name": "@invm/inventory-db-utils",
   "version": "0.0.1",
   "type": "commonjs",
   "private": true,
   "dependencies": {
-    "@homelab/environments": "workspace:*"
+    "@invm/environments": "workspace:*"
   }
 }

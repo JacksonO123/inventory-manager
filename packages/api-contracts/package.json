@@ -1,16 +1,16 @@
 {
-  "name": "@homelab/api-contracts",
+  "name": "@invm/api-contracts",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "exports": {
     ".": {
-      "@homelab/source": "./src/index.ts",
+      "@invm/source": "./src/index.ts",
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
     "./*": {
-      "@homelab/source": "./src/*",
+      "@invm/source": "./src/*",
       "import": "./src/*",
       "types": "./src/*"
     }

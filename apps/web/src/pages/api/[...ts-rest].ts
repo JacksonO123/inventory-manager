@@ -1,4 +1,4 @@
-import { rootWebRouter } from '@homelab/api-contracts/web';
+import { rootWebRouter } from '@invm/api-contracts/web';
 import { createNextRoute, createNextRouter } from '@ts-rest/next';
 
 const router = createNextRoute(rootWebRouter, {

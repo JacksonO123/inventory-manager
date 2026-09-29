@@ -1,4 +1,4 @@
-import { dbEnv } from '@homelab/environments/db';
+import { dbEnv } from '@invm/environments/db';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
@@ -19,7 +19,7 @@ const pool = new Pool({ connectionString: url });
   try {
     const db = drizzle(pool);
     console.log('Running migrations...');
-    await migrate(db, { migrationsFolder: './packages/core-db-utils/migrations' });
+    await migrate(db, { migrationsFolder: './packages/inventory-db-utils/migrations' });
     console.log('Migrations completed successfully.');
   } catch (err) {
     console.error('Migration failed:', err);

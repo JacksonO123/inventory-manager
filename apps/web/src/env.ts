@@ -1,4 +1,4 @@
-import { createEnv, environmentSchema } from '@homelab/environments';
+import { createEnv, environmentSchema } from '@invm/environments';
 import { z } from 'zod';
 
 export const env = createEnv({

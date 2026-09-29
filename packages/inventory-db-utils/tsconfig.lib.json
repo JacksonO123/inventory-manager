@@ -1,15 +1,9 @@
 {
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-        "outDir": "../../dist/packages/core-db-utils"
-    },
-    "include": [
-        "src/**/*.ts"
-    ],
-    "exclude": [
-        "jest.config.*",
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
-    ],
-    "references": []
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/packages/inventory-db-utils"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["jest.config.*", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "references": []
 }
