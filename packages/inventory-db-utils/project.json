@@ -1,0 +1,45 @@
+{
+  "name": "@homelab/core-db-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/core-db-utils/src",
+  "projectType": "library",
+  "targets": {
+    "tsc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "commands": ["oxlint {projectRoot}"],
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "migrate:run": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/core-db-utils/src/migrate.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "migrate:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "drizzle-kit generate --schema packages/core-db-utils/src/schema.ts --out packages/core-db-utils/migrations --dialect postgresql --casing snake_case",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "commands": ["oxfmt {projectRoot} --write"],
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

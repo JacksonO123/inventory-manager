@@ -1,0 +1,31 @@
+{
+  "name": "@homelab/api-contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/api-contracts/src",
+  "projectType": "library",
+  "targets": {
+    "tsc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "commands": ["oxlint {projectRoot}"],
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "commands": ["oxfmt {projectRoot} --write"],
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

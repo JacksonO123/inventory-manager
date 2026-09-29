@@ -1,0 +1,44 @@
+{
+  "name": "@homelab/environments",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/environments/src",
+  "projectType": "library",
+  "targets": {
+    "tsc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "commands": ["oxlint {projectRoot}"],
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "options": {
+        "commands": ["oxfmt {projectRoot} --write"],
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "setup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx packages/environments/src/lib/writeAppEnvs.ts"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "command": "jest"
+      }
+    }
+  }
+}

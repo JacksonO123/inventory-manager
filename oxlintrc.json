@@ -1,0 +1,37 @@
+{
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2022": true
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    ".nx/",
+    "coverage/",
+    "apps/web/.next/",
+    "**/*.d.ts",
+    "**/*.js",
+    "**/webpack.config.js",
+    "**/next.config.ts",
+    "**/jest.config.*",
+    "**/jest.preset.ts",
+    ".opencode/",
+    "apps/web/specs/**/*.spec.tsx"
+  ],
+  "rules": {
+    "explicit-function-return-type": "off",
+    "no-unused-vars": "warn",
+    "no-explicit-any": "warn",
+    "no-misused-promises": "error",
+    "no-extraneous-class": "warn",
+    "restrict-template-expressions": "off",
+    "require-await": "off"
+  },
+  "typescript": {
+    "parser": {
+      "kind": "typescriptEstree",
+      "tsconfigRootDir": "."
+    }
+  }
+}
