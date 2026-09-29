@@ -2,7 +2,7 @@ import { rootWebRouter } from '@homelab/api-contracts/web';
 import { createNextRoute, createNextRouter } from '@ts-rest/next';
 
 const router = createNextRoute(rootWebRouter, {
-  status: async () => {
+  debug: async () => {
     return { status: 200, body: 'success' };
   }
 });
