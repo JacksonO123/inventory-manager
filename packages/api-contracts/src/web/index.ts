@@ -1,7 +1,6 @@
 import { c } from '../contract';
 import { z } from 'zod';
-
-export * from './routers';
+import { messagesRouter } from './routers/messages';
 
 export const rootWebRouter = c.router({
   debug: {
@@ -10,5 +9,7 @@ export const rootWebRouter = c.router({
     responses: {
       200: z.literal('success')
     }
-  }
+  },
+
+  messages: messagesRouter
 });
