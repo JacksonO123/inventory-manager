@@ -4,6 +4,6 @@
     "outDir": "../../dist/packages/inventory-db-utils"
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["jest.config.*", "src/**/*.spec.ts", "src/**/*.test.ts"],
+  "exclude": ["jest.config.*", "src/**/*.spec.ts", "src/**/*.test.ts", "src/migrate.ts"],
   "references": []
 }
