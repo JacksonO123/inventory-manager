@@ -10,6 +10,7 @@ The inventory manager repo.
 - AI is not recommended for architecture, get good + learn something
 - AI is great for tests, use it to generate tests
 - AI is ok if you are ayush (prs will be reviewed more critically)
+- If you generate something with ai and it does something sometimes (not ui), make ai generate a test for it
 
 ## How it works
 
@@ -48,7 +49,7 @@ Defines `ts-rest` contracts for api shapes and validators. Invalidates tons of b
 
 #### environments
 
-The util for handling all secrets and distributing them to the correct projects.
+The util for handling all secrets and distributing them to the correct projects. If you are interested in it def talk to me about it.
 
 This is the home for the actual secret files that contain things like db urls/passwords, server urls, tokens, etc. the root `.env` is for project environment things such as configuring `development`, `staging`, `production` environment locally, things like that.
 
@@ -72,3 +73,15 @@ This package also has a util for protecting secrets for nextjs. This is roughly 
 #### inventory-db-utils
 
 Where db schemas, migrations, connection utils etc are stored.
+
+### DB
+
+This project uses a postgres db. See above for creating a local one.
+
+I recommend you use some program for inspecting databases. Personally I use `pgAdmin`. `DBeaver` is another popular one. Up to you. Super useful.
+
+DB migrations are handled completely by drizzle, do not go off and do manual migrations, create migration files yourself etc.
+
+To create a custom migration, read the docs its something like `pnpx drizzle-kit generate --custom --name=seed-initial-users`. This should not be common. Your migrations should be pretty simple most of the time.
+
+Sql migration files are tracked in `packages/inventory-db-utils/migrations/`. Schema is defined in `packages/inventory-db-utils/src/schema.ts`.

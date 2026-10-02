@@ -6,3 +6,6 @@ docker run --name inventory_db-dev \
     -e POSTGRES_PASSWORD=dev-admin \
     -p 5432:5432 \
     -d postgres
+
+pnpm i
+nx migrate:run inventory-db-utils
