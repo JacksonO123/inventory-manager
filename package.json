@@ -57,6 +57,7 @@
     "@ts-rest/core": "3.53.0-rc.1",
     "@ts-rest/next": "3.53.0-rc.1",
     "@ts-rest/react-query": "3.53.0-rc.1",
+    "better-auth": "^1.7.7",
     "class-validator": "^0.15.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",

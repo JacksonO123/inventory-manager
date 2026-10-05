@@ -85,3 +85,9 @@ DB migrations are handled completely by drizzle, do not go off and do manual mig
 To create a custom migration, read the docs its something like `pnpx drizzle-kit generate --custom --name=seed-initial-users`. This should not be common. Your migrations should be pretty simple most of the time.
 
 Sql migration files are tracked in `packages/inventory-db-utils/migrations/`. Schema is defined in `packages/inventory-db-utils/src/schema.ts`.
+
+### Important to note
+
+This section has some things that are good too know, may solve problems you can have.
+
+1. To build the web app, you must have an active dev environment for it with `nx dev web`. The reason is because nextjs pre renders data that it fetches in server components, and the api it relies on is its own server. So it must be running in order to build it. Kinda funny, good to know
