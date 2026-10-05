@@ -10,5 +10,11 @@ export const envSchema = z.object({
   }),
   api: z.object({
     baseUrl: z.url()
+  }),
+  web: z.object({
+    betterAuthSecret: z.string().min(1),
+    googleClientId: z.string().min(1),
+    googleClientSecret: z.string().min(1),
+    baseUrl: z.url()
   })
 });

@@ -1,4 +1,9 @@
 {
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript"],
+  "options": {
+    "typeAware": true
+  },
   "env": {
     "browser": true,
     "node": true,
@@ -16,22 +21,23 @@
     "**/next.config.ts",
     "**/jest.config.*",
     "**/jest.preset.ts",
-    ".opencode/",
     "apps/web/specs/**/*.spec.tsx"
   ],
   "rules": {
-    "explicit-function-return-type": "off",
     "no-unused-vars": "warn",
-    "no-explicit-any": "warn",
-    "no-misused-promises": "error",
-    "no-extraneous-class": "warn",
-    "restrict-template-expressions": "off",
-    "require-await": "off"
-  },
-  "typescript": {
-    "parser": {
-      "kind": "typescriptEstree",
-      "tsconfigRootDir": "."
-    }
+    "typescript/explicit-function-return-type": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-misused-promises": "error",
+    "typescript/no-extraneous-class": "warn",
+    "typescript/restrict-template-expressions": "off",
+    "typescript/require-await": "off",
+    "typescript/strict-boolean-expressions": [
+      "error",
+      {
+        "allowNumber": false,
+        "allowNullableNumber": false,
+        "allowNullableObject": false
+      }
+    ]
   }
 }
