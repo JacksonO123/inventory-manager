@@ -1,11 +1,6 @@
 import { pgTable } from 'drizzle-orm/pg-core';
 import * as t from 'drizzle-orm/pg-core';
 
-export const messageTable = pgTable('message_table', {
-  id: t.serial('id').primaryKey(),
-  message: t.text('message').notNull()
-});
-
 export const user = pgTable('user', {
   id: t.text('id').primaryKey(),
   name: t.text('name').notNull(),
@@ -75,3 +70,9 @@ export const verification = pgTable(
   },
   (table) => [t.index('verification_identifier_idx').on(table.identifier)]
 );
+
+export const itemTable = pgTable('item', {
+  id: t.serial().primaryKey(),
+  name: t.text().notNull(),
+  description: t.text()
+});
