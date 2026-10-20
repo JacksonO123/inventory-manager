@@ -15,6 +15,20 @@
       "when": 1791224087472,
       "tag": "0001_clean_ted_forrester",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792447247668,
+      "tag": "0002_acoustic_fabian_cortez",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792447661884,
+      "tag": "0003_windy_reavers",
+      "breakpoints": true
     }
   ]
 }
