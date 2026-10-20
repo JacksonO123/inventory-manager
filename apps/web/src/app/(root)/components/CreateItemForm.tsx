@@ -1,4 +1,3 @@
-import { itemSchema } from '@invm/api-contracts/schemas';
 import { useForm } from '@tanstack/react-form';
 import { Card, CardContent, CardFooter } from '../../../components/ui/card';
 import { Field, FieldLabel, FieldError } from '../../../components/ui/field';
@@ -7,6 +6,7 @@ import { useId } from 'react';
 import { Textarea } from '../../../components/ui/textarea';
 import { Button } from '../../../components/ui/button';
 import { PartialItem } from '../../../types/types';
+import { z } from 'zod';
 
 type CreateItemFormProps = {
   onSave: (item: PartialItem) => void;
@@ -18,7 +18,10 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
 
   const form = useForm({
     validators: {
-      onChange: itemSchema.omit({ id: true })
+      onChange: z.object({
+        name: z.string().min(1),
+        description: z.string().min(1)
+      })
     },
     defaultValues: {
       name: '',
