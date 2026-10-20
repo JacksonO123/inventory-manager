@@ -1,12 +1,16 @@
 import { rootWebRouter } from '@invm/api-contracts/web';
 import { createNextRoute, createNextRouter } from '@ts-rest/next';
 import { db } from '../../server/db';
-import { messageTable } from '@invm/inventory-db-utils';
+import { itemTable } from '@invm/inventory-db-utils';
 
-const nextMessagesRoute = createNextRoute(rootWebRouter.messages, {
-  getMessages: async () => {
-    const messages = await db.select().from(messageTable);
-    return { status: 200, body: messages };
+const nextItemRoute = createNextRoute(rootWebRouter.item, {
+  createItem: async ({ body }) => {
+    try {
+      const [createdItem] = await db.insert(itemTable).values(body).returning();
+      return { status: 200, body: createdItem };
+    } catch (err) {
+      return { status: 500, body: { message: err + '' } };
+    }
   }
 });
 
@@ -15,7 +19,7 @@ const router = createNextRoute(rootWebRouter, {
     return { status: 200, body: 'success' };
   },
 
-  messages: nextMessagesRoute
+  item: nextItemRoute
 });
 
 export default createNextRouter(rootWebRouter, router);
