@@ -18,6 +18,15 @@ It is an nx mono repo. Learn more generally about that here [nx](https://nx.dev/
 
 ### Setup
 
+### Quick setup guide
+
+To make setup easy, I combined all setup pieces into a quick script to run
+
+```sh
+chmod +x ./scripts/setup.sh
+./scripts/setup.sh
+```
+
 Run this to get your repo setup
 
 ```sh
@@ -29,8 +38,8 @@ nx setup environments
 Run this to create local postgres db with docker. You must already have docker daemon, or docker desktop installed.
 
 ```sh
-chmod +x ./create_local_db.sh
-./create_local_db.sh
+chmod +x ./scripts/create-local-db.sh
+./scripts/create-local-db.sh
 ```
 
 After this you are more or less good to go.
