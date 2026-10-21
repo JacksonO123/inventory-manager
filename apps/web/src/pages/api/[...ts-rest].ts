@@ -6,8 +6,17 @@ import { itemTable } from '@invm/inventory-db-utils';
 const nextItemRoute = createNextRoute(rootWebRouter.item, {
   createItem: async ({ body }) => {
     try {
-      const [createdItem] = await db.insert(itemTable).values(body).returning();
+      const [createdItem] = await db.insert(itemTable).values(body).returning({ id: itemTable.id });
       return { status: 200, body: createdItem };
+    } catch (err) {
+      return { status: 500, body: { message: err + '' } };
+    }
+  },
+
+  getItems: async () => {
+    try {
+      const items = await db.select().from(itemTable);
+      return { status: 200, body: items };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }
