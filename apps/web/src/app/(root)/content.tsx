@@ -11,7 +11,6 @@ import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
 import { Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
-import { itemSchema } from '@invm/api-contracts/schemas';
 
 type ContentProps = {
   items: ItemType[];
