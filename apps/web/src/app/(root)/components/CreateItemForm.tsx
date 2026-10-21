@@ -64,10 +64,10 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
             {(field) => (
               <div className="w-full">
                 <Field>
-                  <FieldLabel htmlFor={`entry-link-${formId}`}>Link</FieldLabel>
+                  <FieldLabel htmlFor={`entry-description-${formId}`}>Description</FieldLabel>
                   <Textarea
-                    id={`entry-link-${formId}`}
-                    placeholder="Link"
+                    id={`entry-description-${formId}`}
+                    placeholder="Description"
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                   />

@@ -9,18 +9,33 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/pop
 import { useState } from 'react';
 import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
-import { PartialItem } from '../../types/types';
+import { Item as ItemType, PartialItem } from '../../types/types';
+import { Items } from './components/Items';
+import { itemSchema } from '@invm/api-contracts/schemas';
 
-export function Content() {
+type ContentProps = {
+  items: ItemType[];
+};
+
+export function Content({ items: itemsFromServer }: ContentProps) {
   const session = authClient.useSession();
   const [creatingItem, setCreatingItem] = useState(false);
+  const [items, setItems] = useState([...itemsFromServer]);
 
   const saveItemMutation = tsr.item.createItem.useMutation();
 
   async function handleSaveItem(item: PartialItem) {
-    // use result from this when making optimistic updates
-    await saveItemMutation.mutateAsync({ body: item });
-    setCreatingItem(false);
+    try {
+      const fullItem: ItemType = { ...item, id: -1 };
+      setItems((prev) => [...prev, fullItem]);
+      setCreatingItem(false);
+      const res = await saveItemMutation.mutateAsync({ body: item });
+      setItems((items) =>
+        items.map((item) => (item.id === -1 ? { ...item, id: res.body.id } : item))
+      );
+    } catch {
+      setItems((items) => items.filter((item) => item.id !== -1));
+    }
   }
 
   return (
@@ -67,6 +82,7 @@ export function Content() {
           </Button>
         )}
       </div>
+      <Items items={items} />
     </main>
   );
 }
