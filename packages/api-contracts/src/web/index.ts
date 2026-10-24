@@ -1,6 +1,6 @@
 import { c } from '../contract';
 import { z } from 'zod';
-import { messagesRouter } from './routers/messages';
+import { itemRouter } from './routers';
 
 export const rootWebRouter = c.router({
   debug: {
@@ -11,5 +11,5 @@ export const rootWebRouter = c.router({
     }
   },
 
-  messages: messagesRouter
+  item: itemRouter
 });

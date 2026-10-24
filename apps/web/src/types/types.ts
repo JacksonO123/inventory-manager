@@ -1,6 +1,6 @@
-import { internalUtilEntrySchema } from '@invm/api-contracts/schemas';
+import { itemSchema } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
-export type Entry = z.infer<typeof internalUtilEntrySchema>;
+export type Item = z.infer<typeof itemSchema>;
 
-export type PartialEntry = Omit<Entry, 'id'>;
+export type PartialItem = Omit<Item, 'id'>;
