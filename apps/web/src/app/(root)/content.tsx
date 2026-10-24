@@ -72,16 +72,16 @@ export function Content({ items: itemsFromServer }: ContentProps) {
           </Button>
         )}
       </Header>
-      <div className="p-8">
+      <div className="p-8 flex flex-col gap-4">
         {creatingItem ? (
           <CreateItemForm onSave={handleSaveItem} onCancel={() => setCreatingItem(false)} />
         ) : (
-          <Button onClick={() => setCreatingItem(true)}>
+          <Button onClick={() => setCreatingItem(true)} className="w-fit">
             Create Item <Plus />
           </Button>
         )}
+        <Items items={items} />
       </div>
-      <Items items={items} />
     </main>
   );
 }
