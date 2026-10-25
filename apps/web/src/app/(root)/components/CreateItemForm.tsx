@@ -20,7 +20,7 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
     validators: {
       onChange: z.object({
         name: z.string().min(1),
-        description: z.string().min(1)
+        description: z.string()
       })
     },
     defaultValues: {
@@ -28,7 +28,7 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
       description: ''
     },
     onSubmit: ({ value }) => {
-      onSave(value);
+      onSave({ name: value.name, description: value.description || null });
     }
   });
 
@@ -64,7 +64,9 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
             {(field) => (
               <div className="w-full">
                 <Field>
-                  <FieldLabel htmlFor={`entry-description-${formId}`}>Description</FieldLabel>
+                  <FieldLabel htmlFor={`entry-description-${formId}`}>
+                    Description (optional)
+                  </FieldLabel>
                   <Textarea
                     id={`entry-description-${formId}`}
                     placeholder="Description"
