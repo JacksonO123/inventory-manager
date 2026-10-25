@@ -8,4 +8,4 @@ docker run --name inventory_db-dev \
     -d postgres
 
 pnpm i
-nx migrate:run inventory-db-utils
+pnpm nx migrate:run inventory-db-utils
