@@ -34,4 +34,6 @@ jobs:
         run: pnpm nx sync
 
       - name: Lint, typecheck, test affected projects
+        env:
+          NX_BASE: origin/${{ github.event.pull_request.base.ref }}
         run: pnpm nx affected -t lint tsc test
