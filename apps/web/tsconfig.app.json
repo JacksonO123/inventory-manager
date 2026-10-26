@@ -39,6 +39,7 @@
     "src/**/*.spec.js",
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
-    ".next"
+    ".next",
+    "next.config.ts"
   ]
 }
