@@ -28,7 +28,7 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
       description: ''
     },
     onSubmit: ({ value }) => {
-      onSave({ name: value.name, description: value.description || null });
+      onSave({ name: value.name, description: value.description.trim() || null });
     }
   });
 
