@@ -32,8 +32,6 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
     }
   });
 
-  console.log(form.getAllErrors());
-
   return (
     <form
       onSubmit={(e) => {
