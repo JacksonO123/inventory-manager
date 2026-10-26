@@ -1,4 +1,3 @@
-// Yann Chan
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CreateItemForm } from './CreateItemForm';
 
