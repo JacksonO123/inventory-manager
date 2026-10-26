@@ -1,11 +1,8 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { authClient } from '../../client/auth-client';
 import { Header } from '../../components/Header';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { Button } from '../../components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { useState } from 'react';
 import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
@@ -17,7 +14,6 @@ type ContentProps = {
 };
 
 export function Content({ items: itemsFromServer }: ContentProps) {
-  const session = authClient.useSession();
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
 
@@ -39,8 +35,9 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   return (
     <main>
-      <Header className="flex justify-end">
-        {session.isPending ? (
+      <Header className="flex justify-between">
+        <h1 className="text-lg">Inventory Manager</h1>
+        {/*session.isPending ? (
           <LoadingSpinner />
         ) : session.data ? (
           <Popover>
@@ -70,7 +67,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
           >
             Sign In
           </Button>
-        )}
+        )*/}
       </Header>
       <div className="p-8 flex flex-col gap-4">
         {creatingItem ? (
