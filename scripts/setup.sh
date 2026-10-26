@@ -9,7 +9,7 @@ else
     echo "pnpm found"
 fi
 
-if command -v nx >/dev/null 2>&1; then
+if ! command -v nx >/dev/null 2>&1; then
     echo "nx not found in path, I recommend installing it with 'pnpm i -g nx' if you will be doing development"
 fi
 
