@@ -12,7 +12,6 @@ export function RenderClientErrors({ errors }: RenderClientErrorsProps) {
   const errorsRef = useRef(memoErrors);
 
   useEffect(() => {
-    console.log(errors);
     setTimeout(() => {
       errorsRef.current.forEach((error) => {
         toast.add({
