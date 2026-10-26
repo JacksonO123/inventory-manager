@@ -19,7 +19,7 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
   const form = useForm({
     validators: {
       onChange: z.object({
-        name: z.string().min(1),
+        name: z.string().trim().min(1),
         description: z.string()
       })
     },
