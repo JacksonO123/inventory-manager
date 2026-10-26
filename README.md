@@ -12,11 +12,7 @@ The inventory manager repo.
 - AI is ok if you are ayush (prs will be reviewed more critically)
 - If you generate something with ai and it does something sometimes (not ui), make ai generate a test for it
 
-## How it works
-
-It is an nx mono repo. Learn more generally about that here [nx](https://nx.dev/).
-
-### Setup
+## Setup
 
 ### Quick setup guide
 
@@ -27,22 +23,50 @@ chmod +x ./scripts/setup.sh
 ./scripts/setup.sh
 ```
 
-Run this to get your repo setup
+### How to start web app
+
+After setting up, run this
+
+```sh
+nx dev web
+```
+
+### Step by step setup
+
+Install dependencies
 
 ```sh
 pnpm i
+```
+
+Create nx project graph
+
+```sh
 nx sync
+```
+
+Put this in root `.env`
+
+```env
+ENVIRONMENT=development
+```
+
+Create required env files. You must talk to me (jackson) to get the required secrets file first.
+
+```sh
 nx setup environments
 ```
 
-Run this to create local postgres db with docker. You must already have docker daemon, or docker desktop installed.
+create local postgres db with docker. You must already have docker daemon, or docker desktop installed.
 
 ```sh
 chmod +x ./scripts/create-local-db.sh
 ./scripts/create-local-db.sh
 ```
 
-After this you are more or less good to go.
+## How it works
+
+It is an nx mono repo. Learn more generally about that here [nx](https://nx.dev/).
 
 ### Structure
 
