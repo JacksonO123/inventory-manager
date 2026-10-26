@@ -82,7 +82,6 @@ export function Content({ items: itemsFromServer }: ContentProps) {
         )}
         <Items items={items} />
       </div>
-      <Items items={items} />
     </main>
   );
 }
