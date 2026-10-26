@@ -5,3 +5,5 @@ export const itemSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1).nullable()
 });
+
+export const itemSchemaOmitId = itemSchema.omit({ id: true });

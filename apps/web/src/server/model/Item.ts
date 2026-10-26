@@ -1,9 +1,7 @@
 import { itemTable } from '@invm/inventory-db-utils';
-import { itemSchema } from '@invm/api-contracts/schemas';
+import { itemSchemaOmitId } from '@invm/api-contracts/schemas';
 import { db } from '../db';
 import { PartialItem, Item as ItemType } from '../../types/types';
-
-const createItemSchema = itemSchema.omit({ id: true });
 
 export class Item {
   values: ItemType;
@@ -17,7 +15,7 @@ export class Item {
   }
 
   static async create(values: PartialItem) {
-    const parsed = createItemSchema.parse(values);
+    const parsed = itemSchemaOmitId.parse(values);
     const [createdItem] = await db.insert(itemTable).values(parsed).returning();
     return new Item(createdItem);
   }
