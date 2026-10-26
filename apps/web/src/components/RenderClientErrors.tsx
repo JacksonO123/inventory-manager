@@ -10,13 +10,17 @@ type RenderClientErrorsProps = {
 export function RenderClientErrors({ errors }: RenderClientErrorsProps) {
   const memoErrors = useMemo(() => errors, []);
   const errorsRef = useRef(memoErrors);
+
   useEffect(() => {
-    errorsRef.current.forEach((error) => {
-      toast.add({
-        title: error,
-        type: 'error'
+    console.log(errors);
+    setTimeout(() => {
+      errorsRef.current.forEach((error) => {
+        toast.add({
+          title: error,
+          type: 'error'
+        });
       });
-    });
+    }, 10);
   }, []);
 
   return null;
