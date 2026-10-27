@@ -76,3 +76,9 @@ export const itemTable = pgTable('item', {
   name: t.text().notNull(),
   description: t.text()
 });
+
+export const basicUserTable = pgTable('basic_user', {
+  id: t.serial().primaryKey(),
+  name: t.text().notNull(),
+  email: t.text().notNull().unique()
+});

@@ -1,15 +1,19 @@
 import { c } from '../contract';
 import { z } from 'zod';
-import { itemRouter } from './routers';
+import { basicAuthRouter, itemRouter } from './routers';
 
-export const rootWebRouter = c.router({
-  debug: {
-    path: '/debug',
-    method: 'GET',
-    responses: {
-      200: z.literal('success')
-    }
+export const rootWebRouter = c.router(
+  {
+    debug: {
+      path: '/debug',
+      method: 'GET',
+      responses: {
+        200: z.literal('success')
+      }
+    },
+
+    item: itemRouter,
+    auth: basicAuthRouter
   },
-
-  item: itemRouter
-});
+  { pathPrefix: '/api' }
+);
