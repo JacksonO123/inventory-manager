@@ -8,12 +8,18 @@ import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
 import { Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
+import { useBasicAuth } from '../../hooks/useBasicAuth';
+import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
+import { useAuthPopup } from '../../hooks/useAuthPopup';
+import { AuthPopup } from '../../components/AuthPopup';
 
 type ContentProps = {
   items: ItemType[];
 };
 
 export function Content({ items: itemsFromServer }: ContentProps) {
+  const session = useBasicAuth();
+  const { open: authOpen, setOpen: setAuthOpen, authType, setAuthType } = useAuthPopup();
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
 
@@ -35,39 +41,44 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   return (
     <main>
+      <AuthPopup open={authOpen} authType={authType} onOpenChange={setAuthOpen} />
       <Header className="flex justify-between">
         <h1 className="text-lg">Inventory Manager</h1>
-        {/*session.isPending ? (
-          <LoadingSpinner />
-        ) : session.data ? (
+        {session.basicUser ? (
           <Popover>
             <PopoverTrigger
               render={
-                <button className="rounded-full border flex gap-2 items-center justify-center pl-4 cursor-pointer">
-                  <span>{session.data.user.email}</span>
-                  {session.data.user.image && (
-                    <img src={session.data.user.image} className="size-8 rounded-full" />
-                  )}
+                <button className="rounded-xl border flex items-end justify-center cursor-pointer flex-col px-1.5 py-1 bg-white">
+                  <span className="leading-5">{session.basicUser.name}</span>
+                  <span className="leading-5">{session.basicUser.email}</span>
                 </button>
               }
             />
             <PopoverContent align="end">
-              <Button onClick={() => authClient.signOut()}>Sign out</Button>
+              <Button onClick={() => session.signOut()}>Sign out</Button>
             </PopoverContent>
           </Popover>
         ) : (
-          <Button
-            onClick={() =>
-              authClient.signIn.social({
-                provider: 'google',
-                callbackURL: '/',
-                errorCallbackURL: '/auth-error'
-              })
-            }
-          >
-            Sign In
-          </Button>
-        )*/}
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAuthType('login');
+                setAuthOpen(true);
+              }}
+            >
+              Log In
+            </Button>
+            <Button
+              onClick={() => {
+                setAuthType('signup');
+                setAuthOpen(true);
+              }}
+            >
+              Sign Up
+            </Button>
+          </div>
+        )}
       </Header>
       <div className="p-8 flex flex-col gap-4">
         {creatingItem ? (

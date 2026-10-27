@@ -13,3 +13,5 @@ export const basicUserSchema = z.object({
   name: z.string().min(1),
   email: z.email()
 });
+
+export const basicUserSchemaOmitId = basicUserSchema.omit({ id: true });

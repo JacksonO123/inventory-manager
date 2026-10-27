@@ -1,8 +1,17 @@
-import { basicUserSchema, itemSchema } from '@invm/api-contracts/schemas';
+import {
+  basicUserSchema,
+  basicUserSchemaOmitId,
+  itemSchema,
+  itemSchemaOmitId
+} from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
 export type Item = z.infer<typeof itemSchema>;
 
-export type PartialItem = Omit<Item, 'id'>;
+export type PartialItem = z.infer<typeof itemSchemaOmitId>;
 
 export type BasicUser = z.infer<typeof basicUserSchema>;
+
+export type PartialBasicUser = z.infer<typeof basicUserSchemaOmitId>;
+
+export type AuthTypes = 'signup' | 'login';

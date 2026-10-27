@@ -1,5 +1,7 @@
+'use client';
+
 import { useState } from 'react';
-import { BasicAuthContext } from '../contexts/basic-auth.ts';
+import { BasicAuthContext } from '../contexts/basicAuth.ts';
 import { BasicUser } from '../types/types';
 
 type BasicAuthProvider = {
@@ -13,8 +15,14 @@ export function BasicAuthProvider({ children }: BasicAuthProvider) {
     setBasicUser(user);
   }
 
+  function handleSignOut() {
+    setBasicUser(null);
+  }
+
   return (
-    <BasicAuthContext.Provider value={{ basicUser, setBasicUser: handleSetBasicUser }}>
+    <BasicAuthContext.Provider
+      value={{ basicUser, setBasicUser: handleSetBasicUser, signOut: handleSignOut }}
+    >
       {children}
     </BasicAuthContext.Provider>
   );

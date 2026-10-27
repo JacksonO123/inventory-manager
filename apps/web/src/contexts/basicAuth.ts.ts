@@ -4,9 +4,11 @@ import { BasicUser } from '../types/types';
 type BasicAuthContextType = {
   basicUser: BasicUser | null;
   setBasicUser: (user: BasicUser) => void;
+  signOut: () => void;
 };
 
 export const BasicAuthContext = createContext<BasicAuthContextType>({
   basicUser: null,
-  setBasicUser: () => {}
+  setBasicUser: () => {},
+  signOut: () => {}
 });
