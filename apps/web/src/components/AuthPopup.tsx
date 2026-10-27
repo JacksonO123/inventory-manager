@@ -3,27 +3,22 @@
 import { createPortal } from 'react-dom';
 import { Dialog, DialogContent } from './ui/dialog';
 import { useOnClient } from '../hooks/useOnClient';
-import { AuthTypes } from '../types/types';
 import { SignUpFormHandler } from './SignUpForm';
 import { LogInFormHandler } from './LogInForm';
+import { useAuthPopup } from '../hooks/useAuthPopup';
 
-type AuthPopupProps = {
-  open: boolean;
-  authType: AuthTypes;
-  onOpenChange: (open: boolean) => void;
-};
-
-export function AuthPopup({ open, onOpenChange, authType }: AuthPopupProps) {
+export function AuthPopup() {
   const onClient = useOnClient();
+  const { open, setOpen, authType } = useAuthPopup();
 
   return onClient
     ? createPortal(
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent showCloseButton={false}>
             {authType === 'signup' ? (
-              <SignUpFormHandler onClose={() => onOpenChange(false)} />
+              <SignUpFormHandler onClose={() => setOpen(false)} />
             ) : (
-              <LogInFormHandler onClose={() => onOpenChange(false)} />
+              <LogInFormHandler onClose={() => setOpen(false)} />
             )}
           </DialogContent>
         </Dialog>,

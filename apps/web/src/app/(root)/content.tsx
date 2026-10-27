@@ -19,7 +19,7 @@ type ContentProps = {
 
 export function Content({ items: itemsFromServer }: ContentProps) {
   const session = useBasicAuth();
-  const { open: authOpen, setOpen: setAuthOpen, authType, setAuthType } = useAuthPopup();
+  const { setOpen: setAuthOpen, setAuthType } = useAuthPopup();
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
 
@@ -41,7 +41,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   return (
     <main>
-      <AuthPopup open={authOpen} authType={authType} onOpenChange={setAuthOpen} />
+      <AuthPopup />
       <Header className="flex justify-between">
         <h1 className="text-lg">Inventory Manager</h1>
         {session.basicUser ? (
