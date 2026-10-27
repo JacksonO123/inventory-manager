@@ -100,7 +100,7 @@ export function SignUpFormContents({
           Email already exists, try{' '}
           <button
             className="text-primary underline cursor-pointer"
-            onClick={() => switchAuthType('signup')}
+            onClick={() => switchAuthType('login')}
           >
             logging in
           </button>
