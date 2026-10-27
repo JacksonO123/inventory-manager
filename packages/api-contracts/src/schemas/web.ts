@@ -7,3 +7,9 @@ export const itemSchema = z.object({
 });
 
 export const itemSchemaOmitId = itemSchema.omit({ id: true });
+
+export const basicUserSchema = z.object({
+  id: z.number().gte(0),
+  name: z.string().min(1),
+  email: z.email()
+});

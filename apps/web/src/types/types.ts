@@ -1,6 +1,8 @@
-import { itemSchema } from '@invm/api-contracts/schemas';
+import { basicUserSchema, itemSchema } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
 export type Item = z.infer<typeof itemSchema>;
 
 export type PartialItem = Omit<Item, 'id'>;
+
+export type BasicUser = z.infer<typeof basicUserSchema>;
