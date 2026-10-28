@@ -1,16 +1,12 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { Header } from '../../components/Header';
 import { Button } from '../../components/ui/button';
 import { useState } from 'react';
 import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
 import { Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
-import { useBasicAuth } from '../../hooks/useBasicAuth';
-import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
-import { useAuthPopup } from '../../hooks/useAuthPopup';
 import { AuthPopup } from '../../components/AuthPopup';
 import { toast } from '../../components/ui/toast';
 
@@ -19,8 +15,6 @@ type ContentProps = {
 };
 
 export function Content({ items: itemsFromServer }: ContentProps) {
-  const session = useBasicAuth();
-  const { setOpen: setAuthOpen, setAuthType } = useAuthPopup();
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
 
