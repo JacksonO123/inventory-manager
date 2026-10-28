@@ -1,6 +1,6 @@
 # Inventory manager
 
-The inventory manager repo.
+The inventory manager repo. Project for a cs class.
 
 ## Rules
 
