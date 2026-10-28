@@ -9,7 +9,8 @@ export const envSchema = z.object({
     password: z.string().min(1)
   }),
   api: z.object({
-    baseUrl: z.url()
+    baseUrl: z.url(),
+    serverProtectedKey: z.string().min(1)
   }),
   web: z.object({
     betterAuthSecret: z.string().min(1),

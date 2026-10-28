@@ -50,44 +50,6 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   return (
     <main>
       <AuthPopup />
-      <Header className="flex justify-between">
-        <h1 className="text-lg">Inventory Manager</h1>
-        {session.basicUser ? (
-          <Popover>
-            <PopoverTrigger
-              render={
-                <button className="rounded-xl border flex items-end justify-center cursor-pointer flex-col px-1.5 py-1 bg-white">
-                  <span className="leading-5">{session.basicUser.name}</span>
-                  <span className="leading-5">{session.basicUser.email}</span>
-                </button>
-              }
-            />
-            <PopoverContent align="end">
-              <Button onClick={() => session.signOut()}>Sign out</Button>
-            </PopoverContent>
-          </Popover>
-        ) : (
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setAuthType('login');
-                setAuthOpen(true);
-              }}
-            >
-              Log In
-            </Button>
-            <Button
-              onClick={() => {
-                setAuthType('signup');
-                setAuthOpen(true);
-              }}
-            >
-              Sign Up
-            </Button>
-          </div>
-        )}
-      </Header>
       <div className="p-8 flex flex-col gap-4">
         {creatingItem ? (
           <CreateItemForm onSave={handleSaveItem} onCancel={() => setCreatingItem(false)} />
