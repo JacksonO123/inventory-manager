@@ -9,7 +9,7 @@ export const itemRouter = c.router(
       method: 'PUT',
       body: partialItemSchema,
       responses: {
-        200: z.object({ id: z.number().gte(0) }),
+        200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
         500: errorMsgSchema
       }
     },

@@ -12,6 +12,7 @@ import { useBasicAuth } from '../../hooks/useBasicAuth';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { useAuthPopup } from '../../hooks/useAuthPopup';
 import { AuthPopup } from '../../components/AuthPopup';
+import { toast } from '../../components/ui/toast';
 
 type ContentProps = {
   items: ItemType[];
@@ -23,17 +24,24 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
 
-  const saveItemMutation = tsr.item.createItem.useMutation();
-
   async function handleSaveItem(item: PartialItem) {
     try {
-      const fullItem: ItemType = { ...item, id: -1 };
+      const fullItem: ItemType = { ...item, id: -1, status: 'available' };
       setItems((prev) => [...prev, fullItem]);
       setCreatingItem(false);
-      const res = await saveItemMutation.mutateAsync({ body: item });
-      setItems((items) =>
-        items.map((item) => (item.id === -1 ? { ...item, id: res.body.id } : item))
-      );
+      const res = await tsr.item.createItem.mutate({ body: item });
+      if (res.status === 200) {
+        setItems((items) =>
+          items.map((item) =>
+            item.id === -1 ? { ...item, id: res.body.id, status: res.body.status } : item
+          )
+        );
+      } else if (res.status === 500) {
+        toast.add({
+          type: 'error',
+          title: res.body.message
+        });
+      }
     } catch {
       setItems((items) => items.filter((item) => item.id !== -1));
     }
