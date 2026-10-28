@@ -17,6 +17,9 @@ export class Item {
   static async create(values: PartialItem) {
     const parsed = partialItemSchema.parse(values);
     const [createdItem] = await db.insert(itemTable).values(parsed).returning();
+    if (createdItem === undefined) {
+      throw new Error('Failed to create item');
+    }
     return new Item(createdItem);
   }
 }

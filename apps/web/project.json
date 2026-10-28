@@ -6,7 +6,11 @@
     "tsc": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc --noEmit",
+        "commands": [
+          "tsc --noEmit -p tsconfig.app.json",
+          "tsc --noEmit -p tsconfig.spec.json",
+          "tsc --noEmit -p tsconfig.node.json"
+        ],
         "cwd": "{projectRoot}"
       }
     },
