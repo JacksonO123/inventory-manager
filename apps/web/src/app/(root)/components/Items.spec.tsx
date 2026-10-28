@@ -6,8 +6,8 @@ describe('Items', () => {
     render(
       <Items
         items={[
-          { id: 1, name: 'HDMI cable', description: '6 ft, black' },
-          { id: 2, name: 'Box of pens', description: 'blue ink' }
+          { id: 1, name: 'HDMI cable', description: '6 ft, black', status: 'available' },
+          { id: 2, name: 'Box of pens', description: 'blue ink', status: 'available' }
         ]}
       />
     );
@@ -19,7 +19,9 @@ describe('Items', () => {
   });
 
   it('shows an item that has no description', () => {
-    render(<Items items={[{ id: 1, name: 'HDMI cable', description: null }]} />);
+    render(
+      <Items items={[{ id: 1, name: 'HDMI cable', description: null, status: 'available' }]} />
+    );
 
     expect(screen.getByText('HDMI cable')).toBeTruthy();
   });

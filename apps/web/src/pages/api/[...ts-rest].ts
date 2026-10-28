@@ -7,7 +7,10 @@ const nextItemRoute = createNextRoute(rootWebRouter.item, {
   createItem: async ({ body }) => {
     try {
       const createdItem = await Item.create(body);
-      return { status: 200, body: { id: createdItem.values.id } };
+      return {
+        status: 200,
+        body: { id: createdItem.values.id, status: createdItem.values.status }
+      };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }
