@@ -19,7 +19,8 @@ export const appEnvContents: Record<string, EnvContents<z.ZodObject>> = {
       INVENTORY_DB_NAME: env.inventory_db.dbName,
       BETTER_AUTH_SECRET: env.web.betterAuthSecret,
       GOOGLE_CLIENT_ID: env.web.googleClientId,
-      GOOGLE_CLIENT_SECRET: env.web.googleClientSecret
+      GOOGLE_CLIENT_SECRET: env.web.googleClientSecret,
+      SERVER_PROTECTED_KEY: env.api.serverProtectedKey
     }
   })
 };

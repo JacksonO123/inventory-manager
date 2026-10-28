@@ -1,4 +1,5 @@
 import {
+  adminSchema,
   basicUserSchema,
   basicUserSchemaOmitId,
   itemSchema,
@@ -15,3 +16,5 @@ export type BasicUser = z.infer<typeof basicUserSchema>;
 export type PartialBasicUser = z.infer<typeof basicUserSchemaOmitId>;
 
 export type AuthTypes = 'signup' | 'login';
+
+export type Admin = z.infer<typeof adminSchema>;

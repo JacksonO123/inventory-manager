@@ -16,3 +16,8 @@ export const basicUserSchema = z.object({
 });
 
 export const basicUserSchemaOmitId = basicUserSchema.omit({ id: true });
+
+export const adminSchema = z.object({
+  id: z.number().gte(0),
+  user_id: z.string().min(1)
+});

@@ -1,6 +1,7 @@
 import { c } from '../contract';
 import { z } from 'zod';
 import { basicAuthRouter, itemRouter } from './routers';
+import { adminRouter } from './routers/admin';
 
 export const rootWebRouter = c.router(
   {
@@ -13,7 +14,8 @@ export const rootWebRouter = c.router(
     },
 
     item: itemRouter,
-    auth: basicAuthRouter
+    auth: basicAuthRouter,
+    admin: adminRouter
   },
   { pathPrefix: '/api' }
 );

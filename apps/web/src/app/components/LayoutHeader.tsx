@@ -22,7 +22,7 @@ export function LayoutHeader() {
               <button className="rounded-full border flex items-center cursor-pointer bg-white pl-3 gap-2">
                 <span>{session.data.user.email}</span>
                 {session.data.user.image && (
-                  <img src={session.data.user.image} className="size-8 rounded-full" />
+                  <img src={session.data.user.image} className="size-6 rounded-full" />
                 )}
               </button>
             }

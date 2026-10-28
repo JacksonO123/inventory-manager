@@ -7,7 +7,7 @@ export const adminRouter = c.router(
       path: '/is-admin',
       method: 'GET',
       query: z.object({
-        id: z.number().gte(0)
+        id: z.string().min(1)
       }),
       responses: {
         200: z.object({
