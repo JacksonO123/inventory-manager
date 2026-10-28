@@ -71,10 +71,13 @@ export const verification = pgTable(
   (table) => [t.index('verification_identifier_idx').on(table.identifier)]
 );
 
+export const itemStatus = t.pgEnum('item_status', ['available', 'booked', 'out_of_service']);
+
 export const itemTable = pgTable('item', {
   id: t.serial().primaryKey(),
   name: t.text().notNull(),
-  description: t.text()
+  description: t.text(),
+  status: itemStatus().notNull().default('available')
 });
 
 export const basicUserTable = pgTable('basic_user', {
