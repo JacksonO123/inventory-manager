@@ -13,7 +13,7 @@ const url = getConnectionUrl(
   inventory_db.dbName
 );
 
-const pool = new Pool({ connectionString: url });
+const pool = new Pool({ connectionString: url, ssl: dbEnv.environment === 'production' });
 
 (async () => {
   try {

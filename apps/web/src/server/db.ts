@@ -10,7 +10,7 @@ const connectionString = getConnectionUrl(
   env.INVENTORY_DB_NAME
 );
 
-const pool = new Pool({ connectionString });
+const pool = new Pool({ connectionString, ssl: env.ENVIRONMENT === 'production' });
 
 process.on('SIGTERM', () => pool.end());
 
