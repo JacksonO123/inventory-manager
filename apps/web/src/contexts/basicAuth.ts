@@ -7,7 +7,7 @@ type BasicAuthContextType = {
   signOut: () => void;
 };
 
-export const BasicAuthContext = createContext<BasicAuthContextType>({
+export const basicAuthContext = createContext<BasicAuthContextType>({
   basicUser: null,
   setBasicUser: () => {},
   signOut: () => {}

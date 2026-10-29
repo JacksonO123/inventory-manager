@@ -11,7 +11,7 @@ export function LayoutHeader() {
   const session = authClient.useSession();
 
   return (
-    <Header className="flex justify-between">
+    <Header className="flex justify-between h-16 items-center">
       <h1 className="text-lg">Inventory Manager</h1>
       {session.isPending ? (
         <LoadingSpinner />
@@ -22,7 +22,7 @@ export function LayoutHeader() {
               <button className="rounded-full border flex items-center cursor-pointer bg-white pl-3 gap-2">
                 <span>{session.data.user.email}</span>
                 {session.data.user.image && (
-                  <img src={session.data.user.image} className="size-6 rounded-full" />
+                  <img src={session.data.user.image} className="rounded-full aspect-square h-8" />
                 )}
               </button>
             }

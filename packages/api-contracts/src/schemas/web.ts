@@ -21,3 +21,8 @@ export const adminSchema = z.object({
   id: z.number().gte(0),
   user_id: z.string().min(1)
 });
+
+export const superAdminSchema = z.object({
+  id: z.number().gte(0),
+  user_id: z.string().min(1)
+});

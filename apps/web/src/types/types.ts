@@ -3,7 +3,8 @@ import {
   basicUserSchema,
   basicUserSchemaOmitId,
   itemSchema,
-  partialItemSchema
+  partialItemSchema,
+  superAdminSchema
 } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
@@ -18,3 +19,5 @@ export type PartialBasicUser = z.infer<typeof basicUserSchemaOmitId>;
 export type AuthTypes = 'signup' | 'login';
 
 export type Admin = z.infer<typeof adminSchema>;
+
+export type SuperAdmin = z.infer<typeof superAdminSchema>;
