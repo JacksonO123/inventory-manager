@@ -1,6 +1,7 @@
 import { Toaster } from '../components/ui/toast';
 import { Providers } from '../providers';
 import './global.css';
+import { LayoutHeader } from './components/LayoutHeader';
 
 export const metadata = {
   title: 'Welcome to web',
@@ -12,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <Providers>
         <body>
+          <LayoutHeader />
           {children}
           <Toaster />
         </body>

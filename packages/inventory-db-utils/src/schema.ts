@@ -85,3 +85,19 @@ export const basicUserTable = pgTable('basic_user', {
   name: t.text().notNull(),
   email: t.text().notNull().unique()
 });
+
+export const superAdminTable = pgTable('super_admin', {
+  id: t.serial().primaryKey(),
+  user_id: t
+    .text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' })
+});
+
+export const adminTable = pgTable('admin', {
+  id: t.serial().primaryKey(),
+  user_id: t
+    .text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' })
+});

@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
   // See: https://nextjs.org/docs/app/api-reference/config/next-config-js
   turbopack: {
     root: path.resolve(__dirname, '../..')
+  },
+  images: {
+    formats: ['image/webp'],
+    remotePatterns: [
+      {
+        hostname: 'lh3.googleusercontent.com'
+      }
+    ]
   }
 };
 

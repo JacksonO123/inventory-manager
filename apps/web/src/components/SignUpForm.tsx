@@ -58,7 +58,7 @@ export function SignUpFormContents({
               <FieldLabel htmlFor={`entry-name-${formId}`}>Name</FieldLabel>
               <Input
                 id={`entry-name-${formId}`}
-                placeholder="Util name"
+                placeholder="Name"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
