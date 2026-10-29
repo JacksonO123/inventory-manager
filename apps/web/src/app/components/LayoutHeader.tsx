@@ -10,14 +10,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from 'cn';
 import { tsr } from '../../server/tsr';
+import { useQuery } from '@tanstack/react-query';
 
 export function LayoutHeader() {
   const pathname = usePathname();
   const session = authClient.useSession();
   const userId = session.data?.user.id;
-  const { data: isSuperAdmin } = tsr.superAdmin.isSuperAdmin.useQuery({
+  const { data: isSuperAdmin } = useQuery({
     queryKey: ['is_super_admin', userId],
-    queryData: { query: { id: userId! } },
+    queryFn: () => tsr.superAdmin.isSuperAdmin.mutate({ body: { id: userId! } }),
     enabled: !!userId
   });
 

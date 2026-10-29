@@ -1,9 +1,11 @@
-export function headersFromRawHeaders(rawHeaders: string[]) {
-  const headers: [string, string][] = [];
+import type { IncomingHttpHeaders } from 'http';
 
-  for (let i = 0; i < rawHeaders.length; i += 2) {
-    headers.push([rawHeaders[i]!, rawHeaders[i + 1]!]);
+export function incomingHeadersToHeaders(incomingHeaders: IncomingHttpHeaders) {
+  const headers = new Headers();
+  for (const [key, value] of Object.entries(incomingHeaders)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) value.forEach((val) => headers.append(key, val));
+    else headers.set(key, value);
   }
-
-  return new Headers(headers);
+  return headers;
 }

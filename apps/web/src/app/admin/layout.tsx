@@ -3,7 +3,6 @@
 import { headers } from 'next/headers';
 import { auth } from '../../server/auth';
 import { tsr } from '../../server/tsr';
-import { env } from '../../env';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -16,9 +15,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect('/');
   }
 
-  const isAdminRes = await tsr.admin.isAdmin.query({
-    query: { id: session.user.id },
-    extraHeaders: { authorization: env.SERVER_PROTECTED_KEY }
+  const isAdminRes = await tsr.admin.isAdmin.mutate({
+    body: { id: session.user.id }
   });
   if (isAdminRes.status !== 200 || !isAdminRes.body.isAdmin) {
     redirect('/');

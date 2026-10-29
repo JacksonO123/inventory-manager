@@ -26,3 +26,13 @@ export const superAdminSchema = z.object({
   id: z.number().gte(0),
   user_id: z.string().min(1)
 });
+
+export const userSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  email: z.email(),
+  emailVerified: z.boolean(),
+  image: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string()
+});

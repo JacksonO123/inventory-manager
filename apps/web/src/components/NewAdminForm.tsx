@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 
 type NewAdminFormProps = {
-  externalValidator?: (email: string) => Promise<true | { msg: string }>;
+  externalValidator?: (email: string) => Promise<true | string>;
   onCancel: () => void;
   onSubmit: (email: string) => void;
 };
@@ -20,7 +20,12 @@ export function NewAdminForm({ externalValidator, onCancel, onSubmit }: NewAdmin
         const validatorRes = await externalValidator?.(value.email);
         if (validatorRes === undefined) return undefined;
         if (validatorRes === true) return undefined;
-        return validatorRes.msg;
+        return {
+          form: 'Email validation error',
+          fields: {
+            email: validatorRes
+          }
+        };
       }
     },
     defaultValues: {
@@ -49,7 +54,13 @@ export function NewAdminForm({ externalValidator, onCancel, onSubmit }: NewAdmin
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
-              {field.state.meta.isTouched && <FieldError errors={field.state.meta.errors} />}
+              {field.state.meta.isTouched && (
+                <FieldError
+                  errors={field.state.meta.errors.map((item) => ({
+                    message: typeof item === 'object' ? item.message : item
+                  }))}
+                />
+              )}
             </Field>
           </div>
         )}
