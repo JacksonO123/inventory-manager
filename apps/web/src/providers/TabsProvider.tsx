@@ -13,7 +13,7 @@ export function TabsContextProvider({ children, onTabChange }: TabsContextProvid
 
   function addTab(tab: string) {
     if (tabs.length === 0) {
-      setActive(tab);
+      setActive((prev) => (prev ? prev : tab));
     }
 
     setTabs((prev) => [...prev, tab]);

@@ -6,29 +6,34 @@ import { PopoverContent } from '../../components/ui/popover';
 import { authClient } from '../../client/auth-client';
 import { Button } from '../../components/ui/button';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { tsr } from '../../server/tsr';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from 'cn';
+import { tsr } from '../../server/tsr';
 
 export function LayoutHeader() {
+  const pathname = usePathname();
   const session = authClient.useSession();
   const userId = session.data?.user.id;
-  const { data } = tsr.superAdmin.isSuperAdmin.useQuery({
+  const { data: isSuperAdmin } = tsr.superAdmin.isSuperAdmin.useQuery({
     queryKey: ['is_super_admin', userId],
-    enabled: !!userId,
-    queryData: {
-      query: {
-        id: userId as string
-      }
-    }
+    queryData: { query: { id: userId! } },
+    enabled: !!userId
   });
 
   return (
     <Header className="flex justify-between h-16 items-center">
       <h1 className="text-lg">Inventory Manager</h1>
-      <div>
-        {data?.body.isAdmin && (
-          <Link href="/super-admin" className="cursor-pointer">
-            Admin panel
+      <div className="flex gap-6 items-center text-md">
+        {isSuperAdmin?.status === 200 && isSuperAdmin.body.isAdmin === true && (
+          <Link
+            href="/super-admin"
+            className={cn(
+              'cursor-pointer underline',
+              pathname?.startsWith('/super-admin') && 'text-primary'
+            )}
+          >
+            Admin Panel
           </Link>
         )}
         {session.isPending ? (

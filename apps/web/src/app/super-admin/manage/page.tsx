@@ -3,9 +3,22 @@
 import { Plus } from 'lucide-react';
 import { TabGroup, Tab, TabContent, Tabs } from '../../../components/Tabs';
 import { Button } from '../../../components/ui/button';
-import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '../../../components/ui/dialog';
+import { NewAdminForm } from '../../../components/NewAdminForm';
+import { useState } from 'react';
 
 export default function ManageSuperAdminPage() {
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [superAdminOpen, setSuperAdminOpen] = useState(false);
+
+  function handleCheckValidEmail(email: string) {}
+
   return (
     <main className="flex justify-center pt-20">
       <div className="w-full max-w-3xl p-4 rounded-md border">
@@ -17,7 +30,7 @@ export default function ManageSuperAdminPage() {
           <div>
             <TabContent tab="super-admin">
               <div className="w-full flex justify-end">
-                <Dialog>
+                <Dialog open={superAdminOpen} onOpenChange={setSuperAdminOpen}>
                   <DialogTrigger
                     render={
                       <Button>
@@ -25,6 +38,19 @@ export default function ManageSuperAdminPage() {
                       </Button>
                     }
                   />
+                  <DialogContent className="max-w-md! w-md!" showCloseButton={false}>
+                    <DialogHeader>
+                      <DialogTitle>
+                        Enter email of new{' '}
+                        <span className="text-primary font-bold">super admin</span>
+                      </DialogTitle>
+                    </DialogHeader>
+                    <NewAdminForm
+                      onCancel={() => setSuperAdminOpen(false)}
+                      onSubmit={() => {}}
+                      externalValidator={handleCheckValidEmail}
+                    />
+                  </DialogContent>
                 </Dialog>
               </div>
             </TabContent>
