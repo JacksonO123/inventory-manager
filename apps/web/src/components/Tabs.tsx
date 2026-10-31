@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
 import { useTabs } from '../hooks/useTabs';
 import { TabsContextProvider } from '../providers/TabsProvider';
 import { cn } from 'cn';
@@ -26,7 +26,10 @@ type TabGroupProps = React.ComponentProps<'div'> & {
   children: React.ReactNode | React.ReactNode[];
 };
 
-export function TabGroup({ children, className, ...others }: TabGroupProps) {
+export const TabGroup = forwardRef(function TabGroup(
+  { children, className, ...others }: TabGroupProps,
+  ref: ForwardedRef<HTMLDivElement>
+) {
   const { styles } = useTabs();
 
   function computeStyles() {
@@ -38,7 +41,7 @@ export function TabGroup({ children, className, ...others }: TabGroupProps) {
   }
 
   return (
-    <div className={cn(className, 'p-0.75 bg-zinc-100 w-fit rounded-lg')} {...others}>
+    <div className={cn(className, 'p-0.75 bg-zinc-100 w-fit rounded-lg')} {...others} ref={ref}>
       <div className="flex relative gap-2 w-fit">
         {children}
         <div
@@ -48,7 +51,7 @@ export function TabGroup({ children, className, ...others }: TabGroupProps) {
       </div>
     </div>
   );
-}
+});
 
 type TabProps = {
   value: string;

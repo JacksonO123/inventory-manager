@@ -14,6 +14,7 @@ import {
   validateAdminEmail,
   validateSuperAdminEmail
 } from './utils/adminActions';
+import { useElementSize } from '@mantine/hooks';
 
 type ContentProps = {
   initialAdmins: AdminAndEmail[];
@@ -23,6 +24,7 @@ type ContentProps = {
 export default function Content({ initialAdmins, initialSuperAdmins }: ContentProps) {
   const [superAdmins, setSuperAdmins] = useState(initialSuperAdmins);
   const [admins, setAdmins] = useState(initialAdmins);
+  const { ref, width } = useElementSize();
 
   function handleDemote(admin: AdminAndEmail) {
     setAdmins((prev) => [admin, ...prev]);
@@ -35,12 +37,12 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
   return (
     <main className="flex justify-center pt-20 px-20">
       <div className="w-full max-w-3xl p-4 rounded-md border">
-        <Tabs onTabChange={() => {}}>
-          <TabGroup className="absolute">
+        <Tabs>
+          <TabGroup className="absolute" ref={ref}>
             <Tab value="super-admin">Super Admin</Tab>
             <Tab value="admin">Admin</Tab>
           </TabGroup>
-          <div>
+          <div className="min-h-9">
             <TabContent tab="super-admin">
               <AdminManage
                 admins={superAdmins}
@@ -51,6 +53,7 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
                 addAdminFn={addSuperAdmin}
                 onActionComplete={handleDemote}
                 adminType="super"
+                tabWidth={width}
               />
             </TabContent>
             <TabContent tab="admin">
@@ -63,6 +66,7 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
                 addAdminFn={addAdmin}
                 onActionComplete={handlePromote}
                 adminType="regular"
+                tabWidth={width}
               />
             </TabContent>
           </div>
