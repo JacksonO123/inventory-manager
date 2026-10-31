@@ -106,9 +106,9 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
       }
 
       await Admin.revoke(body.id);
-      await SuperAdmin.create(admin.user_id);
+      const newSuperAdmin = await SuperAdmin.create(admin.user_id);
 
-      return { status: 200 };
+      return { status: 200, body: { id: newSuperAdmin.values.id } };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }

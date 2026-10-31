@@ -89,7 +89,9 @@ export const superAdminRouter = c.router(
         id: z.number().gte(0)
       }),
       responses: {
-        200: c.noBody(),
+        200: z.object({
+          id: z.number().gte(0)
+        }),
         500: errorMsgSchema,
         401: errorMsgSchema
       }

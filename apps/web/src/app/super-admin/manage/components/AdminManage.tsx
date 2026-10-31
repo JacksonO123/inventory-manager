@@ -3,7 +3,9 @@ import { useMemo, useState } from 'react';
 import { NewAdminForm } from '../../../../components/NewAdminForm';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
@@ -13,15 +15,16 @@ import { AdminAndEmail, ServerErrorRes } from '../../../../types/types';
 import { Button } from '../../../../components/ui/button';
 import { AdminEmailList } from './AdminList';
 import { Input } from '../../../../components/ui/input';
+import { authClient } from '../../../../client/auth-client';
 
 type AdminManageProps = {
   admins: AdminAndEmail[];
   setAdmins: (admins: AdminAndEmail[] | ((prev: AdminAndEmail[]) => AdminAndEmail[])) => void;
 
   validateFn: (email: string) => Promise<true | string>;
-  actionFn: (id: number) => Promise<ServerErrorRes>;
+  actionFn: (id: number) => Promise<ServerErrorRes<{ id: number }>>;
   revokeFn: (id: number) => Promise<ServerErrorRes>;
-  addAdminFn: (email: string) => Promise<ServerErrorRes>;
+  addAdminFn: (email: string) => Promise<ServerErrorRes<{ id: number }>>;
 
   onActionComplete: (admin: AdminAndEmail) => void;
 
@@ -38,6 +41,7 @@ export function AdminManage({
   addAdminFn,
   onActionComplete
 }: AdminManageProps) {
+  const session = authClient.useSession();
   const [adminOpen, setAdminOpen] = useState(false);
   const [emailFilter, setEmailFilter] = useState('');
 
@@ -51,16 +55,24 @@ export function AdminManage({
     setAdmins((prev) => [{ email, user_id: '', id: -1 }, ...prev]);
     setAdminOpen(false);
 
-    const error = await addAdminFn(email);
-    if (error !== null) {
+    const result = await addAdminFn(email);
+    if (result.status === 'error') {
       setAdmins((prev) => prev.filter((item) => item.id === -1));
 
-      if (error.error !== undefined) {
+      if (result.error !== undefined) {
         toast.add({
-          type: 'Error',
-          title: error.error
+          type: 'error',
+          title: result.error
         });
       }
+    } else {
+      setAdmins((prev) =>
+        prev.map((item) => (item.id === -1 ? { ...item, id: result.body.id } : item))
+      );
+      toast.add({
+        type: 'success',
+        title: 'Admin added successfully'
+      });
     }
   }
 
@@ -68,16 +80,21 @@ export function AdminManage({
     let before = [...admins];
     setAdmins((prev) => prev.filter((admin) => admin.id !== id));
 
-    const error = await revokeFn(id);
-    if (error !== null) {
+    const result = await revokeFn(id);
+    if (result.status === 'error') {
       setAdmins(before);
 
-      if (error.error !== undefined) {
+      if (result.error !== undefined) {
         toast.add({
           type: 'error',
-          title: error.error
+          title: result.error
         });
       }
+    } else {
+      toast.add({
+        type: 'success',
+        title: 'Admin revoked successfully'
+      });
     }
   }
 
@@ -86,18 +103,23 @@ export function AdminManage({
     const actionTarget = admins.find((item) => item.id === id);
     setAdmins((prev) => prev.filter((admin) => admin.id !== id));
 
-    const error = await actionFn(id);
-    if (error !== null) {
+    const result = await actionFn(id);
+    if (result.status === 'error') {
       setAdmins(before);
 
-      if (error.error !== undefined) {
+      if (result.error !== undefined) {
         toast.add({
           type: 'error',
-          title: error.error
+          title: result.error
         });
       }
     } else if (actionTarget) {
-      onActionComplete(actionTarget);
+      const correctedIdAdmin = { ...actionTarget, id: result.body.id };
+      onActionComplete(correctedIdAdmin);
+      toast.add({
+        type: 'success',
+        title: `Admin ${adminType === 'regular' ? 'promoted' : 'demoted'} successfully`
+      });
     }
   }
 
@@ -137,12 +159,75 @@ export function AdminManage({
       </div>
       {filteredAdmins.length > 0 && (
         <AdminEmailList
+          userEmail={session.data?.user.email ?? null}
           admins={filteredAdmins}
-          onRevoke={handleRevokeEmail}
-          actionRender={(id) => (
-            <Button variant="outline" size="sm" onClick={() => handleAction(id)}>
-              {adminType === 'regular' ? 'Promote' : 'Demote'}
-            </Button>
+          actionRender={({ email, id }) => (
+            <>
+              <Dialog>
+                <DialogTrigger
+                  render={
+                    <Button variant="outline" size="sm" disabled={session.isPending}>
+                      {adminType === 'regular' ? 'Promote' : 'Demote'}
+                    </Button>
+                  }
+                />
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you sure?</DialogTitle>
+                    <DialogDescription>
+                      {adminType === 'regular'
+                        ? `This action will grant super admin privileges to ${email}`
+                        : `This action will remove super admin privileges from ${email}`}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex gap-4 w-full">
+                    <DialogClose
+                      render={
+                        <Button variant="outline" className="flex-1">
+                          Cancel
+                        </Button>
+                      }
+                    />
+                    <DialogClose
+                      render={
+                        <Button className="flex-1" onClick={() => handleAction(id)}>
+                          Yes
+                        </Button>
+                      }
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger>
+                  <Button variant="destructive" size="sm" disabled={session.isPending}>
+                    Revoke
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you sure?</DialogTitle>
+                    <DialogDescription>This action is not reversible</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex gap-4 w-full">
+                    <DialogClose
+                      render={
+                        <Button variant="outline" className="flex-1">
+                          Cancel
+                        </Button>
+                      }
+                    />
+                    <DialogClose
+                      render={
+                        <Button className="flex-1" onClick={() => handleRevokeEmail(id)}>
+                          Yes
+                        </Button>
+                      }
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         />
       )}

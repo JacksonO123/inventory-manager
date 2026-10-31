@@ -24,4 +24,6 @@ export type User = z.infer<typeof userSchema>;
 
 export type AdminAndEmail = Admin & { email: string };
 
-export type ServerErrorRes = { error: string | undefined } | null;
+export type ServerErrorRes<T = unknown> =
+  | { status: 'error'; error?: string }
+  | { status: 'success'; body: T };
