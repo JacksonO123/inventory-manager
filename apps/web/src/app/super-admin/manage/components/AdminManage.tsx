@@ -3,26 +3,45 @@ import { useMemo, useState } from 'react';
 import { NewAdminForm } from '../../../../components/NewAdminForm';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
 } from '../../../../components/ui/dialog';
 import { toast } from '../../../../components/ui/toast';
-import { tsr } from '../../../../server/tsr';
-import { AdminAndEmail } from '../../../../types/types';
+import { AdminAndEmail, ServerErrorRes } from '../../../../types/types';
 import { Button } from '../../../../components/ui/button';
 import { AdminEmailList } from './AdminList';
 import { Input } from '../../../../components/ui/input';
+import { authClient } from '../../../../client/auth-client';
 
 type AdminManageProps = {
   admins: AdminAndEmail[];
   setAdmins: (admins: AdminAndEmail[] | ((prev: AdminAndEmail[]) => AdminAndEmail[])) => void;
 
-  onPromote: (admin: AdminAndEmail) => void;
+  validateFn: (email: string) => Promise<true | string>;
+  actionFn: (id: number) => Promise<ServerErrorRes<{ id: number }>>;
+  revokeFn: (id: number) => Promise<ServerErrorRes>;
+  addAdminFn: (email: string) => Promise<ServerErrorRes<{ id: number }>>;
+
+  onActionComplete: (admin: AdminAndEmail) => void;
+
+  adminType: 'super' | 'regular';
 };
 
-export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) {
+export function AdminManage({
+  admins,
+  adminType,
+  setAdmins,
+  actionFn,
+  validateFn,
+  revokeFn,
+  addAdminFn,
+  onActionComplete
+}: AdminManageProps) {
+  const session = authClient.useSession();
   const [adminOpen, setAdminOpen] = useState(false);
   const [emailFilter, setEmailFilter] = useState('');
 
@@ -32,28 +51,28 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
     );
   }, [admins, emailFilter]);
 
-  async function handleCheckValidAdminEmail(email: string) {
-    const res = await tsr.superAdmin.isValidSuperAdminEmail.mutate({ body: { email } });
-    if (res.status !== 200) return 'Validation error';
-    if (res.body.status === 'no_user_exists') return 'Given email is not an existing user';
-    if (res.body.status === 'super_admin_exists') return 'Already a super admin';
-
-    return true;
-  }
-
   async function handleAddAdmin(email: string) {
-    setAdmins((prev) => [...prev, { email, user_id: '', id: -1 }]);
+    setAdmins((prev) => [{ email, user_id: '', id: -1 }, ...prev]);
     setAdminOpen(false);
-    const res = await tsr.admin.addAdmin.mutate({ body: { email } });
-    if (res.status !== 200) {
+
+    const result = await addAdminFn(email);
+    if (result.status === 'error') {
       setAdmins((prev) => prev.filter((item) => item.id === -1));
 
-      if (res.status === 500 || res.status === 401) {
+      if (result.error !== undefined) {
         toast.add({
-          type: 'Error',
-          title: res.body.message
+          type: 'error',
+          title: result.error
         });
       }
+    } else {
+      setAdmins((prev) =>
+        prev.map((item) => (item.id === -1 ? { ...item, id: result.body.id } : item))
+      );
+      toast.add({
+        type: 'success',
+        title: 'Admin added successfully'
+      });
     }
   }
 
@@ -61,36 +80,46 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
     let before = [...admins];
     setAdmins((prev) => prev.filter((admin) => admin.id !== id));
 
-    const res = await tsr.admin.revokeAdmin.mutate({ body: { id } });
-    if (res.status !== 200) {
+    const result = await revokeFn(id);
+    if (result.status === 'error') {
       setAdmins(before);
 
-      if (res.status === 500 || res.status === 401) {
+      if (result.error !== undefined) {
         toast.add({
           type: 'error',
-          title: res.body.message
+          title: result.error
         });
       }
+    } else {
+      toast.add({
+        type: 'success',
+        title: 'Admin revoked successfully'
+      });
     }
   }
 
-  async function handlePromote(id: number) {
+  async function handleAction(id: number) {
     let before = [...admins];
-    const promoted = admins.find((item) => item.id === id);
+    const actionTarget = admins.find((item) => item.id === id);
     setAdmins((prev) => prev.filter((admin) => admin.id !== id));
 
-    const res = await tsr.admin.promote.mutate({ body: { id } });
-    if (res.status !== 200) {
+    const result = await actionFn(id);
+    if (result.status === 'error') {
       setAdmins(before);
 
-      if (res.status === 500 || res.status === 401) {
+      if (result.error !== undefined) {
         toast.add({
           type: 'error',
-          title: res.body.message
+          title: result.error
         });
       }
-    } else if (promoted) {
-      onPromote(promoted);
+    } else if (actionTarget) {
+      const correctedIdAdmin = { ...actionTarget, id: result.body.id };
+      onActionComplete(correctedIdAdmin);
+      toast.add({
+        type: 'success',
+        title: `Admin ${adminType === 'regular' ? 'promoted' : 'demoted'} successfully`
+      });
     }
   }
 
@@ -107,32 +136,98 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
           <DialogTrigger
             render={
               <Button>
-                Add admin <Plus />
+                Add {adminType === 'super' ? 'super admin' : 'admin'} <Plus />
               </Button>
             }
           />
           <DialogContent className="max-w-md! w-md!" showCloseButton={false}>
             <DialogHeader>
               <DialogTitle>
-                Enter email of new <span className="text-primary font-bold">admin</span>
+                Enter email of new{' '}
+                <span className="text-primary font-bold">
+                  {adminType === 'super' ? 'super admin' : 'admin'}
+                </span>
               </DialogTitle>
             </DialogHeader>
             <NewAdminForm
               onCancel={() => setAdminOpen(false)}
               onSubmit={handleAddAdmin}
-              externalValidator={handleCheckValidAdminEmail}
+              externalValidator={validateFn}
             />
           </DialogContent>
         </Dialog>
       </div>
       {filteredAdmins.length > 0 && (
         <AdminEmailList
+          userEmail={session.data?.user.email ?? null}
           admins={filteredAdmins}
-          onRevoke={handleRevokeEmail}
-          actionRender={(id) => (
-            <Button variant="outline" size="sm" onClick={() => handlePromote(id)}>
-              Promote
-            </Button>
+          actionRender={({ email, id }) => (
+            <>
+              <Dialog>
+                <DialogTrigger
+                  render={
+                    <Button variant="outline" size="sm" disabled={session.isPending}>
+                      {adminType === 'regular' ? 'Promote' : 'Demote'}
+                    </Button>
+                  }
+                />
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you sure?</DialogTitle>
+                    <DialogDescription>
+                      {adminType === 'regular'
+                        ? `This action will grant super admin privileges to ${email}`
+                        : `This action will remove super admin privileges from ${email}`}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex gap-4 w-full">
+                    <DialogClose
+                      render={
+                        <Button variant="outline" className="flex-1">
+                          Cancel
+                        </Button>
+                      }
+                    />
+                    <DialogClose
+                      render={
+                        <Button className="flex-1" onClick={() => handleAction(id)}>
+                          Yes
+                        </Button>
+                      }
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger>
+                  <Button variant="destructive" size="sm" disabled={session.isPending}>
+                    Revoke
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Are you sure?</DialogTitle>
+                    <DialogDescription>This action is not reversible</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex gap-4 w-full">
+                    <DialogClose
+                      render={
+                        <Button variant="outline" className="flex-1">
+                          Cancel
+                        </Button>
+                      }
+                    />
+                    <DialogClose
+                      render={
+                        <Button className="flex-1" onClick={() => handleRevokeEmail(id)}>
+                          Yes
+                        </Button>
+                      }
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         />
       )}

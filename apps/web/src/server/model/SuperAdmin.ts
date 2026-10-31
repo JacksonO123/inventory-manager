@@ -1,12 +1,12 @@
 import { superAdminTable, user } from '@invm/inventory-db-utils';
-import { SuperAdmin as SuperAdminType } from '../../types/types';
+import { AdminAndEmail, Admin as AdminType } from '../../types/types';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
 
 export class SuperAdmin {
-  values: SuperAdminType;
+  values: AdminType;
 
-  constructor(values: SuperAdminType) {
+  constructor(values: AdminType) {
     this.values = values;
   }
 
@@ -39,7 +39,7 @@ export class SuperAdmin {
 export class SuperAdminWithEmail extends SuperAdmin {
   email: string;
 
-  constructor(values: SuperAdminType & { email: string }) {
+  constructor(values: AdminAndEmail) {
     super({ id: values.id, user_id: values.user_id });
     this.email = values.email;
   }

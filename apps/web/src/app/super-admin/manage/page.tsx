@@ -9,8 +9,6 @@ export default async function ManageSuperAdminPage() {
     tsr.admin.getAllWithEmail.query()
   ]);
 
-  console.log(initialSuperAdmins, initialAdmins);
-
   return (
     <Content
       initialSuperAdmins={initialSuperAdmins.status === 200 ? initialSuperAdmins.body.admins : []}

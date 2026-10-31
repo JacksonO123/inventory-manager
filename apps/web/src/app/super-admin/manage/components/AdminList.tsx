@@ -1,15 +1,15 @@
 import { Fragment, useId } from 'react';
 import { Separator } from '../../../../components/ui/separator';
-import { Button } from '../../../../components/ui/button';
+import { cn } from 'cn';
 
 type AdminEmailListProps = {
+  userEmail: string | null;
   admins: { email: string; id: number }[];
 
-  actionRender: (id: number) => React.ReactNode;
-  onRevoke: (id: number) => void;
+  actionRender?: (admin: { email: string; id: number }) => React.ReactNode;
 };
 
-export function AdminEmailList({ admins, onRevoke, actionRender }: AdminEmailListProps) {
+export function AdminEmailList({ userEmail, admins, actionRender }: AdminEmailListProps) {
   const listId = useId();
 
   return (
@@ -17,13 +17,12 @@ export function AdminEmailList({ admins, onRevoke, actionRender }: AdminEmailLis
       {admins.map((admin, index) => (
         <Fragment key={`email-${index}-${listId}`}>
           <div className="flex justify-between gap-4 items-center">
-            <span>{admin.email}</span>
-            <div className="flex gap-2">
-              {actionRender(admin.id)}
-              <Button variant="destructive" size="sm" onClick={() => onRevoke(admin.id)}>
-                Revoke
-              </Button>
-            </div>
+            <span className={cn(userEmail === admin.email && 'text-muted-foreground')}>
+              {admin.email}
+            </span>
+            {userEmail !== admin.email && actionRender && (
+              <div className="flex gap-2">{actionRender(admin)}</div>
+            )}
           </div>
           {index < admins.length - 1 && <Separator className="h-px" />}
         </Fragment>
