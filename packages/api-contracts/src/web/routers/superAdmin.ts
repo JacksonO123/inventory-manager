@@ -54,8 +54,7 @@ export const superAdminRouter = c.router(
       }),
       responses: {
         200: z.object({
-          id: z.number().gte(0),
-          user_id: z.string().min(1)
+          userId: z.string().min(1)
         }),
         500: errorMsgSchema,
         401: errorMsgSchema
@@ -70,11 +69,11 @@ export const superAdminRouter = c.router(
         })
       }
     },
-    revokeAdmin: {
+    revokeSuperAdmin: {
       path: '/revoke',
       method: 'DELETE',
       body: z.object({
-        id: z.number().gte(0)
+        userId: z.string().min(1)
       }),
       responses: {
         200: c.noBody(),
@@ -86,12 +85,10 @@ export const superAdminRouter = c.router(
       path: '/demote',
       method: 'PATCH',
       body: z.object({
-        id: z.number().gte(0)
+        userId: z.string().min(1)
       }),
       responses: {
-        200: z.object({
-          id: z.number().gte(0)
-        }),
+        200: c.noBody(),
         500: errorMsgSchema,
         401: errorMsgSchema
       }

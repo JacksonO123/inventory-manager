@@ -26,12 +26,15 @@ export class SuperAdmin {
     return admin !== undefined;
   }
 
-  static async revoke(id: number) {
-    await db.delete(superAdminTable).where(eq(superAdminTable.id, id));
+  static async revoke(userId: string) {
+    await db.delete(superAdminTable).where(eq(superAdminTable.user_id, userId));
   }
 
-  static async getById(id: number) {
-    const [res] = await db.select().from(superAdminTable).where(eq(superAdminTable.id, id));
+  static async getByUserId(userId: string) {
+    const [res] = await db
+      .select()
+      .from(superAdminTable)
+      .where(eq(superAdminTable.user_id, userId));
     return res;
   }
 }

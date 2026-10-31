@@ -1,12 +1,13 @@
 import { Fragment, useId } from 'react';
 import { Separator } from '../../../../components/ui/separator';
 import { cn } from 'cn';
+import { PartialAdminAndEmail } from '../../../../types/types';
 
 type AdminEmailListProps = {
   userEmail: string | null;
-  admins: { email: string; id: number }[];
+  admins: PartialAdminAndEmail[];
 
-  actionRender?: (admin: { email: string; id: number }) => React.ReactNode;
+  actionRender?: (admin: PartialAdminAndEmail) => React.ReactNode;
 };
 
 export function AdminEmailList({ userEmail, admins, actionRender }: AdminEmailListProps) {
@@ -16,7 +17,7 @@ export function AdminEmailList({ userEmail, admins, actionRender }: AdminEmailLi
     <div className="flex flex-col gap-2">
       {admins.map((admin, index) => (
         <Fragment key={`email-${index}-${listId}`}>
-          <div className="flex justify-between gap-4 items-center">
+          <div className="flex justify-between gap-4 items-center min-h-7">
             <span className={cn(userEmail === admin.email && 'text-muted-foreground')}>
               {admin.email}
             </span>
