@@ -2,7 +2,7 @@ import { errorMsgSchema } from '@invm/api-contracts/schemas';
 import { HTTPStatusCode } from '@ts-rest/core';
 import { tsr } from '../../../../server/tsr';
 import { z } from 'better-auth';
-import { ServerErrorRes } from '../../../../types/types';
+import { IdServerErrorRes, ServerErrorRes } from '../../../../types/types';
 
 export async function validateSuperAdminEmail(email: string): Promise<true | string> {
   const res = await tsr.superAdmin.isValidSuperAdminEmail.mutate({ body: { email } });
@@ -47,32 +47,32 @@ function tsrResultToErrorRes(
   return { status: 'success', body: bodyTransform?.(res.body) };
 }
 
-export async function revokeSuperAdmin(id: number): Promise<ServerErrorRes> {
-  const res = await tsr.superAdmin.revokeAdmin.mutate({ body: { id } });
+export async function revokeSuperAdmin(userId: string): Promise<ServerErrorRes> {
+  const res = await tsr.superAdmin.revokeSuperAdmin.mutate({ body: { userId } });
   return tsrResultToErrorRes(res);
 }
 
-export async function revokeAdmin(id: number): Promise<ServerErrorRes> {
-  const res = await tsr.admin.revokeAdmin.mutate({ body: { id } });
+export async function revokeAdmin(userId: string): Promise<ServerErrorRes> {
+  const res = await tsr.admin.revokeAdmin.mutate({ body: { userId } });
   return tsrResultToErrorRes(res);
 }
 
-export async function addSuperAdmin(email: string): Promise<ServerErrorRes<{ id: number }>> {
+export async function addSuperAdmin(email: string): Promise<IdServerErrorRes> {
   const res = await tsr.superAdmin.addSuperAdmin.mutate({ body: { email } });
-  return tsrResultToErrorRes(res, (body) => ({ id: body.id }));
+  return tsrResultToErrorRes(res, (body) => ({ userId: body.userId }));
 }
 
-export async function addAdmin(email: string): Promise<ServerErrorRes<{ id: number }>> {
+export async function addAdmin(email: string): Promise<IdServerErrorRes> {
   const res = await tsr.admin.addAdmin.mutate({ body: { email } });
-  return tsrResultToErrorRes(res, (body) => ({ id: body.id }));
+  return tsrResultToErrorRes(res, (body) => ({ userId: body.userId }));
 }
 
-export async function demoteSuperAdmin(id: number): Promise<ServerErrorRes<{ id: number }>> {
-  const res = await tsr.superAdmin.demote.mutate({ body: { id } });
-  return tsrResultToErrorRes(res, (body) => ({ id: body.id }));
+export async function demoteSuperAdmin(userId: string): Promise<ServerErrorRes> {
+  const res = await tsr.superAdmin.demote.mutate({ body: { userId } });
+  return tsrResultToErrorRes(res);
 }
 
-export async function promoteAdmin(id: number): Promise<ServerErrorRes<{ id: number }>> {
-  const res = await tsr.admin.promote.mutate({ body: { id } });
-  return tsrResultToErrorRes(res, (body) => ({ id: body.id }));
+export async function promoteAdmin(userId: string): Promise<ServerErrorRes> {
+  const res = await tsr.admin.promote.mutate({ body: { userId } });
+  return tsrResultToErrorRes(res);
 }

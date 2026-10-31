@@ -1,7 +1,7 @@
 'use client';
 
 import { TabGroup, Tab, TabContent, Tabs } from '../../../components/Tabs';
-import { AdminAndEmail } from '../../../types/types';
+import { PartialAdminAndEmail } from '../../../types/types';
 import { AdminManage } from './components/AdminManage';
 import { useState } from 'react';
 import {
@@ -17,8 +17,8 @@ import {
 import { useElementSize } from '@mantine/hooks';
 
 type ContentProps = {
-  initialAdmins: AdminAndEmail[];
-  initialSuperAdmins: AdminAndEmail[];
+  initialAdmins: PartialAdminAndEmail[];
+  initialSuperAdmins: PartialAdminAndEmail[];
 };
 
 export default function Content({ initialAdmins, initialSuperAdmins }: ContentProps) {
@@ -26,11 +26,11 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
   const [admins, setAdmins] = useState(initialAdmins);
   const { ref, width } = useElementSize();
 
-  function handleDemote(admin: AdminAndEmail) {
+  function handleDemote(admin: PartialAdminAndEmail) {
     setAdmins((prev) => [admin, ...prev]);
   }
 
-  function handlePromote(admin: AdminAndEmail) {
+  function handlePromote(admin: PartialAdminAndEmail) {
     setSuperAdmins((prev) => [admin, ...prev]);
   }
 

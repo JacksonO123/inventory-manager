@@ -25,7 +25,9 @@ export const adminRouter = c.router(
         email: z.email()
       }),
       responses: {
-        200: adminSchema,
+        200: z.object({
+          userId: z.string().min(1)
+        }),
         500: errorMsgSchema,
         401: errorMsgSchema
       }
@@ -43,7 +45,7 @@ export const adminRouter = c.router(
       path: '/revoke',
       method: 'DELETE',
       body: z.object({
-        id: z.number().gte(0)
+        userId: z.string().min(1)
       }),
       responses: {
         200: c.noBody(),
@@ -55,12 +57,10 @@ export const adminRouter = c.router(
       path: '/promote',
       method: 'PATCH',
       body: z.object({
-        id: z.number().gte(0)
+        userId: z.string().min(1)
       }),
       responses: {
-        200: z.object({
-          id: z.number().gte(0)
-        }),
+        200: c.noBody(),
         500: errorMsgSchema,
         401: errorMsgSchema
       }

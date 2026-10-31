@@ -94,7 +94,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
         return { status: 500, body: { message: 'Failed to create admin' } };
       }
 
-      return { status: 200, body: { user_id: admin.values.user_id, id: admin.values.id } };
+      return { status: 200, body: { userId: admin.values.user_id, id: admin.values.id } };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }
@@ -122,7 +122,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
       return { status: 500, body: { message: err + '' } };
     }
   },
-  revokeAdmin: async ({ body, req }) => {
+  revokeSuperAdmin: async ({ body, req }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
@@ -130,7 +130,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
       if (!userIsSuperAdmin) return unauthorizedResponse;
 
-      await SuperAdmin.revoke(body.id);
+      await SuperAdmin.revoke(body.userId);
       return { status: 200 };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
@@ -144,15 +144,15 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
       if (!userIsSuperAdmin) return unauthorizedResponse;
 
-      const superAdmin = await SuperAdmin.getById(body.id);
+      const superAdmin = await SuperAdmin.getByUserId(body.userId);
       if (!superAdmin) {
         return { status: 500, body: { message: 'Failed to demote, user is not a super admin' } };
       }
 
-      await SuperAdmin.revoke(body.id);
-      const newAdmin = await Admin.create(superAdmin.user_id);
+      await SuperAdmin.revoke(body.userId);
+      await Admin.create(superAdmin.user_id);
 
-      return { status: 200, body: { id: newAdmin.values.id } };
+      return { status: 200 };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }

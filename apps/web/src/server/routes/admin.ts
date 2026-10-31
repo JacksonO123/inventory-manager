@@ -50,7 +50,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
         return { status: 500, body: { message: 'Failed to create admin' } };
       }
 
-      return { status: 200, body: { user_id: admin.values.user_id, id: admin.values.id } };
+      return { status: 200, body: { userId: admin.values.user_id, id: admin.values.id } };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }
@@ -86,7 +86,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
       if (!userIsSuperAdmin) return unauthorizedResponse;
 
-      await Admin.revoke(body.id);
+      await Admin.revoke(body.userId);
       return { status: 200 };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
@@ -100,15 +100,15 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
       if (!userIsSuperAdmin) return unauthorizedResponse;
 
-      const admin = await Admin.getById(body.id);
+      const admin = await Admin.getByUserId(body.userId);
       if (!admin) {
         return { status: 500, body: { message: 'Failed to promote, user is not an admin' } };
       }
 
-      await Admin.revoke(body.id);
-      const newSuperAdmin = await SuperAdmin.create(admin.user_id);
+      await Admin.revoke(body.userId);
+      await SuperAdmin.create(admin.user_id);
 
-      return { status: 200, body: { id: newSuperAdmin.values.id } };
+      return { status: 200 };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }

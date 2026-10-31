@@ -11,25 +11,27 @@ import {
   DialogTrigger
 } from '../../../../components/ui/dialog';
 import { toast } from '../../../../components/ui/toast';
-import { AdminAndEmail, ServerErrorRes } from '../../../../types/types';
+import { IdServerErrorRes, PartialAdminAndEmail, ServerErrorRes } from '../../../../types/types';
 import { Button } from '../../../../components/ui/button';
 import { AdminEmailList } from './AdminList';
 import { Input } from '../../../../components/ui/input';
 import { authClient } from '../../../../client/auth-client';
 
 type AdminManageProps = {
-  admins: AdminAndEmail[];
-  setAdmins: (admins: AdminAndEmail[] | ((prev: AdminAndEmail[]) => AdminAndEmail[])) => void;
+  admins: PartialAdminAndEmail[];
+  setAdmins: (
+    admins: PartialAdminAndEmail[] | ((prev: PartialAdminAndEmail[]) => PartialAdminAndEmail[])
+  ) => void;
 
   adminType: 'super' | 'regular';
   tabWidth: number;
 
   validateFn: (email: string) => Promise<true | string>;
-  actionFn: (id: number) => Promise<ServerErrorRes<{ id: number }>>;
-  revokeFn: (id: number) => Promise<ServerErrorRes>;
-  addAdminFn: (email: string) => Promise<ServerErrorRes<{ id: number }>>;
+  actionFn: (userId: string) => Promise<ServerErrorRes>;
+  revokeFn: (userId: string) => Promise<ServerErrorRes>;
+  addAdminFn: (email: string) => Promise<IdServerErrorRes>;
 
-  onActionComplete: (admin: AdminAndEmail) => void;
+  onActionComplete: (admin: PartialAdminAndEmail) => void;
 };
 
 export function AdminManage({
@@ -54,12 +56,12 @@ export function AdminManage({
   }, [admins, emailFilter]);
 
   async function handleAddAdmin(email: string) {
-    setAdmins((prev) => [{ email, user_id: '', id: -1 }, ...prev]);
+    setAdmins((prev) => [{ email, user_id: '' }, ...prev]);
     setAdminOpen(false);
 
     const result = await addAdminFn(email);
     if (result.status === 'error') {
-      setAdmins((prev) => prev.filter((item) => item.id === -1));
+      setAdmins((prev) => prev.filter((item) => item.email !== email));
 
       if (result.error !== undefined) {
         toast.add({
@@ -69,7 +71,7 @@ export function AdminManage({
       }
     } else {
       setAdmins((prev) =>
-        prev.map((item) => (item.id === -1 ? { ...item, id: result.body.id } : item))
+        prev.map((item) => (item.email === email ? { ...item, user_id: result.body.userId } : item))
       );
       toast.add({
         type: 'success',
@@ -78,11 +80,11 @@ export function AdminManage({
     }
   }
 
-  async function handleRevokeEmail(id: number) {
+  async function handleRevokeEmail(userId: string) {
     let before = [...admins];
-    setAdmins((prev) => prev.filter((admin) => admin.id !== id));
+    setAdmins((prev) => prev.filter((admin) => admin.user_id !== userId));
 
-    const result = await revokeFn(id);
+    const result = await revokeFn(userId);
     if (result.status === 'error') {
       setAdmins(before);
 
@@ -100,12 +102,12 @@ export function AdminManage({
     }
   }
 
-  async function handleAction(id: number) {
+  async function handleAction(userId: string) {
     let before = [...admins];
-    const actionTarget = admins.find((item) => item.id === id);
-    setAdmins((prev) => prev.filter((admin) => admin.id !== id));
+    const actionTarget = admins.find((item) => item.user_id === userId);
+    setAdmins((prev) => prev.filter((admin) => admin.user_id !== userId));
 
-    const result = await actionFn(id);
+    const result = await actionFn(userId);
     if (result.status === 'error') {
       setAdmins(before);
 
@@ -116,8 +118,7 @@ export function AdminManage({
         });
       }
     } else if (actionTarget) {
-      const correctedIdAdmin = { ...actionTarget, id: result.body.id };
-      onActionComplete(correctedIdAdmin);
+      onActionComplete(actionTarget);
       toast.add({
         type: 'success',
         title: `Admin ${adminType === 'regular' ? 'promoted' : 'demoted'} successfully`
@@ -166,7 +167,7 @@ export function AdminManage({
         <AdminEmailList
           userEmail={session.data?.user.email ?? null}
           admins={filteredAdmins}
-          actionRender={({ email, id }) => (
+          actionRender={({ email, user_id: userId }) => (
             <>
               <Dialog>
                 <DialogTrigger
@@ -195,7 +196,7 @@ export function AdminManage({
                     />
                     <DialogClose
                       render={
-                        <Button className="flex-1" onClick={() => handleAction(id)}>
+                        <Button className="flex-1" onClick={() => handleAction(userId)}>
                           Yes
                         </Button>
                       }
@@ -226,7 +227,7 @@ export function AdminManage({
                     />
                     <DialogClose
                       render={
-                        <Button className="flex-1" onClick={() => handleRevokeEmail(id)}>
+                        <Button className="flex-1" onClick={() => handleRevokeEmail(userId)}>
                           Yes
                         </Button>
                       }

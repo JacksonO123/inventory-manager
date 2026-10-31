@@ -26,12 +26,12 @@ export class Admin {
     return admin !== undefined;
   }
 
-  static async revoke(id: number) {
-    await db.delete(adminTable).where(eq(adminTable.id, id));
+  static async revoke(userId: string) {
+    await db.delete(adminTable).where(eq(adminTable.user_id, userId));
   }
 
-  static async getById(id: number) {
-    const [res] = await db.select().from(adminTable).where(eq(adminTable.id, id));
+  static async getByUserId(userId: string) {
+    const [res] = await db.select().from(adminTable).where(eq(adminTable.user_id, userId));
     return res;
   }
 }
