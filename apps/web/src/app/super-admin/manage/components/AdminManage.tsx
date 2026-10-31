@@ -21,19 +21,21 @@ type AdminManageProps = {
   admins: AdminAndEmail[];
   setAdmins: (admins: AdminAndEmail[] | ((prev: AdminAndEmail[]) => AdminAndEmail[])) => void;
 
+  adminType: 'super' | 'regular';
+  tabWidth: number;
+
   validateFn: (email: string) => Promise<true | string>;
   actionFn: (id: number) => Promise<ServerErrorRes<{ id: number }>>;
   revokeFn: (id: number) => Promise<ServerErrorRes>;
   addAdminFn: (email: string) => Promise<ServerErrorRes<{ id: number }>>;
 
   onActionComplete: (admin: AdminAndEmail) => void;
-
-  adminType: 'super' | 'regular';
 };
 
 export function AdminManage({
   admins,
   adminType,
+  tabWidth,
   setAdmins,
   actionFn,
   validateFn,
@@ -125,37 +127,40 @@ export function AdminManage({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-full flex justify-end gap-4">
-        <Input
-          className="max-w-2xs"
-          placeholder="Filter email"
-          value={emailFilter}
-          onChange={(e) => setEmailFilter(e.target.value)}
-        />
-        <Dialog open={adminOpen} onOpenChange={setAdminOpen}>
-          <DialogTrigger
-            render={
-              <Button>
-                Add {adminType === 'super' ? 'super admin' : 'admin'} <Plus />
-              </Button>
-            }
+      <div className="flex-1 flex gap-4 flex-wrap">
+        <div className="h-9" style={{ minWidth: `${tabWidth}px` }} />
+        <div className="flex-1 flex gap-4 justify-end">
+          <Input
+            className="max-w-2xs min-w-20"
+            placeholder="Filter email"
+            value={emailFilter}
+            onChange={(e) => setEmailFilter(e.target.value)}
           />
-          <DialogContent className="max-w-md! w-md!" showCloseButton={false}>
-            <DialogHeader>
-              <DialogTitle>
-                Enter email of new{' '}
-                <span className="text-primary font-bold">
-                  {adminType === 'super' ? 'super admin' : 'admin'}
-                </span>
-              </DialogTitle>
-            </DialogHeader>
-            <NewAdminForm
-              onCancel={() => setAdminOpen(false)}
-              onSubmit={handleAddAdmin}
-              externalValidator={validateFn}
+          <Dialog open={adminOpen} onOpenChange={setAdminOpen}>
+            <DialogTrigger
+              render={
+                <Button>
+                  Add {adminType === 'super' ? 'super admin' : 'admin'} <Plus />
+                </Button>
+              }
             />
-          </DialogContent>
-        </Dialog>
+            <DialogContent className="max-w-md! w-md!" showCloseButton={false}>
+              <DialogHeader>
+                <DialogTitle>
+                  Enter email of new{' '}
+                  <span className="text-primary font-bold">
+                    {adminType === 'super' ? 'super admin' : 'admin'}
+                  </span>
+                </DialogTitle>
+              </DialogHeader>
+              <NewAdminForm
+                onCancel={() => setAdminOpen(false)}
+                onSubmit={handleAddAdmin}
+                externalValidator={validateFn}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       {filteredAdmins.length > 0 && (
         <AdminEmailList
