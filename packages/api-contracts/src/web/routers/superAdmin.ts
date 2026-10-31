@@ -1,4 +1,4 @@
-import { errorMsgSchema, superAdminSchema } from '../../schemas';
+import { errorMsgSchema, adminSchema } from '../../schemas';
 import { c } from '../../contract';
 import { z } from 'zod';
 
@@ -66,7 +66,7 @@ export const superAdminRouter = c.router(
       method: 'GET',
       responses: {
         200: z.object({
-          admins: z.array(superAdminSchema.extend({ email: z.email() }))
+          admins: z.array(adminSchema.extend({ email: z.email() }))
         })
       }
     },

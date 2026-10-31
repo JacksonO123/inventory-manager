@@ -9,8 +9,7 @@ import {
   DialogTrigger
 } from '../../../../components/ui/dialog';
 import { toast } from '../../../../components/ui/toast';
-import { tsr } from '../../../../server/tsr';
-import { AdminAndEmail } from '../../../../types/types';
+import { AdminAndEmail, ServerErrorRes } from '../../../../types/types';
 import { Button } from '../../../../components/ui/button';
 import { AdminEmailList } from './AdminList';
 import { Input } from '../../../../components/ui/input';
@@ -19,10 +18,26 @@ type AdminManageProps = {
   admins: AdminAndEmail[];
   setAdmins: (admins: AdminAndEmail[] | ((prev: AdminAndEmail[]) => AdminAndEmail[])) => void;
 
-  onPromote: (admin: AdminAndEmail) => void;
+  validateFn: (email: string) => Promise<true | string>;
+  actionFn: (id: number) => Promise<ServerErrorRes>;
+  revokeFn: (id: number) => Promise<ServerErrorRes>;
+  addAdminFn: (email: string) => Promise<ServerErrorRes>;
+
+  onActionComplete: (admin: AdminAndEmail) => void;
+
+  adminType: 'super' | 'regular';
 };
 
-export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) {
+export function AdminManage({
+  admins,
+  adminType,
+  setAdmins,
+  actionFn,
+  validateFn,
+  revokeFn,
+  addAdminFn,
+  onActionComplete
+}: AdminManageProps) {
   const [adminOpen, setAdminOpen] = useState(false);
   const [emailFilter, setEmailFilter] = useState('');
 
@@ -32,26 +47,18 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
     );
   }, [admins, emailFilter]);
 
-  async function handleCheckValidAdminEmail(email: string) {
-    const res = await tsr.superAdmin.isValidSuperAdminEmail.mutate({ body: { email } });
-    if (res.status !== 200) return 'Validation error';
-    if (res.body.status === 'no_user_exists') return 'Given email is not an existing user';
-    if (res.body.status === 'super_admin_exists') return 'Already a super admin';
-
-    return true;
-  }
-
   async function handleAddAdmin(email: string) {
-    setAdmins((prev) => [...prev, { email, user_id: '', id: -1 }]);
+    setAdmins((prev) => [{ email, user_id: '', id: -1 }, ...prev]);
     setAdminOpen(false);
-    const res = await tsr.admin.addAdmin.mutate({ body: { email } });
-    if (res.status !== 200) {
+
+    const error = await addAdminFn(email);
+    if (error !== null) {
       setAdmins((prev) => prev.filter((item) => item.id === -1));
 
-      if (res.status === 500 || res.status === 401) {
+      if (error.error !== undefined) {
         toast.add({
           type: 'Error',
-          title: res.body.message
+          title: error.error
         });
       }
     }
@@ -61,36 +68,36 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
     let before = [...admins];
     setAdmins((prev) => prev.filter((admin) => admin.id !== id));
 
-    const res = await tsr.admin.revokeAdmin.mutate({ body: { id } });
-    if (res.status !== 200) {
+    const error = await revokeFn(id);
+    if (error !== null) {
       setAdmins(before);
 
-      if (res.status === 500 || res.status === 401) {
+      if (error.error !== undefined) {
         toast.add({
           type: 'error',
-          title: res.body.message
+          title: error.error
         });
       }
     }
   }
 
-  async function handlePromote(id: number) {
+  async function handleAction(id: number) {
     let before = [...admins];
-    const promoted = admins.find((item) => item.id === id);
+    const actionTarget = admins.find((item) => item.id === id);
     setAdmins((prev) => prev.filter((admin) => admin.id !== id));
 
-    const res = await tsr.admin.promote.mutate({ body: { id } });
-    if (res.status !== 200) {
+    const error = await actionFn(id);
+    if (error !== null) {
       setAdmins(before);
 
-      if (res.status === 500 || res.status === 401) {
+      if (error.error !== undefined) {
         toast.add({
           type: 'error',
-          title: res.body.message
+          title: error.error
         });
       }
-    } else if (promoted) {
-      onPromote(promoted);
+    } else if (actionTarget) {
+      onActionComplete(actionTarget);
     }
   }
 
@@ -107,20 +114,23 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
           <DialogTrigger
             render={
               <Button>
-                Add admin <Plus />
+                Add {adminType === 'super' ? 'super admin' : 'admin'} <Plus />
               </Button>
             }
           />
           <DialogContent className="max-w-md! w-md!" showCloseButton={false}>
             <DialogHeader>
               <DialogTitle>
-                Enter email of new <span className="text-primary font-bold">admin</span>
+                Enter email of new{' '}
+                <span className="text-primary font-bold">
+                  {adminType === 'super' ? 'super admin' : 'admin'}
+                </span>
               </DialogTitle>
             </DialogHeader>
             <NewAdminForm
               onCancel={() => setAdminOpen(false)}
               onSubmit={handleAddAdmin}
-              externalValidator={handleCheckValidAdminEmail}
+              externalValidator={validateFn}
             />
           </DialogContent>
         </Dialog>
@@ -130,8 +140,8 @@ export function AdminManage({ admins, setAdmins, onPromote }: AdminManageProps) 
           admins={filteredAdmins}
           onRevoke={handleRevokeEmail}
           actionRender={(id) => (
-            <Button variant="outline" size="sm" onClick={() => handlePromote(id)}>
-              Promote
+            <Button variant="outline" size="sm" onClick={() => handleAction(id)}>
+              {adminType === 'regular' ? 'Promote' : 'Demote'}
             </Button>
           )}
         />

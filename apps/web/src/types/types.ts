@@ -4,7 +4,6 @@ import {
   basicUserSchemaOmitId,
   itemSchema,
   partialItemSchema,
-  superAdminSchema,
   userSchema
 } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
@@ -21,10 +20,8 @@ export type AuthTypes = 'signup' | 'login';
 
 export type Admin = z.infer<typeof adminSchema>;
 
-export type SuperAdmin = z.infer<typeof superAdminSchema>;
-
 export type User = z.infer<typeof userSchema>;
 
 export type AdminAndEmail = Admin & { email: string };
 
-export type SuperAdminAndEmail = SuperAdmin & { email: string };
+export type ServerErrorRes = { error: string | undefined } | null;
