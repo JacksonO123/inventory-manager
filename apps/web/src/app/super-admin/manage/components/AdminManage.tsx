@@ -199,11 +199,13 @@ export function AdminManage({
                 </DialogContent>
               </Dialog>
               <Dialog>
-                <DialogTrigger>
-                  <Button variant="destructive" size="sm" disabled={session.isPending}>
-                    Revoke
-                  </Button>
-                </DialogTrigger>
+                <DialogTrigger
+                  render={
+                    <Button variant="destructive" size="sm" disabled={session.isPending}>
+                      Revoke
+                    </Button>
+                  }
+                />
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Are you sure?</DialogTitle>
