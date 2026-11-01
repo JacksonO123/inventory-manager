@@ -1,5 +1,6 @@
 import { pgTable } from 'drizzle-orm/pg-core';
 import * as t from 'drizzle-orm/pg-core';
+import { isNull } from 'drizzle-orm';
 
 export const user = pgTable('user', {
   id: t.text('id').primaryKey(),
@@ -85,6 +86,30 @@ export const basicUserTable = pgTable('basic_user', {
   name: t.text().notNull(),
   email: t.text().notNull().unique()
 });
+
+export const checkoutTable = pgTable(
+  'checkout',
+  {
+    id: t.serial().primaryKey(),
+    itemId: t
+      .integer('item_id')
+      .notNull()
+      .references(() => itemTable.id, { onDelete: 'cascade' }),
+    borrowerId: t
+      .integer('borrower_id')
+      .notNull()
+      .references(() => basicUserTable.id, { onDelete: 'cascade' }),
+    checkedOutAt: t
+      .timestamp('checked_out_at', { precision: 6, withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    returnedAt: t.timestamp('returned_at', { precision: 6, withTimezone: true })
+  },
+  (table) => [
+    t.uniqueIndex('checkout_open_item_idx').on(table.itemId).where(isNull(table.returnedAt)),
+    t.index('checkout_borrowerId_idx').on(table.borrowerId)
+  ]
+);
 
 export const superAdminTable = pgTable('super_admin', {
   id: t.serial().primaryKey(),
