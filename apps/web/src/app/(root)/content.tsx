@@ -30,14 +30,19 @@ export function Content({ items: itemsFromServer }: ContentProps) {
             item.id === -1 ? { ...item, id: res.body.id, status: res.body.status } : item
           )
         );
-      } else if (res.status === 500) {
+      } else {
+        setItems((items) => items.filter((item) => item.id !== -1));
         toast.add({
           type: 'error',
-          title: res.body.message
+          title: res.status === 500 ? res.body.message : 'Failed to create item'
         });
       }
     } catch {
       setItems((items) => items.filter((item) => item.id !== -1));
+      toast.add({
+        type: 'error',
+        title: 'Failed to create item'
+      });
     }
   }
 
