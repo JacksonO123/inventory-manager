@@ -3,6 +3,7 @@
  */
 import { ZodError } from 'zod';
 import { Item } from './Item';
+import { HttpError } from '../errors';
 import { db } from '../db';
 import { itemTable } from '@invm/inventory-db-utils';
 
@@ -37,7 +38,14 @@ function mockTransaction({
     update: jest.fn(() => ({
       set: (values: unknown) => {
         updateSet(values);
-        return { where: () => ({ returning: () => Promise.resolve(updates.shift() ?? []) }) };
+        return {
+          where: () => {
+            const result = updates.shift() ?? [];
+            return Object.assign(Promise.resolve(result), {
+              returning: () => Promise.resolve(result)
+            });
+          }
+        };
       }
     })),
     insert: jest.fn(() => ({ values: insertValues }))
@@ -101,41 +109,41 @@ describe('Item.checkOut', () => {
   });
 
   it('books an available item and records the checkout', async () => {
-    const booked = { id: 1, name: 'x', description: null, status: 'booked' };
     const { insertValues, updateSet } = mockTransaction({
       selects: [[{ id: 7 }]],
-      updates: [[booked]]
+      updates: [[{ id: 1 }]]
     });
 
-    const result = await Item.checkOut(1, 7);
-
-    expect(result).toEqual({ ok: true, item: new Item(booked as never) });
+    await expect(Item.checkOut(1, 7)).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenCalledWith({ status: 'booked' });
     expect(insertValues).toHaveBeenCalledWith({ itemId: 1, borrowerId: 7 });
   });
 
-  it('fails when the borrower does not exist and never touches the item', async () => {
+  it('throws 404 when the borrower does not exist and never touches the item', async () => {
     const { tx } = mockTransaction({ selects: [[]] });
 
-    await expect(Item.checkOut(1, 7)).resolves.toEqual({
-      ok: false,
-      reason: 'borrower_not_found'
-    });
+    await expect(Item.checkOut(1, 7)).rejects.toEqual(new HttpError(404, 'Borrower not found'));
     expect(tx.update).not.toHaveBeenCalled();
     expect(tx.insert).not.toHaveBeenCalled();
   });
 
-  it('fails when the item is not available', async () => {
+  it('throws 409 when the item is not available', async () => {
     const { tx } = mockTransaction({ selects: [[{ id: 7 }], [{ id: 1 }]], updates: [[]] });
 
-    await expect(Item.checkOut(1, 7)).resolves.toEqual({ ok: false, reason: 'not_available' });
+    await expect(Item.checkOut(1, 7)).rejects.toMatchObject({
+      status: 409,
+      message: 'Item is not available'
+    });
     expect(tx.insert).not.toHaveBeenCalled();
   });
 
-  it('fails when the item does not exist', async () => {
+  it('throws 404 when the item does not exist', async () => {
     const { tx } = mockTransaction({ selects: [[{ id: 7 }], []], updates: [[]] });
 
-    await expect(Item.checkOut(1, 7)).resolves.toEqual({ ok: false, reason: 'item_not_found' });
+    await expect(Item.checkOut(1, 7)).rejects.toMatchObject({
+      status: 404,
+      message: 'Item not found'
+    });
     expect(tx.insert).not.toHaveBeenCalled();
   });
 });
@@ -146,26 +154,45 @@ describe('Item.return', () => {
   });
 
   it('closes the checkout and makes the item available again', async () => {
-    const available = { id: 1, name: 'x', description: null, status: 'available' };
-    const { updateSet } = mockTransaction({ updates: [[{ id: 3 }], [available]] });
+    const { updateSet } = mockTransaction({ updates: [[{ id: 3 }], []] });
 
-    const result = await Item.return(1, 7);
-
-    expect(result).toEqual({ ok: true, item: new Item(available as never) });
+    await expect(Item.return(1, 7)).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenNthCalledWith(1, { returnedAt: expect.any(Date) });
     expect(updateSet).toHaveBeenNthCalledWith(2, { status: 'available' });
   });
 
-  it('fails when the item is not checked out by this borrower', async () => {
+  it('throws 409 when the item is not checked out by this borrower', async () => {
     const { tx } = mockTransaction({ updates: [[]], selects: [[{ id: 1 }]] });
 
-    await expect(Item.return(1, 7)).resolves.toEqual({ ok: false, reason: 'not_checked_out' });
+    await expect(Item.return(1, 7)).rejects.toMatchObject({
+      status: 409,
+      message: 'Item is not checked out by this borrower'
+    });
     expect(tx.update).toHaveBeenCalledTimes(1);
   });
 
-  it('fails when the item does not exist', async () => {
+  it('throws 404 when the item does not exist', async () => {
     mockTransaction({ updates: [[]], selects: [[]] });
 
-    await expect(Item.return(1, 7)).resolves.toEqual({ ok: false, reason: 'item_not_found' });
+    await expect(Item.return(1, 7)).rejects.toMatchObject({
+      status: 404,
+      message: 'Item not found'
+    });
+  });
+});
+
+describe('Item.exists', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('uses the main db when no transaction is passed', async () => {
+    const limit = jest.fn().mockResolvedValue([{ id: 1 }]);
+    (db.select as jest.Mock).mockReturnValue({
+      from: () => ({ where: () => ({ limit }) })
+    });
+
+    await expect(Item.exists(1)).resolves.toBe(true);
+    expect(db.select).toHaveBeenCalled();
   });
 });

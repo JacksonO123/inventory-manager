@@ -25,24 +25,24 @@ export const itemRouter = c.router(
       }
     },
     checkOut: {
-      path: '/:id/checkout',
+      path: '/checkout/:id',
       method: 'POST',
       pathParams: itemIdParamsSchema,
       body: borrowerBodySchema,
       responses: {
-        200: itemSchema,
+        200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,
         409: errorMsgSchema,
         500: errorMsgSchema
       }
     },
     returnItem: {
-      path: '/:id/return',
+      path: '/return/:id',
       method: 'POST',
       pathParams: itemIdParamsSchema,
       body: borrowerBodySchema,
       responses: {
-        200: itemSchema,
+        200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,
         409: errorMsgSchema,
         500: errorMsgSchema

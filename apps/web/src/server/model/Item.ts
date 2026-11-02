@@ -2,15 +2,8 @@ import { basicUserTable, checkoutTable, itemTable } from '@invm/inventory-db-uti
 import { partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
+import { HttpError } from '../errors';
 import { PartialItem, Item as ItemType } from '../../types/types';
-
-export type CheckoutResult =
-  | { ok: true; item: Item }
-  | { ok: false; reason: 'item_not_found' | 'borrower_not_found' | 'not_available' };
-
-export type ReturnResult =
-  | { ok: true; item: Item }
-  | { ok: false; reason: 'item_not_found' | 'not_checked_out' };
 
 export class Item {
   values: ItemType;
@@ -32,15 +25,15 @@ export class Item {
     return new Item(createdItem);
   }
 
-  static async checkOut(itemId: number, borrowerId: number): Promise<CheckoutResult> {
-    return await db.transaction(async (tx) => {
+  static async checkOut(itemId: number, borrowerId: number) {
+    await db.transaction(async (tx) => {
       const [borrower] = await tx
         .select({ id: basicUserTable.id })
         .from(basicUserTable)
         .where(eq(basicUserTable.id, borrowerId))
         .limit(1);
       if (borrower === undefined) {
-        return { ok: false, reason: 'borrower_not_found' };
+        throw new HttpError(404, 'Borrower not found');
       }
 
       // only flips the status if the item is still available, so two people
@@ -49,19 +42,20 @@ export class Item {
         .update(itemTable)
         .set({ status: 'booked' })
         .where(and(eq(itemTable.id, itemId), eq(itemTable.status, 'available')))
-        .returning();
+        .returning({ id: itemTable.id });
       if (item === undefined) {
-        const exists = await Item.exists(tx, itemId);
-        return { ok: false, reason: exists ? 'not_available' : 'item_not_found' };
+        if (await Item.exists(itemId, tx)) {
+          throw new HttpError(409, 'Item is not available');
+        }
+        throw new HttpError(404, 'Item not found');
       }
 
       await tx.insert(checkoutTable).values({ itemId, borrowerId });
-      return { ok: true, item: new Item(item) };
     });
   }
 
-  static async return(itemId: number, borrowerId: number): Promise<ReturnResult> {
-    return await db.transaction(async (tx) => {
+  static async return(itemId: number, borrowerId: number) {
+    await db.transaction(async (tx) => {
       const [checkout] = await tx
         .update(checkoutTable)
         .set({ returnedAt: new Date() })
@@ -74,23 +68,17 @@ export class Item {
         )
         .returning({ id: checkoutTable.id });
       if (checkout === undefined) {
-        const exists = await Item.exists(tx, itemId);
-        return { ok: false, reason: exists ? 'not_checked_out' : 'item_not_found' };
+        if (await Item.exists(itemId, tx)) {
+          throw new HttpError(409, 'Item is not checked out by this borrower');
+        }
+        throw new HttpError(404, 'Item not found');
       }
 
-      const [item] = await tx
-        .update(itemTable)
-        .set({ status: 'available' })
-        .where(eq(itemTable.id, itemId))
-        .returning();
-      if (item === undefined) {
-        throw new Error('Failed to update item status');
-      }
-      return { ok: true, item: new Item(item) };
+      await tx.update(itemTable).set({ status: 'available' }).where(eq(itemTable.id, itemId));
     });
   }
 
-  private static async exists(tx: Pick<typeof db, 'select'>, itemId: number) {
+  static async exists(itemId: number, tx: Pick<typeof db, 'select'> = db) {
     const [row] = await tx
       .select({ id: itemTable.id })
       .from(itemTable)
