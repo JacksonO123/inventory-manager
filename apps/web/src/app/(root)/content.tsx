@@ -19,25 +19,22 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   const [items, setItems] = useState([...itemsFromServer]);
 
   async function handleSaveItem(item: PartialItem) {
-    try {
-      const fullItem: ItemType = { ...item, id: -1, status: 'available' };
-      setItems((prev) => [...prev, fullItem]);
-      setCreatingItem(false);
-      const res = await tsr.item.createItem.mutate({ body: item });
-      if (res.status === 200) {
-        setItems((items) =>
-          items.map((item) =>
-            item.id === -1 ? { ...item, id: res.body.id, status: res.body.status } : item
-          )
-        );
-      } else if (res.status === 500) {
-        toast.add({
-          type: 'error',
-          title: res.body.message
-        });
-      }
-    } catch {
+    const fullItem: ItemType = { ...item, id: -1, status: 'available' };
+    setItems((prev) => [...prev, fullItem]);
+    setCreatingItem(false);
+    const res = await tsr.item.createItem.mutate({ body: item });
+    if (res.status === 200) {
+      setItems((items) =>
+        items.map((item) =>
+          item.id === -1 ? { ...item, id: res.body.id, status: res.body.status } : item
+        )
+      );
+    } else {
       setItems((items) => items.filter((item) => item.id !== -1));
+      toast.add({
+        type: 'error',
+        title: res.status === 500 ? res.body.message : 'Failed to create item'
+      });
     }
   }
 
