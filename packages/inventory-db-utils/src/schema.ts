@@ -136,3 +136,9 @@ export const adminTable = pgTable(
   },
   (table) => [t.index('admin_user_id_index').on(table.user_id)]
 );
+
+export const orgTable = pgTable('organization', {
+  id: t.serial().primaryKey(),
+  name: t.text('name').notNull(),
+  description: t.text('description').notNull()
+});
