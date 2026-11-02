@@ -126,3 +126,9 @@ export const adminTable = pgTable('admin', {
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' })
 });
+
+export const orgTable = pgTable('organization', {
+  id: t.serial().primaryKey(),
+  name: t.text('name').notNull(),
+  description: t.text('description').notNull()
+});
