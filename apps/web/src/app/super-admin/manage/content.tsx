@@ -15,6 +15,8 @@ import {
   validateSuperAdminEmail
 } from './utils/adminActions';
 import { useElementSize } from '@mantine/hooks';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 type ContentProps = {
   initialAdmins: PartialAdminAndEmail[];
@@ -35,42 +37,48 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
   }
 
   return (
-    <main className="flex justify-center pt-20 px-20">
-      <div className="w-full max-w-3xl p-4 rounded-md border">
-        <Tabs>
-          <TabGroup className="absolute" ref={ref}>
-            <Tab value="super-admin">Super Admin</Tab>
-            <Tab value="admin">Admin</Tab>
-          </TabGroup>
-          <div className="min-h-9">
-            <TabContent tab="super-admin">
-              <AdminManage
-                admins={superAdmins}
-                setAdmins={setSuperAdmins}
-                actionFn={demoteSuperAdmin}
-                revokeFn={revokeSuperAdmin}
-                validateFn={validateSuperAdminEmail}
-                addAdminFn={addSuperAdmin}
-                onActionComplete={handleDemote}
-                adminType="super"
-                tabWidth={width}
-              />
-            </TabContent>
-            <TabContent tab="admin">
-              <AdminManage
-                admins={admins}
-                setAdmins={setAdmins}
-                actionFn={promoteAdmin}
-                revokeFn={revokeAdmin}
-                validateFn={validateAdminEmail}
-                addAdminFn={addAdmin}
-                onActionComplete={handlePromote}
-                adminType="regular"
-                tabWidth={width}
-              />
-            </TabContent>
-          </div>
-        </Tabs>
+    <main className="flex justify-center pt-8 px-20">
+      <div className="w-full max-w-3xl flex flex-col gap-4">
+        <Link href="/super-admin" className="flex gap-2 items-center">
+          <ArrowLeft size={18} />
+          <span className="underline">Back to dashboard</span>
+        </Link>
+        <div className="w-full max-w-3xl p-4 rounded-md border">
+          <Tabs>
+            <TabGroup className="absolute" ref={ref}>
+              <Tab value="super-admin">Super Admin</Tab>
+              <Tab value="admin">Admin</Tab>
+            </TabGroup>
+            <div className="min-h-9">
+              <TabContent tab="super-admin">
+                <AdminManage
+                  admins={superAdmins}
+                  setAdmins={setSuperAdmins}
+                  actionFn={demoteSuperAdmin}
+                  revokeFn={revokeSuperAdmin}
+                  validateFn={validateSuperAdminEmail}
+                  addAdminFn={addSuperAdmin}
+                  onActionComplete={handleDemote}
+                  adminType="super"
+                  tabWidth={width}
+                />
+              </TabContent>
+              <TabContent tab="admin">
+                <AdminManage
+                  admins={admins}
+                  setAdmins={setAdmins}
+                  actionFn={promoteAdmin}
+                  revokeFn={revokeAdmin}
+                  validateFn={validateAdminEmail}
+                  addAdminFn={addAdmin}
+                  onActionComplete={handlePromote}
+                  adminType="regular"
+                  tabWidth={width}
+                />
+              </TabContent>
+            </div>
+          </Tabs>
+        </div>
       </div>
     </main>
   );
