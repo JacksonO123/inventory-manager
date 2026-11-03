@@ -30,7 +30,6 @@ jest.mock('../../../../server/tsr', () => ({
   }
 }));
 
-// The mocked tsr has the same shape for every call, so loosen the typing for tests
 const mocked = tsr as any;
 
 beforeEach(() => jest.clearAllMocks());
@@ -81,7 +80,6 @@ describe('validateAdminEmail', () => {
   });
 });
 
-// Every action funnels its response through tsrResultToErrorRes
 describe.each([
   ['revokeSuperAdmin', revokeSuperAdmin, mocked.superAdmin.revokeSuperAdmin.mutate],
   ['revokeAdmin', revokeAdmin, mocked.admin.revokeAdmin.mutate],
