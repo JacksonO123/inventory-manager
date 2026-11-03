@@ -61,15 +61,8 @@
     {
       "idx": 8,
       "version": "7",
-      "when": 1793823769584,
-      "tag": "0008_harsh_thunderbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1793832525732,
-      "tag": "0009_handy_black_bolt",
+      "when": 1793681191318,
+      "tag": "0008_peaceful_quasimodo",
       "breakpoints": true
     },
     {
