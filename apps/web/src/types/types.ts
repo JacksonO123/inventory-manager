@@ -3,6 +3,7 @@ import {
   basicUserSchema,
   basicUserSchemaOmitId,
   itemSchema,
+  orgSchema,
   partialItemSchema,
   userSchema
 } from '@invm/api-contracts/schemas';
@@ -35,3 +36,7 @@ export type ServerErrorRes<T = unknown> =
   | { status: 'success'; body: T };
 
 export type IdServerErrorRes = ServerErrorRes<{ userId: string }>;
+
+export type Org = z.infer<typeof orgSchema>;
+
+export type PartialOrg = Omit<Org, 'id' | 'location'>;
