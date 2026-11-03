@@ -14,6 +14,7 @@ const config = {
   // Mirrors the "paths" in tsconfig.base.json, which Jest does not read on its own
   moduleNameMapper: {
     '^@invm/inventory-db-utils$': '<rootDir>/../../packages/inventory-db-utils/src/index.ts',
+    '^@invm/api-contracts/web$': '<rootDir>/../../packages/api-contracts/src/web/index.ts',
     '^@invm/api-contracts/schemas$': '<rootDir>/../../packages/api-contracts/src/schemas/index.ts'
   },
   coverageDirectory: '../../coverage/apps/web',
