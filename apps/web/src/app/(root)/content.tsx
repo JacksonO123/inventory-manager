@@ -7,6 +7,7 @@ import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
 import { Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
+import { Borrower } from './components/Borrower';
 import { AuthPopup } from '../../components/AuthPopup';
 import { toast } from '../../components/ui/toast';
 import { useBasicAuth } from '../../hooks/useBasicAuth';
@@ -20,7 +21,12 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
   const { basicUser } = useBasicAuth();
-  const { setOpen: setAuthPopupOpen } = useAuthPopup();
+  const { setOpen: setAuthPopupOpen, setAuthType } = useAuthPopup();
+
+  function openBorrowerForm() {
+    setAuthType('signup');
+    setAuthPopupOpen(true);
+  }
 
   async function handleSaveItem(item: PartialItem) {
     const fullItem: ItemType = { ...item, id: -1, status: 'available' };
@@ -48,7 +54,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   async function handleCheckOut(itemId: number) {
     if (basicUser === null) {
-      setAuthPopupOpen(true);
+      openBorrowerForm();
       return;
     }
     const res = await tsr.item.checkOut.mutate({
@@ -70,7 +76,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   async function handleReturn(itemId: number) {
     if (basicUser === null) {
-      setAuthPopupOpen(true);
+      openBorrowerForm();
       return;
     }
     const res = await tsr.item.returnItem.mutate({
@@ -94,6 +100,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
     <main>
       <AuthPopup />
       <div className="p-8 flex flex-col gap-4">
+        <Borrower borrower={basicUser} onChange={openBorrowerForm} />
         {creatingItem ? (
           <CreateItemForm onSave={handleSaveItem} onCancel={() => setCreatingItem(false)} />
         ) : (
