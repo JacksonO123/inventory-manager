@@ -1,9 +1,11 @@
-import Link from 'next/link';
+import { tsrFactory } from '../../server/tsrFactory';
+import { SuperAdminPageContent } from './content';
 
-export default function AdminPage() {
-  return (
-    <div>
-      <Link href="/super-admin/manage">manage</Link>
-    </div>
-  );
+export const dynamic = 'force-dynamic';
+
+export default async function AdminPage() {
+  const tsr = await tsrFactory();
+  const orgs = await tsr.orgRouter.getAll.query();
+
+  return <SuperAdminPageContent orgs={orgs.status === 200 ? orgs.body : []} />;
 }
