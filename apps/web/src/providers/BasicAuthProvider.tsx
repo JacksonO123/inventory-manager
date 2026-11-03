@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { basicAuthContext } from '../contexts/basicAuth';
 import { BasicUser } from '../types/types';
+import { useLocalStorage } from '@mantine/hooks';
 
 type BasicAuthProvider = {
   children: React.ReactNode | React.ReactNode[];
 };
 
 export function BasicAuthProvider({ children }: BasicAuthProvider) {
-  const [basicUser, setBasicUser] = useState<BasicUser | null>(null);
+  const [basicUser, setBasicUser] = useLocalStorage<BasicUser | null>({
+    key: 'basic-auth-user',
+    defaultValue: null
+  });
 
   function handleSetBasicUser(user: BasicUser) {
     setBasicUser(user);
