@@ -140,5 +140,8 @@ export const adminTable = pgTable(
 export const orgTable = pgTable('organization', {
   id: t.serial().primaryKey(),
   name: t.text('name').notNull(),
-  description: t.text('description').notNull()
+  description: t.text('description').notNull(),
+  location: t.integer('location').notNull(),
+  svgDataUrl: t.text('svg_data_url'),
+  path: t.text('path').notNull()
 });
