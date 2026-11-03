@@ -9,6 +9,8 @@ import { Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
 import { AuthPopup } from '../../components/AuthPopup';
 import { toast } from '../../components/ui/toast';
+import { useBasicAuth } from '../../hooks/useBasicAuth';
+import { useAuthPopup } from '../../hooks/useAuthPopup';
 
 type ContentProps = {
   items: ItemType[];
@@ -17,6 +19,8 @@ type ContentProps = {
 export function Content({ items: itemsFromServer }: ContentProps) {
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
+  const { basicUser } = useBasicAuth();
+  const { setOpen: setAuthPopupOpen } = useAuthPopup();
 
   async function handleSaveItem(item: PartialItem) {
     const fullItem: ItemType = { ...item, id: -1, status: 'available' };
@@ -38,6 +42,54 @@ export function Content({ items: itemsFromServer }: ContentProps) {
     }
   }
 
+  function setItemStatus(itemId: number, status: ItemType['status']) {
+    setItems((items) => items.map((item) => (item.id === itemId ? { ...item, status } : item))); // replace the matching item with a copy that has the new status, leaving the rest unchanged
+  }
+
+  async function handleCheckOut(itemId: number) {
+    if (basicUser === null) {
+      setAuthPopupOpen(true);
+      return;
+    }
+    const res = await tsr.item.checkOut.mutate({
+      params: { id: itemId },
+      body: { borrowerId: basicUser.id }
+    });
+    if (res.status === 200) {
+      setItemStatus(itemId, 'booked');
+    } else {
+      toast.add({
+        type: 'error',
+        title:
+          res.status === 404 || res.status === 409 || res.status === 500
+            ? res.body.message
+            : 'Failed to check out item'
+      });
+    }
+  }
+
+  async function handleReturn(itemId: number) {
+    if (basicUser === null) {
+      setAuthPopupOpen(true);
+      return;
+    }
+    const res = await tsr.item.returnItem.mutate({
+      params: { id: itemId },
+      body: { borrowerId: basicUser.id }
+    });
+    if (res.status === 200) {
+      setItemStatus(itemId, 'available');
+    } else {
+      toast.add({
+        type: 'error',
+        title:
+          res.status === 404 || res.status === 409 || res.status === 500
+            ? res.body.message
+            : 'Failed to return item'
+      });
+    }
+  }
+
   return (
     <main>
       <AuthPopup />
@@ -49,7 +101,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
             Create Item <Plus />
           </Button>
         )}
-        <Items items={items} />
+        <Items items={items} onCheckOut={handleCheckOut} onReturn={handleReturn} />
       </div>
     </main>
   );
