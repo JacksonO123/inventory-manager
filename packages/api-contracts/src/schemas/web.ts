@@ -31,12 +31,3 @@ export const userSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string()
 });
-
-export const orgSchema = z.object({
-  id: z.number().int().gte(0),
-  name: z.string().trim().min(1),
-  description: z.string().trim().min(1),
-  location: z.number().int().gte(0),
-  svgDataUrl: z.string().trim().min(1).nullable(),
-  path: z.string().trim().min(1)
-});

@@ -4,7 +4,6 @@ import { nextItemRoute } from '../../server/routes/item';
 import { basicAuthRoute } from '../../server/routes/auth';
 import { adminRoute } from '../../server/routes/admin';
 import { superAdminRoute } from '../../server/routes/superAdmin';
-import { orgRoute } from '../../server/routes/org';
 
 const router = createNextRoute(rootWebRouter, {
   debug: async () => {
@@ -14,8 +13,7 @@ const router = createNextRoute(rootWebRouter, {
   item: nextItemRoute,
   auth: basicAuthRoute,
   admin: adminRoute,
-  superAdmin: superAdminRoute,
-  orgRouter: orgRoute
+  superAdmin: superAdminRoute
 });
 
 export default createNextRouter(rootWebRouter, router);
