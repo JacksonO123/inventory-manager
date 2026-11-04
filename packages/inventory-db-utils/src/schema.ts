@@ -111,18 +111,28 @@ export const checkoutTable = pgTable(
   ]
 );
 
-export const superAdminTable = pgTable('super_admin', {
-  id: t.serial().primaryKey(),
-  user_id: t
-    .text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' })
-});
+export const superAdminTable = pgTable(
+  'super_admin',
+  {
+    id: t.serial().primaryKey(),
+    user_id: t
+      .text('user_id')
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: 'cascade' })
+  },
+  (table) => [t.index('super_admin_user_id_index').on(table.user_id)]
+);
 
-export const adminTable = pgTable('admin', {
-  id: t.serial().primaryKey(),
-  user_id: t
-    .text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' })
-});
+export const adminTable = pgTable(
+  'admin',
+  {
+    id: t.serial().primaryKey(),
+    user_id: t
+      .text('user_id')
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: 'cascade' })
+  },
+  (table) => [t.index('admin_user_id_index').on(table.user_id)]
+);
