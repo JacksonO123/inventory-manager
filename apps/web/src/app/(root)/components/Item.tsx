@@ -30,13 +30,15 @@ export function Item({ item, allowCheckInOut, onCheckOut, onReturn }: ItemProps)
   );
 
   return (
-    <div className="flex flex-col border rounded-lg overflow-hidden w-fit">
-      <div className="w-72 h-32 bg-linear-to-br from-primary to-primary/50">
+    <div className="flex flex-col border rounded-lg overflow-hidden w-fit max-w-72">
+      <div className="w-72 h-32 max-h-32 bg-linear-to-br from-primary to-primary/50">
         {/* image of item goes here */}
       </div>
       <div className="py-2 px-3">
         <div className="flex gap-4 justify-between items-center">
-          <h1 className="font-medium text-lg">{item.name}</h1>
+          <h1 className="font-medium text-lg text-ellipsis truncate" title={item.name}>
+            {item.name}
+          </h1>
           <div className="flex items-center justify-between pt-2">
             {isSaving ? (
               <LoadingSpinner />
@@ -83,7 +85,9 @@ export function Item({ item, allowCheckInOut, onCheckOut, onReturn }: ItemProps)
             )}
           </div>
         </div>
-        <p className="text-sm">{item.description}</p>
+        <p className="text-sm text-ellipsis truncate" title={item.description ?? undefined}>
+          {item.description}
+        </p>
       </div>
     </div>
   );
