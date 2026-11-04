@@ -1,7 +1,7 @@
 import { Toaster } from '../components/ui/toast';
 import { Providers } from '../providers';
+import { LayoutHeader } from './components/LayoutHeader';
 import './global.css';
-import { LayoutHeaderMVP } from './components/LayoutHeaderMVP';
 
 export const metadata = {
   title: 'Inventory Manager',
@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <Providers>
         <body>
-          <LayoutHeaderMVP />
+          <LayoutHeader />
           {children}
           <Toaster />
         </body>
