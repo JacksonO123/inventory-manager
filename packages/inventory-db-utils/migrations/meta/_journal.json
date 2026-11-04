@@ -57,48 +57,6 @@
       "when": 1793568696975,
       "tag": "0007_material_morlocks",
       "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1793681191318,
-      "tag": "0008_peaceful_quasimodo",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1793912138022,
-      "tag": "0010_brown_gamma_corps",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1793912157450,
-      "tag": "0011_vengeful_the_phantom",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1793912211663,
-      "tag": "0012_swift_moonstone",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "7",
-      "when": 1793913021113,
-      "tag": "0013_living_hiroim",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "7",
-      "when": 1793922019681,
-      "tag": "0014_fat_doctor_spectrum",
-      "breakpoints": true
     }
   ]
 }
