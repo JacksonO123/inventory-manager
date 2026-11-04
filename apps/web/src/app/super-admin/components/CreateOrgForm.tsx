@@ -1,4 +1,3 @@
-import { orgSchema } from '@invm/api-contracts/schemas';
 import { useForm } from '@tanstack/react-form';
 import { PartialOrg } from '../../../types/types';
 import { Field, FieldError, FieldLabel } from '../../../components/ui/field';
@@ -6,6 +5,7 @@ import { Input } from '../../../components/ui/input';
 import { useId } from 'react';
 import { Textarea } from '../../../components/ui/textarea';
 import { Button } from '../../../components/ui/button';
+import { z } from 'zod';
 
 type CreateOrgFormProps = {
   onSubmit: (org: PartialOrg) => void;
@@ -17,9 +17,12 @@ export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
 
   const form = useForm({
     validators: {
-      onChange: orgSchema
-        .omit({ id: true })
-        .extend({ svgDataUrl: orgSchema.shape.svgDataUrl.unwrap() })
+      onChange: z.object({
+        name: z.string().trim().min(1),
+        description: z.string().trim().min(1),
+        path: z.string(),
+        svgDataUrl: z.string()
+      })
     },
     defaultValues: {
       name: '',

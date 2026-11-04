@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, UserRoundShield } from 'lucide-react';
+import { Pencil, Plus, UserRoundShield, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import {
   Dialog,
@@ -24,6 +24,7 @@ type SuperAdminPageContentProps = {
 export function SuperAdminPageContent({ orgs: initialOrgs }: SuperAdminPageContentProps) {
   const [orgs, setOrgs] = useState(initialOrgs);
   const [createOrgOpen, setCreateOrgOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   async function handleCreateOrgSubmit(partialOrg: PartialOrg) {
     setOrgs((prev) => [{ ...partialOrg, id: -1, location: 0 }, ...prev]);
@@ -70,15 +71,26 @@ export function SuperAdminPageContent({ orgs: initialOrgs }: SuperAdminPageConte
               />
             </DialogContent>
           </Dialog>
-          <Link href="/super-admin/manage">
-            <Button variant="outline">
-              <UserRoundShield /> Manage Admins
-            </Button>
-          </Link>
+          <div className="flex gap-4">
+            {editing ? (
+              <Button variant="outline" onClick={() => setEditing(false)}>
+                <X /> Cancel
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => setEditing(true)}>
+                <Pencil /> Edit orgs
+              </Button>
+            )}
+            <Link href="/super-admin/manage">
+              <Button variant="outline">
+                <UserRoundShield /> Manage Admins
+              </Button>
+            </Link>
+          </div>
         </div>
         <Orgs
           orgs={orgs}
-          managing={false}
+          managing={editing}
           onUpdate={() => {}}
           onDelete={() => {}}
           onReorder={() => {}}
