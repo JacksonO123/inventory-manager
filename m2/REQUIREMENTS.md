@@ -16,4 +16,3 @@
 - Users can see who is currently set as the borrower.
 - Users can change who is borrowing.
 - Users are told when an item can't be borrowed or returned, and why.
-- The system keeps a record of who borrowed each item and when.
