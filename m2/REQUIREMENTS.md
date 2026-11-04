@@ -6,7 +6,7 @@
 - Users can create items that are named.
 - Users can create items with associated descriptions.
 - Users can see whether each item is available, booked or out of service.
-- Users can see the same items accross sessions
+- Users can see the same items as a list accross sessions
 
 ### Borrowing
 
