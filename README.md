@@ -1,120 +1,144 @@
-# Inventory manager
+# Inventory Manager
 
-The inventory manager repo. Project for a cs class.
+A web application for managing the loaning of items from multiple clubs and residence halls belonging to a university. 
 
-## Rules
+## Installation & Setup
 
-- AI is ok for frontend, dont make it bad
-- AI is ok for debugging
-- AI is not recommended for backend, get good + learn something
-- AI is not recommended for architecture, get good + learn something
-- AI is great for tests, use it to generate tests
-- AI is ok if you are ayush (prs will be reviewed more critically)
-- If you generate something with ai and it does something sometimes (not ui), make ai generate a test for it
+### Prerequisites
 
-## Setup
+| Tool | Version | Notes |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org) | 26 | The version used in CI |
+| [pnpm](https://pnpm.io) | 12 | Package manager |
+| [Docker](https://www.docker.com) | Any recent | Runs the local PostgreSQL database. Docker Desktop must be running. |
+| [Nx](https://nx.dev) (optional) | 23 | `pnpm i -g nx` lets you type `nx ...` instead of `pnpm nx ...` |
+| Bash | Any | The setup scripts are Bash. On Windows, use Git Bash. |
 
-### Quick setup guide
+You also need the development secrets file (`secrets.development.json`). It holds the database credentials and OAuth keys and is not committed to the repository. Ask the project maintainer (Jackson) for a copy and place it at:
 
-To make setup easy, I combined all setup pieces into a quick script to run
+```
+packages/environments/src/secrets/secrets.development.json
+```
+
+### Quick setup
+
+Run this script to perform every setup step:
 
 ```sh
 chmod +x ./scripts/setup.sh
 ./scripts/setup.sh
 ```
 
-### How to start web app
+### Manual setup
 
-After setting up, run this
+If you did not run the above script, or a step failed, follow these steps below.
+
+1. **Install dependencies**
+
+   ```sh
+   pnpm i
+   ```
+
+2. **Generate the Nx project graph**
+
+   ```sh
+   pnpm nx sync
+   ```
+
+3. **Set the environment.** Create a `.env` file in the repository root containing:
+
+   ```env
+   ENVIRONMENT=development
+   ```
+
+   `.env.sample` lists the other accepted values (`staging`, `production`).
+
+4. **Distribute secrets to each app.** This writes the environment variables each project needs into that project's own `.env` file.
+
+   ```sh
+   pnpm nx setup environments
+   ```
+
+5. **Create the local database.** This starts a PostgreSQL container named `inventory_db-dev` on port 5432 and applies all migrations.
+
+   ```sh
+   chmod +x ./scripts/create-local-db.sh
+   ./scripts/create-local-db.sh
+   ```
+
+### Running the app
 
 ```sh
-nx dev web
+pnpm nx dev web
 ```
 
-### Step by step setup
+Then open <http://localhost:3000>. The development server reloads the page automatically when you save a file.
 
-Install dependencies
+The database container does not start automatically after a reboot. If the app cannot connect to the database, start it again:
 
 ```sh
-pnpm i
+docker start inventory_db-dev
 ```
 
-Create nx project graph
+### Common development commands
 
 ```sh
-nx sync
+pnpm nx dev web        # Start the development server
+pnpm test              # Run all unit tests (Jest)
+pnpm lint              # Lint all projects (oxlint)
+pnpm tsc               # Type-check all projects
+pnpm format            # Format all projects (oxfmt)
+pnpm runall            # Lint, type-check, and test in one step
+
+pnpm nx test web       # Run tests for a single project
+pnpm nx graph          # Open an interactive graph of the projects
 ```
 
-Put this in root `.env`
+### Database migrations
 
-```env
-ENVIRONMENT=development
-```
-
-Create required env files. You must talk to me (jackson) to get the required secrets file first.
+The database schema is defined in [packages/inventory-db-utils/src/schema.ts](packages/inventory-db-utils/src/schema.ts). After changing it:
 
 ```sh
-nx setup environments
+pnpm nx migrate:generate inventory-db-utils   # Create a migration file from the schema change
+pnpm nx migrate:run inventory-db-utils        # Apply pending migrations to your database
 ```
 
-create local postgres db with docker. You must already have docker daemon, or docker desktop installed.
+Migrations are managed entirely by Drizzle. Do not write or edit migration SQL by hand. Run `migrate:run` after pulling changes that include new migrations.
 
-```sh
-chmod +x ./scripts/create-local-db.sh
-./scripts/create-local-db.sh
-```
+## Tech Stack & Architecture
 
-## How it works
+### Technologies
 
-It is an nx mono repo. Learn more generally about that here [nx](https://nx.dev/).
+| Area | Technology |
+| --- | --- |
+| Language | TypeScript |
+| Frontend | [Next.js](https://nextjs.org) 16, [React](https://react.dev) 19 |
+| UI components | [shadcn/ui](https://ui.shadcn.com) on [Base UI](https://base-ui.com), [Tailwind CSS](https://tailwindcss.com) 4, [Lucide](https://lucide.dev) icons |
+| Forms & client state | [TanStack Form](https://tanstack.com/form), [TanStack Query](https://tanstack.com/query), [Zustand](https://zustand.docs.pmnd.rs) |
+| API | [ts-rest](https://ts-rest.com) contracts, served from Next.js API routes |
+| Validation | [Zod](https://zod.dev) |
+| Authentication | [Better Auth](https://www.better-auth.com) with Google OAuth |
+| Database | [PostgreSQL](https://www.postgresql.org) with [Drizzle ORM](https://orm.drizzle.team) |
+| Monorepo tooling | [Nx](https://nx.dev), [pnpm](https://pnpm.io) workspaces |
+| Quality | [Jest](https://jestjs.io), [oxlint](https://oxc.rs), oxfmt, GitHub Actions CI |
 
-### Structure
+### Repository structure
 
-This repo is split into two main sections: `apps`, and `packages`.
-
-`packages` are for common utilities, shared things, or things that belong in packages.
-
-Things as of writing this readme:
-
-#### api-contracts
-
-Defines `ts-rest` contracts for api shapes and validators. Invalidates tons of bugs, makes backend easy etc.
-
-#### environments
-
-The util for handling all secrets and distributing them to the correct projects. If you are interested in it def talk to me about it.
-
-This is the home for the actual secret files that contain things like db urls/passwords, server urls, tokens, etc. the root `.env` is for project environment things such as configuring `development`, `staging`, `production` environment locally, things like that.
-
-`environments` package has configuration for what secrets belong to what projects, its all typesafe and zod validated. You have already seen the env var distributing script:
+The repository is an Nx monorepo. Runnable applications live in `apps/`, and shared code lives in `packages/`.
 
 ```
-nx setup environments
+inventory-manager/
+├── apps/
+│   └── web/                  Next.js application (frontend and API)
+├── packages/
+│   ├── api-contracts/        API definitions and shared Zod schemas
+│   ├── environments/         Secret management and per-app .env generation
+│   └── inventory-db-utils/   Database schema, migrations, and connection
+├── scripts/                  Setup scripts
+└── .github/workflows/        Continuous integration
 ```
 
-This setup script writes the env vars that specific project needs into its own local `.env`. Projects like `web` are sensitive and could leak secrets since they are client facing, so having nextjs only deal with the `.env` contents that we specifically want is safest. Then within the `web` project, this is then made more strict, but on to that later.
+## Contributing
 
-Projects that are not sensitive to owning secrets can import them from the correct module location in `environments`, there are no projects like that to point to as an example at the time of writing this readme, so just imagine something importing secrets idk.
-
-This package also has a util for protecting secrets for nextjs. This is roughly how that works:
-
-- you define the schema of which secrets belong on client or server
-- you provide a combined object that sets the values of all of the secrets from the process.env that nextjs already parsed together
-- client secrets are accessible on server, server secrets are NOT accessible on client and throw an error when trying to access
-- see example in `apps/web/src/env.ts`
-
-#### inventory-db-utils
-
-Where db schemas, migrations, connection utils etc are stored.
-
-### DB
-
-This project uses a postgres db. See above for creating a local one.
-
-I recommend you use some program for inspecting databases. Personally I use `pgAdmin`. `DBeaver` is another popular one. Up to you. Super useful.
-
-DB migrations are handled completely by drizzle, do not go off and do manual migrations, create migration files yourself etc.
-
-To create a custom migration, read the docs its something like `pnpx drizzle-kit generate --custom --name=seed-initial-users`. This should not be common. Your migrations should be pretty simple most of the time.
-
-Sql migration files are tracked in `packages/inventory-db-utils/migrations/`. Schema is defined in `packages/inventory-db-utils/src/schema.ts`.
+- Run `pnpm runall` before opening a pull request.
+- Generate database migrations with Drizzle. Do not write them by hand.
