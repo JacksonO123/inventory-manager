@@ -13,7 +13,19 @@ export class Item {
   }
 
   static async getAll() {
-    return await db.select().from(itemTable);
+    return await db
+      .select({
+        id: itemTable.id,
+        name: itemTable.name,
+        description: itemTable.description,
+        status: itemTable.status,
+        borrower: checkoutTable.borrowerId
+      })
+      .from(itemTable)
+      .leftJoin(
+        checkoutTable,
+        and(eq(checkoutTable.itemId, itemTable.id), isNull(checkoutTable.returnedAt))
+      );
   }
 
   static async create(values: PartialItem) {
@@ -54,23 +66,14 @@ export class Item {
     });
   }
 
-  static async return(itemId: number, borrowerId: number) {
+  static async return(itemId: number) {
     await db.transaction(async (tx) => {
       const [checkout] = await tx
         .update(checkoutTable)
         .set({ returnedAt: new Date() })
-        .where(
-          and(
-            eq(checkoutTable.itemId, itemId),
-            eq(checkoutTable.borrowerId, borrowerId),
-            isNull(checkoutTable.returnedAt)
-          )
-        )
+        .where(and(eq(checkoutTable.itemId, itemId), isNull(checkoutTable.returnedAt)))
         .returning({ id: checkoutTable.id });
       if (checkout === undefined) {
-        if (await Item.exists(itemId, tx)) {
-          throw new HttpError(409, 'Item is not checked out by this borrower');
-        }
         throw new HttpError(404, 'Item not found');
       }
 

@@ -34,9 +34,9 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
     }
   },
 
-  returnItem: async ({ params, body }) => {
+  returnItem: async ({ params }) => {
     try {
-      await Item.return(params.id, body.borrowerId);
+      await Item.return(params.id);
       return { status: 200, body: { id: params.id } };
     } catch (err) {
       return errorResponse(err);

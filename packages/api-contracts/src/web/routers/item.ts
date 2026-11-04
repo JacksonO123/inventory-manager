@@ -20,7 +20,11 @@ export const itemRouter = c.router(
       path: '/list',
       method: 'GET',
       responses: {
-        200: z.array(itemSchema),
+        200: z.array(
+          itemSchema.extend({
+            borrower: z.number().int().gte(0).nullable()
+          })
+        ),
         500: errorMsgSchema
       }
     },
@@ -40,7 +44,7 @@ export const itemRouter = c.router(
       path: '/return/:id',
       method: 'POST',
       pathParams: itemIdParamsSchema,
-      body: borrowerBodySchema,
+      body: c.noBody(),
       responses: {
         200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,

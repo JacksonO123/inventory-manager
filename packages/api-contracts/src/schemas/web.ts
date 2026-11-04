@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const itemSchema = z.object({
-  id: z.number().gte(0),
+  id: z.number().int().gte(0),
   name: z.string().trim().min(1),
   description: z.string().trim().min(1).nullable(),
   status: z.enum(['available', 'booked', 'out_of_service'])
@@ -10,7 +10,7 @@ export const itemSchema = z.object({
 export const partialItemSchema = itemSchema.omit({ id: true, status: true });
 
 export const basicUserSchema = z.object({
-  id: z.number().gte(0),
+  id: z.number().int().gte(0),
   name: z.string().trim().min(1),
   email: z.email()
 });
@@ -18,7 +18,7 @@ export const basicUserSchema = z.object({
 export const basicUserSchemaOmitId = basicUserSchema.omit({ id: true });
 
 export const adminSchema = z.object({
-  id: z.number().gte(0),
+  id: z.number().int().gte(0),
   user_id: z.string().min(1)
 });
 
