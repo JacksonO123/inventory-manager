@@ -76,9 +76,9 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   async function handleReturn(itemId: number) {
     if (basicUser === null) {
-      openBorrowerForm();
-      return;
-    }
+          toast.add({ type: 'error', title: 'Log in to return an item' });
+          return;
+        }
     const res = await tsr.item.returnItem.mutate({
       params: { id: itemId },
       body: { borrowerId: basicUser.id }
