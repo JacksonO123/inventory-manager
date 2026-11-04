@@ -57,13 +57,6 @@
       "when": 1793568696975,
       "tag": "0007_material_morlocks",
       "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1793681191318,
-      "tag": "0008_peaceful_quasimodo",
-      "breakpoints": true
     }
   ]
 }
