@@ -112,41 +112,31 @@ describe('nextItemRoute.returnItem', () => {
     jest.resetAllMocks();
   });
 
-  it('returns the item from the borrower and returns its id', async () => {
+  it('returns the item and returns its id', async () => {
     (Item.return as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(
-      route.returnItem({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 200, body: { id: 1 } });
-    expect(Item.return).toHaveBeenCalledWith(1, 7);
+    await expect(route.returnItem({ params: { id: 1 } })).resolves.toEqual({
+      status: 200,
+      body: { id: 1 }
+    });
+    expect(Item.return).toHaveBeenCalledWith(1);
   });
 
   it('returns 404 when the item is not found', async () => {
     (Item.return as jest.Mock).mockRejectedValue(new HttpError(404, 'Item not found'));
 
-    await expect(
-      route.returnItem({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 404, body: { message: 'Item not found' } });
-  });
-
-  it('returns 409 when the item is not checked out by this borrower', async () => {
-    (Item.return as jest.Mock).mockRejectedValue(
-      new HttpError(409, 'Item is not checked out by this borrower')
-    );
-
-    await expect(
-      route.returnItem({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({
-      status: 409,
-      body: { message: 'Item is not checked out by this borrower' }
+    await expect(route.returnItem({ params: { id: 1 } })).resolves.toEqual({
+      status: 404,
+      body: { message: 'Item not found' }
     });
   });
 
   it('returns 500 when something other than an HttpError throws', async () => {
     (Item.return as jest.Mock).mockRejectedValue(new Error('db down'));
 
-    await expect(
-      route.returnItem({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 500, body: { message: 'Error: db down' } });
+    await expect(route.returnItem({ params: { id: 1 } })).resolves.toEqual({
+      status: 500,
+      body: { message: 'Error: db down' }
+    });
   });
 });
