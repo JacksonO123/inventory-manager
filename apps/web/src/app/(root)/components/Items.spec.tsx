@@ -2,6 +2,18 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Items } from './Items';
 import { ItemAndBasicUserBorrower } from '../../../types/types';
 
+const mockUseBasicAuth = jest.fn();
+
+jest.mock('../../../hooks/useBasicAuth', () => ({
+  useBasicAuth: () => mockUseBasicAuth()
+}));
+
+const signedOutAuth = {
+  basicUser: null,
+  setBasicUser: () => {},
+  signOut: () => {}
+};
+
 function renderItems(items: ItemAndBasicUserBorrower[], allowCheckInOut = true) {
   const onCheckOut = jest.fn();
   const onReturn = jest.fn();
@@ -17,6 +29,10 @@ function renderItems(items: ItemAndBasicUserBorrower[], allowCheckInOut = true) 
 }
 
 describe('Items', () => {
+  beforeEach(() => {
+    mockUseBasicAuth.mockReturnValue(signedOutAuth);
+  });
+
   it('shows the name and description of every item', () => {
     renderItems([
       {
@@ -94,7 +110,24 @@ describe('Items', () => {
     expect(onReturn).not.toHaveBeenCalled();
   });
 
-  it('calls onReturn with the item id when return is clicked', () => {
+  it('confirms before calling onReturn when the signed in user is not the borrower', () => {
+    const { onCheckOut, onReturn } = renderItems([
+      { id: 5, name: 'HDMI cable', description: null, status: 'booked', borrower: 7 }
+    ]);
+
+    fireEvent.click(screen.getByText('Return'));
+
+    expect(onReturn).not.toHaveBeenCalled();
+    expect(screen.getByText('Are you sure you want to return?')).toBeTruthy();
+
+    fireEvent.click(screen.getByText('Yes'));
+
+    expect(onReturn).toHaveBeenCalledWith(5);
+    expect(onCheckOut).not.toHaveBeenCalled();
+  });
+
+  it('calls onReturn with the item id when return is clicked by the borrower', () => {
+    mockUseBasicAuth.mockReturnValue({ ...signedOutAuth, basicUser: { id: 7 } });
     const { onCheckOut, onReturn } = renderItems([
       { id: 5, name: 'HDMI cable', description: null, status: 'booked', borrower: 7 }
     ]);

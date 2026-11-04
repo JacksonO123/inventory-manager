@@ -5,7 +5,8 @@ import { ZodError } from 'zod';
 import { Item } from './Item';
 import { HttpError } from '../errors';
 import { db } from '../db';
-import { itemTable } from '@invm/inventory-db-utils';
+import { and } from 'drizzle-orm';
+import { checkoutTable, itemTable } from '@invm/inventory-db-utils';
 
 jest.mock('../db', () => ({
   db: { insert: jest.fn(), select: jest.fn(), transaction: jest.fn() }
@@ -86,16 +87,21 @@ describe('Item.getAll', () => {
       { id: 1, name: 'a', description: 'a' },
       { id: 2, name: 'b', description: 'b' }
     ];
-    const from = jest.fn().mockResolvedValue(rows);
+    const leftJoin = jest.fn().mockResolvedValue(rows);
+    const from = jest.fn().mockReturnValue({ leftJoin });
     (db.select as jest.Mock).mockReturnValue({ from });
+    const condition = Symbol('open checkout condition');
+    (and as jest.Mock).mockReturnValue(condition);
 
     await expect(Item.getAll()).resolves.toEqual(rows);
     expect(db.select).toHaveBeenCalled();
     expect(from).toHaveBeenCalledWith(itemTable);
+    expect(leftJoin).toHaveBeenCalledWith(checkoutTable, condition);
   });
 
   it('returns an empty array when no rows exist', async () => {
-    const from = jest.fn().mockResolvedValue([]);
+    const leftJoin = jest.fn().mockResolvedValue([]);
+    const from = jest.fn().mockReturnValue({ leftJoin });
     (db.select as jest.Mock).mockReturnValue({ from });
 
     await expect(Item.getAll()).resolves.toEqual([]);
