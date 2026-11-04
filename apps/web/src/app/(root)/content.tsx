@@ -7,7 +7,6 @@ import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
 import { Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
-import { Borrower } from './components/Borrower';
 import { AuthPopup } from '../../components/AuthPopup';
 import { toast } from '../../components/ui/toast';
 import { useBasicAuth } from '../../hooks/useBasicAuth';
@@ -53,10 +52,6 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   }
 
   async function handleCheckOut(itemId: number) {
-    if (basicUser === null) {
-      openBorrowerForm();
-      return;
-    }
     const res = await tsr.item.checkOut.mutate({
       params: { id: itemId },
       body: { borrowerId: basicUser.id }
@@ -100,7 +95,6 @@ export function Content({ items: itemsFromServer }: ContentProps) {
     <main>
       <AuthPopup />
       <div className="p-8 flex flex-col gap-4">
-        <Borrower borrower={basicUser} onChange={openBorrowerForm} />
         {creatingItem ? (
           <CreateItemForm onSave={handleSaveItem} onCancel={() => setCreatingItem(false)} />
         ) : (
