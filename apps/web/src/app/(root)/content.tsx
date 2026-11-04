@@ -52,10 +52,10 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   }
 
   async function handleCheckOut(itemId: number) {
-  if (basicUser === null) {
-    toast.add({ type: 'error', title: 'Log in to check out an item' });
-    return;
-  }
+    if (basicUser === null) {
+      toast.add({ type: 'error', title: 'Log in to check out an item' });
+      return;
+    }
 
     const res = await tsr.item.checkOut.mutate({
       params: { id: itemId },
