@@ -1,10 +1,16 @@
 import { Item as ItemType } from '../../../types/types';
 import { Button } from '../../../components/ui/button';
 
+const statusLabels: Record<ItemType['status'], string> = {
+  available: 'available',
+  booked: 'booked',
+  out_of_service: 'out of service'
+};
+
 type ItemProps = {
   item: ItemType;
-  onCheckOut: (itemId: number) => void;
-  onReturn: (itemId: number) => void;
+  onCheckOut: () => void;
+  onReturn: () => void;
 };
 
 export function Item({ item, onCheckOut, onReturn }: ItemProps) {
@@ -19,14 +25,14 @@ export function Item({ item, onCheckOut, onReturn }: ItemProps) {
         <div className="font-medium text-lg">{item.name}</div>
         <div className="text-sm">{item.description}</div>
         <div className="flex items-center justify-between pt-2">
-          <span className="text-xs text-muted-foreground">{item.status.replaceAll('_', ' ')}</span>
+          <span className="text-xs text-muted-foreground">{statusLabels[item.status]}</span>
           {!isSaving && item.status === 'available' && (
-            <Button size="sm" onClick={() => onCheckOut(item.id)}>
+            <Button size="sm" onClick={onCheckOut}>
               Check out
             </Button>
           )}
           {!isSaving && item.status === 'booked' && (
-            <Button size="sm" variant="outline" onClick={() => onReturn(item.id)}>
+            <Button size="sm" variant="outline" onClick={onReturn}>
               Return
             </Button>
           )}

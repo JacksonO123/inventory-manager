@@ -16,8 +16,8 @@ export function Items({ items, onCheckOut, onReturn }: ItemsProps) {
       {items.map((item, index) => (
         <Item
           item={item}
-          onCheckOut={onCheckOut}
-          onReturn={onReturn}
+          onCheckOut={() => onCheckOut(item.id)}
+          onReturn={() => onReturn(item.id)}
           key={`item-${index}-${listId}`}
         />
       ))}
