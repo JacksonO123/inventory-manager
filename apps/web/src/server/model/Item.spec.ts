@@ -156,28 +156,19 @@ describe('Item.return', () => {
   it('closes the checkout and makes the item available again', async () => {
     const { updateSet } = mockTransaction({ updates: [[{ id: 3 }], []] });
 
-    await expect(Item.return(1, 7)).resolves.toBeUndefined();
+    await expect(Item.return(1)).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenNthCalledWith(1, { returnedAt: expect.any(Date) });
     expect(updateSet).toHaveBeenNthCalledWith(2, { status: 'available' });
   });
 
-  it('throws 409 when the item is not checked out by this borrower', async () => {
-    const { tx } = mockTransaction({ updates: [[]], selects: [[{ id: 1 }]] });
+  it('throws 404 when there is no open checkout for the item', async () => {
+    const { tx } = mockTransaction({ updates: [[]] });
 
-    await expect(Item.return(1, 7)).rejects.toMatchObject({
-      status: 409,
-      message: 'Item is not checked out by this borrower'
-    });
-    expect(tx.update).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws 404 when the item does not exist', async () => {
-    mockTransaction({ updates: [[]], selects: [[]] });
-
-    await expect(Item.return(1, 7)).rejects.toMatchObject({
+    await expect(Item.return(1)).rejects.toMatchObject({
       status: 404,
       message: 'Item not found'
     });
+    expect(tx.update).toHaveBeenCalledTimes(1);
   });
 });
 

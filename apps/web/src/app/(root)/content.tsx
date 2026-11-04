@@ -5,30 +5,33 @@ import { Button } from '../../components/ui/button';
 import { useState } from 'react';
 import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
-import { Item as ItemType, PartialItem } from '../../types/types';
+import {
+  BasicUser,
+  ItemAndBasicUserBorrower,
+  Item as ItemType,
+  PartialItem
+} from '../../types/types';
 import { Items } from './components/Items';
 import { AuthPopup } from '../../components/AuthPopup';
 import { toast } from '../../components/ui/toast';
 import { useBasicAuth } from '../../hooks/useBasicAuth';
-import { useAuthPopup } from '../../hooks/useAuthPopup';
 
 type ContentProps = {
-  items: ItemType[];
+  items: ItemAndBasicUserBorrower[];
 };
 
 export function Content({ items: itemsFromServer }: ContentProps) {
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
   const { basicUser } = useBasicAuth();
-  const { setOpen: setAuthPopupOpen, setAuthType } = useAuthPopup();
-
-  function openBorrowerForm() {
-    setAuthType('signup');
-    setAuthPopupOpen(true);
-  }
 
   async function handleSaveItem(item: PartialItem) {
-    const fullItem: ItemType = { ...item, id: -1, status: 'available' };
+    const fullItem: ItemAndBasicUserBorrower = {
+      ...item,
+      id: -1,
+      status: 'available',
+      borrower: null
+    };
     setItems((prev) => [...prev, fullItem]);
     setCreatingItem(false);
     const res = await tsr.item.createItem.mutate({ body: item });
@@ -47,8 +50,15 @@ export function Content({ items: itemsFromServer }: ContentProps) {
     }
   }
 
-  function setItemStatus(itemId: number, status: ItemType['status']) {
-    setItems((items) => items.map((item) => (item.id === itemId ? { ...item, status } : item))); // replace the matching item with a copy that has the new status, leaving the rest unchanged
+  function setItemStatus(
+    itemId: number,
+    status: ItemType['status'],
+    borrowerId: BasicUser['id'] | null
+  ) {
+    // replace the matching item with a copy that has the new status, leaving the rest unchanged
+    setItems((items) =>
+      items.map((item) => (item.id === itemId ? { ...item, status, borrower: borrowerId } : item))
+    );
   }
 
   async function handleCheckOut(itemId: number) {
@@ -57,13 +67,16 @@ export function Content({ items: itemsFromServer }: ContentProps) {
       return;
     }
 
+    const oldItem = { ...items.find((item) => item.id === itemId)! };
+
+    setItemStatus(itemId, 'booked', basicUser.id);
     const res = await tsr.item.checkOut.mutate({
       params: { id: itemId },
       body: { borrowerId: basicUser.id }
     });
-    if (res.status === 200) {
-      setItemStatus(itemId, 'booked');
-    } else {
+    if (res.status !== 200) {
+      setItemStatus(itemId, oldItem.status, oldItem.borrower);
+
       toast.add({
         type: 'error',
         title:
@@ -76,16 +89,17 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   async function handleReturn(itemId: number) {
     if (basicUser === null) {
-          toast.add({ type: 'error', title: 'Log in to return an item' });
-          return;
-        }
-    const res = await tsr.item.returnItem.mutate({
-      params: { id: itemId },
-      body: { borrowerId: basicUser.id }
-    });
-    if (res.status === 200) {
-      setItemStatus(itemId, 'available');
-    } else {
+      toast.add({ type: 'error', title: 'Log in to return an item' });
+      return;
+    }
+
+    const oldItem = { ...items.find((item) => item.id === itemId)! };
+
+    setItemStatus(itemId, 'available', basicUser.id);
+    const res = await tsr.item.returnItem.mutate({ params: { id: itemId } });
+    if (res.status !== 200) {
+      setItemStatus(itemId, oldItem.status, oldItem.borrower);
+
       toast.add({
         type: 'error',
         title:
@@ -107,7 +121,12 @@ export function Content({ items: itemsFromServer }: ContentProps) {
             Create Item <Plus />
           </Button>
         )}
-        <Items items={items} onCheckOut={handleCheckOut} onReturn={handleReturn} />
+        <Items
+          items={items}
+          onCheckOut={handleCheckOut}
+          onReturn={handleReturn}
+          allowCheckInOut={basicUser !== null}
+        />
       </div>
     </main>
   );
