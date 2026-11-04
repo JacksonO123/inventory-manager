@@ -64,13 +64,6 @@
       "when": 1793823769584,
       "tag": "0008_harsh_thunderbird",
       "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1793831322773,
-      "tag": "0009_groovy_the_hand",
-      "breakpoints": true
     }
   ]
 }
