@@ -61,7 +61,8 @@ export function Org({
       {...others}
       className={cn(
         className,
-        !editable && 'hover:-translate-y-1 duration-150 hover:border-primary/80 cursor-pointer',
+        !editable &&
+          'hover:-translate-y-1 hover:shadow-md duration-150 hover:border-primary/80 cursor-pointer',
         'p-4 h-42 w-92'
       )}
       onMouseEnter={onEntryHover}
@@ -84,6 +85,7 @@ export function Org({
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl font-medium truncate">{org.name}</h1>
+                <p className="text-sm truncate text-muted-foreground">/{org.path}</p>
               </div>
             </div>
           </div>
