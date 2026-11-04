@@ -13,7 +13,7 @@ export function Items({ items, allowCheckInOut, onCheckOut, onReturn }: ItemsPro
   const listId = useId();
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 flex-wrap">
       {items.map((item, index) => (
         <Item
           item={item}
