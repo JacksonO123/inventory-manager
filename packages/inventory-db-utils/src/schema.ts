@@ -145,12 +145,16 @@ export const orgTable = pgTable('organization', {
   path: t.text('path').notNull()
 });
 
-export const orgPositions = pgTable('org_positions', {
-  id: t.serial().primaryKey(),
-  userId: t
-    .text('user_id')
-    .notNull()
-    .unique()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  positions: t.jsonb().$type<number[]>()
-});
+export const orgPositionsTable = pgTable(
+  'org_positions',
+  {
+    id: t.serial().primaryKey(),
+    userId: t
+      .text('user_id')
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    positions: t.jsonb().$type<number[]>()
+  },
+  (table) => [t.index('org_positions_user_id_index').on(table.userId)]
+);
