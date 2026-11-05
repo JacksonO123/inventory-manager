@@ -141,7 +141,16 @@ export const orgTable = pgTable('organization', {
   id: t.serial().primaryKey(),
   name: t.text('name').notNull(),
   description: t.text('description').notNull(),
-  location: t.integer('location').notNull(),
   svgDataUrl: t.text('svg_data_url'),
   path: t.text('path').notNull()
+});
+
+export const orgPositions = pgTable('org_positions', {
+  id: t.serial().primaryKey(),
+  userId: t
+    .text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  positions: t.jsonb().$type<number[]>()
 });
