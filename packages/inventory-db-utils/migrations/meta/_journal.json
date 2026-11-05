@@ -92,6 +92,13 @@
       "when": 1793912211663,
       "tag": "0012_swift_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793913021113,
+      "tag": "0013_living_hiroim",
+      "breakpoints": true
     }
   ]
 }
