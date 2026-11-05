@@ -154,7 +154,7 @@ export const orgPositionsTable = pgTable(
       .notNull()
       .unique()
       .references(() => user.id, { onDelete: 'cascade' }),
-    positions: t.jsonb().$type<number[]>()
+    positions: t.jsonb().$type<number[]>().notNull()
   },
   (table) => [t.index('org_positions_user_id_index').on(table.userId)]
 );
