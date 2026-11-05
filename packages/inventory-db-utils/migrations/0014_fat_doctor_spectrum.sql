@@ -1,0 +1,1 @@
+ALTER TABLE "org_positions" ALTER COLUMN "positions" SET NOT NULL;
