@@ -39,7 +39,7 @@ export function Item({ item, allowCheckInOut, onCheckOut, onReturn }: ItemProps)
           <h1 className="font-medium text-lg text-ellipsis truncate" title={item.name}>
             {item.name}
           </h1>
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between">
             {isSaving ? (
               <LoadingSpinner />
             ) : !allowCheckInOut ? null : item.status === 'available' ? (
