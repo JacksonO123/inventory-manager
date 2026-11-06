@@ -6,15 +6,17 @@ import { OrgDragGhost } from './OrgDragGhost';
 
 type DraggableLinkEntryListProps = {
   orgs: OrgType[];
+  positions: number[];
   managing: boolean;
 
   onUpdate: (org: OrgType) => void;
   onDelete: (id: number) => void;
-  onReorder: (oldLocation: number, newLocation: number) => void;
+  onReorder: (newPositions: number[]) => void;
 };
 
 export function Orgs({
   orgs,
+  positions,
   managing,
   onUpdate,
   onDelete,
@@ -23,7 +25,10 @@ export function Orgs({
   const [dragging, setDragging] = useState<number | null>(null);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
-  const entriesToRender = useMemo(() => orgs.sort((a, b) => a.location - b.location), [orgs]);
+  const entriesToRender = useMemo(
+    () => orgs.sort((a, b) => positions.indexOf(a.id) - positions.indexOf(b.id)),
+    [orgs]
+  );
 
   const orgId = useId();
 
@@ -35,8 +40,17 @@ export function Orgs({
   function handleEndDragging() {
     if (dragging !== null && draggingIndex !== null) {
       const org = orgs.find((org) => org.id === dragging);
-      if (org !== undefined && org.location !== draggingIndex) {
-        onReorder(org.location, draggingIndex);
+
+      if (org !== undefined) {
+        const orgPosition = positions.indexOf(org.id);
+
+        if (orgPosition !== draggingIndex) {
+          const newOrder = [...positions];
+          const tempPosition = positions[orgPosition];
+          positions[orgPosition] = positions[draggingIndex]!;
+          positions[draggingIndex] = tempPosition!;
+          onReorder(newOrder);
+        }
       }
     }
 

@@ -22,10 +22,7 @@ export class Org {
         throw new Error('Failed to count orgs');
       }
 
-      const [table] = await db
-        .insert(orgTable)
-        .values({ ...partialOrg, location: orgCount.count })
-        .returning();
+      const [table] = await db.insert(orgTable).values(partialOrg).returning();
       if (table === undefined) {
         throw new Error('Failed to create org');
       }
