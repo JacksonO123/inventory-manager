@@ -1,4 +1,4 @@
-import { useForm } from '@tanstack/react-form';
+import { useForm, useSelector } from '@tanstack/react-form';
 import { PartialOrg } from '../../../types/types';
 import { Field, FieldError, FieldLabel } from '../../../components/ui/field';
 import { Input } from '../../../components/ui/input';
@@ -34,15 +34,18 @@ export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
       const obj: PartialOrg = {
         name: value.name.trim(),
         description: value.description.trim(),
-        path: value.path.trim(),
+        path: value.path.trim() || calculateDefaultPath(value.name.trim()),
         svgDataUrl: value.svgDataUrl.trim() || null
       };
       onSubmit(obj);
     }
   });
 
-  function calculateDefaultPath() {
-    return form.state.values.name
+  const orgName = useSelector(form.store, (form) => form.values.name);
+
+  function calculateDefaultPath(name: string) {
+    return name
+      .trim()
       .toLowerCase()
       .split(' ')
       .filter((item) => item.length > 0)
@@ -97,7 +100,7 @@ export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
               <FieldLabel htmlFor={`org-path-${formId}`}>Path (optional)</FieldLabel>
               <Input
                 id={`org-path-${formId}`}
-                placeholder={calculateDefaultPath()}
+                placeholder={calculateDefaultPath(orgName)}
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
               />

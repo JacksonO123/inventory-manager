@@ -19,7 +19,7 @@ export const rootWebRouter = c.router(
     auth: basicAuthRouter,
     admin: adminRouter,
     superAdmin: superAdminRouter,
-    orgRouter: organizationRouter
+    organizations: organizationRouter
   },
   { pathPrefix: '/api' }
 );

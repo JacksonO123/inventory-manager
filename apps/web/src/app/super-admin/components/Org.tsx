@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../../../components/ui/dialog';
+import Link from 'next/link';
 
 type OrgProps = React.ComponentProps<typeof Card> & {
   org: OrgType;
@@ -26,7 +27,13 @@ type OrgProps = React.ComponentProps<typeof Card> & {
   onDelete: () => void;
 };
 
-export function Org({
+export function Org(props: OrgProps) {
+  const content = <OrgContent {...props} />;
+
+  return props.editable ? content : <Link href={`/org/${props.org.path}`}>{content}</Link>;
+}
+
+export function OrgContent({
   org,
   editable,
   className,
@@ -85,7 +92,7 @@ export function Org({
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl font-medium truncate">{org.name}</h1>
-                <p className="text-sm truncate text-muted-foreground">/{org.path}</p>
+                <p className="text-sm truncate text-muted-foreground">/org/{org.path}</p>
               </div>
             </div>
           </div>
@@ -113,9 +120,7 @@ export function Org({
                 <DialogContent className="sm:max-w-sm">
                   <DialogHeader>
                     <DialogTitle>Are you sure?</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to delete this internal util entry?
-                    </DialogDescription>
+                    <DialogDescription>Are you sure you want to delete this org?</DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
                     <DialogClose render={<Button variant="outline">Cancel</Button>} />

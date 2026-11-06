@@ -36,7 +36,12 @@ export const orgSchema = z.object({
   id: z.number().int().gte(0),
   name: z.string().trim().min(1),
   description: z.string().trim().min(1),
-  location: z.number().int().gte(0),
   svgDataUrl: z.string().trim().min(1).nullable(),
   path: z.string().trim().min(1)
+});
+
+export const orgPositionsSchema = z.object({
+  id: z.number().int().gte(0),
+  userId: z.string().min(1),
+  positions: z.array(z.number().int().gte(0))
 });

@@ -3,6 +3,7 @@ import {
   basicUserSchema,
   basicUserSchemaOmitId,
   itemSchema,
+  orgPositionsSchema,
   orgSchema,
   partialItemSchema,
   userSchema
@@ -39,4 +40,6 @@ export type IdServerErrorRes = ServerErrorRes<{ userId: string }>;
 
 export type Org = z.infer<typeof orgSchema>;
 
-export type PartialOrg = Omit<Org, 'id' | 'location'>;
+export type PartialOrg = Omit<Org, 'id'>;
+
+export type OrgPositions = z.infer<typeof orgPositionsSchema>;

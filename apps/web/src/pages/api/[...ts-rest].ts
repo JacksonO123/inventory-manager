@@ -15,7 +15,7 @@ const router = createNextRoute(rootWebRouter, {
   auth: basicAuthRoute,
   admin: adminRoute,
   superAdmin: superAdminRoute,
-  orgRouter: orgRoute
+  organizations: orgRoute
 });
 
 export default createNextRouter(rootWebRouter, router);

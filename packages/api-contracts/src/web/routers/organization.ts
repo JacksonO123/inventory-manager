@@ -16,12 +16,18 @@ export const organizationRouter = c.router(
     create: {
       path: '/create',
       method: 'POST',
-      body: orgSchema.omit({ id: true, location: true }),
+      body: orgSchema.omit({ id: true }),
       responses: {
-        200: z.object({
-          id: z.number().int().gte(0),
-          location: z.number().int().gte(0)
-        }),
+        200: z.object({ id: z.number().int().gte(0) }),
+        500: errorMsgSchema,
+        401: errorMsgSchema
+      }
+    },
+    getPositions: {
+      path: '/get-positions',
+      method: 'GET',
+      responses: {
+        200: z.array(z.number().int().gte(0)),
         500: errorMsgSchema,
         401: errorMsgSchema
       }
