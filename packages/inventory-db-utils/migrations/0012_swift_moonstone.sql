@@ -1,1 +1,0 @@
-ALTER TABLE "org_positions" ALTER COLUMN "positions" DROP DEFAULT;

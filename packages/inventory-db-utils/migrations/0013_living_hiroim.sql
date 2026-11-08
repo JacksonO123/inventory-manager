@@ -1,1 +1,0 @@
-CREATE INDEX "org_positions_user_id_index" ON "org_positions" USING btree ("user_id");
