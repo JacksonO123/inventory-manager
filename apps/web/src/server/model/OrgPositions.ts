@@ -26,4 +26,20 @@ export class OrgPositions {
 
     return new OrgPositions(positions);
   }
+
+  static async updateByUserId(userId: string, newOrder: number[]) {
+    const [res] = await db
+      .insert(orgPositionsTable)
+      .values({ userId, positions: newOrder })
+      .onConflictDoUpdate({
+        target: orgPositionsTable.userId,
+        set: {
+          positions: newOrder
+        }
+      })
+      .returning({ id: orgPositionsTable.id });
+    if (res === undefined) {
+      throw new Error('Failed to update org positions');
+    }
+  }
 }

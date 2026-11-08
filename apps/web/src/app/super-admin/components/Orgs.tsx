@@ -1,8 +1,9 @@
-import { Fragment, useId, useMemo, useState } from 'react';
+import { useId, useMemo } from 'react';
 import { Org as OrgType } from '../../../types/types';
-import { Org } from './Org';
-import { PlaceholderOrg } from './PlaceholderOrg';
+import { Org, OrgProps } from './Org';
 import { OrgDragGhost } from './OrgDragGhost';
+import { DraggableItems } from '../../../components/DraggableItems';
+import { useDragging } from '../../../hooks/use-dragging';
 
 type DraggableLinkEntryListProps = {
   orgs: OrgType[];
@@ -22,87 +23,47 @@ export function Orgs({
   onDelete,
   onReorder
 }: DraggableLinkEntryListProps) {
-  const [dragging, setDragging] = useState<number | null>(null);
-  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const dragId = useId();
 
-  const entriesToRender = useMemo(
+  const sortedEntries = useMemo(
     () => orgs.sort((a, b) => positions.indexOf(a.id) - positions.indexOf(b.id)),
-    [orgs]
+    [orgs, positions]
   );
 
-  const orgId = useId();
+  return (
+    <DraggableItems
+      positions={positions}
+      dragGhost={<OrgDragGhost orgs={orgs} />}
+      onReorder={onReorder}
+    >
+      {sortedEntries.map((org, index) => (
+        <DraggableOrg
+          org={org}
+          editable={managing}
+          index={index}
+          onDelete={() => onDelete(org.id)}
+          onUpdate={onUpdate}
+          key={`org-${dragId}-${index}`}
+        />
+      ))}
+    </DraggableItems>
+  );
+}
 
-  function handleStartDragging(id: number, index: number) {
-    setDragging(id);
-    setDraggingIndex(index);
-  }
+type DraggableOrgProps = Omit<OrgProps, 'onOrgDragStart'> & {
+  index: number;
+};
 
-  function handleEndDragging() {
-    if (dragging !== null && draggingIndex !== null) {
-      const org = orgs.find((org) => org.id === dragging);
-
-      if (org !== undefined) {
-        const orgPosition = positions.indexOf(org.id);
-
-        if (orgPosition !== draggingIndex) {
-          const newOrder = [...positions];
-          const tempPosition = positions[orgPosition];
-          positions[orgPosition] = positions[draggingIndex]!;
-          positions[draggingIndex] = tempPosition!;
-          onReorder(newOrder);
-        }
-      }
-    }
-
-    setDragging(null);
-    setDraggingIndex(null);
-  }
-
-  function handleHover(index: number) {
-    if (dragging !== null) {
-      if (
-        draggingIndex === index ||
-        (index + 1 === orgs.length - 1 && index + 1 !== draggingIndex)
-      ) {
-        setDraggingIndex(index + 1);
-      } else {
-        setDraggingIndex(index);
-      }
-    }
-  }
-
-  function getEntryById(id: number) {
-    return orgs.find((item) => item.id === id);
-  }
-
-  const draggedItemIndex =
-    dragging !== null ? entriesToRender.findIndex((e) => e.id === dragging) : null;
+function DraggableOrg({ org, index, editable, onUpdate, onDelete }: DraggableOrgProps) {
+  const { handleStartDragging } = useDragging();
 
   return (
-    <>
-      <div className="flex flex-wrap justify-center gap-8 w-full">
-        {entriesToRender.map((org, index) => {
-          const visualIndex =
-            index - (draggedItemIndex !== null && index > draggedItemIndex ? 1 : 0);
-          return (
-            <Fragment key={`org-${orgId}-${index}`}>
-              {visualIndex === draggingIndex && org.id !== dragging && <PlaceholderOrg />}
-              <Org
-                hidden={org.id === dragging}
-                org={org}
-                editable={managing}
-                onEntryDragStart={(id: number) => handleStartDragging(id, visualIndex)}
-                onEntryDragEnd={handleEndDragging}
-                onEntryHover={() => handleHover(visualIndex)}
-                onDelete={() => {}}
-                onEditClick={() => {}}
-              />
-            </Fragment>
-          );
-        })}
-        {orgs.length > 0 && (draggingIndex ?? -1) >= orgs.length - 1 && <PlaceholderOrg />}
-      </div>
-      <OrgDragGhost draggingOrg={dragging !== null ? getEntryById(dragging) : undefined} />
-    </>
+    <Org
+      org={org}
+      editable={editable}
+      onUpdate={onUpdate}
+      onDelete={onDelete}
+      onOrgDragStart={() => handleStartDragging(index)}
+    />
   );
 }

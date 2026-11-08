@@ -6,6 +6,7 @@ import { unauthorizedResponse } from './utils/constants';
 import { auth } from '../auth';
 import { incomingHeadersToHeaders } from './utils/headers';
 import { OrgPositions } from '../model/OrgPositions';
+import { SuperAdmin } from '../model/SuperAdmin';
 
 export const orgRoute = createNextRoute(rootWebRouter.organizations, {
   getAll: async ({ req }) => {
@@ -38,6 +39,21 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const ids = await OrgPositions.getByUserId(session.user.id);
 
       return { status: 200, body: ids.values.positions };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  setPositions: async ({ body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      await OrgPositions.updateByUserId(session.user.id, body.positions);
+
+      return { status: 200, body: undefined };
     } catch (err) {
       return errorResponse(err);
     }

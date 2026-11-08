@@ -31,6 +31,17 @@ export const organizationRouter = c.router(
         500: errorMsgSchema,
         401: errorMsgSchema
       }
+    },
+    setPositions: {
+      path: '/set-positions',
+      method: 'POST',
+      body: z.object({
+        positions: z.array(z.number().int().gte(0))
+      }),
+      responses: {
+        200: c.noBody(),
+        500: errorMsgSchema
+      }
     }
   },
   { pathPrefix: '/org' }

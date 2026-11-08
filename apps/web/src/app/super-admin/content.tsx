@@ -14,8 +14,9 @@ import Link from 'next/link';
 import { Orgs } from './components/Orgs';
 import { Org, PartialOrg } from '../../types/types';
 import { tsr } from '../../server/tsr';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from '../../components/ui/toast';
+import { authClient } from '../../client/auth-client';
 
 type SuperAdminPageContentProps = {
   orgs: Org[];
@@ -53,8 +54,25 @@ export function SuperAdminPageContent({
     }
   }
 
-  function handleSetOrgs(values: number[]) {
-    console.log(values);
+  async function handleSetOrgPositions(newOrder: number[]) {
+    const prevOrder = [...orgPositions];
+    setOrgPositions(newOrder);
+
+    const res = await tsr.organizations.setPositions.mutate({
+      body: { positions: newOrder }
+    });
+    if (res.status !== 200) {
+      setOrgPositions(prevOrder);
+      toast.add({
+        type: 'error',
+        title: res.status === 500 ? res.body.message : 'Failed to reorder orgs'
+      });
+    } else {
+      toast.add({
+        type: 'success',
+        title: 'Successfully reordered orgs'
+      });
+    }
   }
 
   return (
@@ -102,7 +120,7 @@ export function SuperAdminPageContent({
           positions={orgPositions}
           onUpdate={() => {}}
           onDelete={() => {}}
-          onReorder={handleSetOrgs}
+          onReorder={handleSetOrgPositions}
         />
       </div>
     </main>

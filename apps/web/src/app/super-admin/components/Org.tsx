@@ -1,4 +1,3 @@
-import { useRef, MouseEvent } from 'react';
 import { Card, CardContent } from '../../../components/ui/card';
 import type { Org as OrgType } from '../../../types/types';
 import { cn } from 'cn';
@@ -15,52 +14,40 @@ import {
   DialogTrigger
 } from '../../../components/ui/dialog';
 import Link from 'next/link';
+import type { MouseEvent } from 'react';
 
-type OrgProps = React.ComponentProps<typeof Card> & {
+export type OrgProps = React.ComponentProps<typeof Card> & {
   org: OrgType;
   editable: boolean;
 
-  onEntryDragStart: (id: number) => void;
-  onEntryDragEnd: () => void;
-  onEntryHover: () => void;
-  onEditClick: () => void;
+  onOrgDragStart: () => void;
   onDelete: () => void;
+  onUpdate: (org: OrgType) => void;
 };
 
 export function Org(props: OrgProps) {
-  const content = <OrgContent {...props} />;
+  const content = <OrgContent {...props} onEditClick={() => {}} />;
 
   return props.editable ? content : <Link href={`/org/${props.org.path}`}>{content}</Link>;
 }
+
+type OrgContentProps = OrgProps & {
+  onEditClick: () => void;
+};
 
 export function OrgContent({
   org,
   editable,
   className,
-  onEntryDragStart,
-  onEntryDragEnd,
-  onEntryHover,
+  onOrgDragStart,
   onEditClick,
   onDelete,
   ...others
-}: OrgProps) {
-  const isDraggingRef = useRef(false);
-  const onEntryDragEndRef = useRef(onEntryDragEnd);
-  onEntryDragEndRef.current = onEntryDragEnd;
-
+}: OrgContentProps) {
   function handleDragStart(e: MouseEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
-    isDraggingRef.current = true;
-    onEntryDragStart(org.id);
-
-    function handleWindowMouseUp() {
-      isDraggingRef.current = false;
-      window.removeEventListener('mouseup', handleWindowMouseUp);
-      onEntryDragEndRef.current();
-    }
-
-    window.addEventListener('mouseup', handleWindowMouseUp);
+    onOrgDragStart();
   }
 
   return (
@@ -72,7 +59,6 @@ export function OrgContent({
           'hover:-translate-y-1 hover:shadow-md duration-150 hover:border-primary/80 cursor-pointer',
         'p-4 h-42 w-92'
       )}
-      onMouseEnter={onEntryHover}
     >
       <CardContent className="px-1 flex flex-col gap-2">
         <div className="flex gap-2 w-full justify-between">
