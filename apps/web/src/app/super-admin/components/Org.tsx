@@ -14,7 +14,8 @@ import {
   DialogTrigger
 } from '../../../components/ui/dialog';
 import Link from 'next/link';
-import type { MouseEvent } from 'react';
+import { useState, type MouseEvent } from 'react';
+import { CreateOrgForm } from './CreateOrgForm';
 
 export type OrgProps = React.ComponentProps<typeof Card> & {
   org: OrgType;
@@ -26,24 +27,22 @@ export type OrgProps = React.ComponentProps<typeof Card> & {
 };
 
 export function Org(props: OrgProps) {
-  const content = <OrgContent {...props} onEditClick={() => {}} />;
+  const content = <OrgContent {...props} />;
 
   return props.editable ? content : <Link href={`/org/${props.org.path}`}>{content}</Link>;
 }
-
-type OrgContentProps = OrgProps & {
-  onEditClick: () => void;
-};
 
 export function OrgContent({
   org,
   editable,
   className,
   onOrgDragStart,
-  onEditClick,
   onDelete,
+  onUpdate,
   ...others
-}: OrgContentProps) {
+}: OrgProps) {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   function handleDragStart(e: MouseEvent<HTMLDivElement>) {
     e.preventDefault();
     e.stopPropagation();
@@ -84,17 +83,23 @@ export function OrgContent({
           </div>
           {editable && (
             <div className="w-fit">
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onEditClick();
-                }}
-              >
-                <Pencil />
-              </Button>
+              <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                <DialogTrigger
+                  render={
+                    <Button size="icon" variant="ghost">
+                      <Pencil />
+                    </Button>
+                  }
+                />
+                <DialogContent>
+                  <CreateOrgForm
+                    defaultValues={org}
+                    onSubmit={(updatedOrg) => onUpdate({ ...updatedOrg, id: org.id })}
+                    onCancel={() => setEditDialogOpen(false)}
+                  />
+                  ;
+                </DialogContent>
+              </Dialog>
               <Dialog>
                 <DialogTrigger
                   render={

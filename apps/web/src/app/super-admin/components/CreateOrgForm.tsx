@@ -8,11 +8,13 @@ import { Button } from '../../../components/ui/button';
 import { z } from 'zod';
 
 type CreateOrgFormProps = {
+  defaultValues?: PartialOrg;
+
   onSubmit: (org: PartialOrg) => void;
   onCancel: () => void;
 };
 
-export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
+export function CreateOrgForm({ defaultValues, onSubmit, onCancel }: CreateOrgFormProps) {
   const formId = useId();
 
   const form = useForm({
@@ -21,10 +23,10 @@ export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
         name: z.string().trim().min(1),
         description: z.string().trim().min(1),
         path: z.string(),
-        svgDataUrl: z.string()
+        svgDataUrl: z.string().nullable()
       })
     },
-    defaultValues: {
+    defaultValues: defaultValues ?? {
       name: '',
       description: '',
       path: '',
@@ -35,7 +37,7 @@ export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
         name: value.name.trim(),
         description: value.description.trim(),
         path: value.path.trim() || calculateDefaultPath(value.name.trim()),
-        svgDataUrl: value.svgDataUrl.trim() || null
+        svgDataUrl: value.svgDataUrl?.trim() || null
       };
       onSubmit(obj);
     }
@@ -117,7 +119,7 @@ export function CreateOrgForm({ onSubmit, onCancel }: CreateOrgFormProps) {
               <Input
                 id={`org-svg-url-${formId}`}
                 placeholder="Svg data url"
-                value={field.state.value}
+                value={field.state.value ?? ''}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
               {field.state.meta.isTouched && <FieldError errors={field.state.meta.errors} />}

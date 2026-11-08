@@ -42,6 +42,24 @@ export const organizationRouter = c.router(
         200: c.noBody(),
         500: errorMsgSchema
       }
+    },
+    update: {
+      path: '/update',
+      method: 'PATCH',
+      body: orgSchema,
+      responses: {
+        200: c.noBody(),
+        500: errorMsgSchema
+      }
+    },
+    delete: {
+      path: '/delete',
+      method: 'DELETE',
+      body: z.object({ id: z.number().int().gte(0) }),
+      responses: {
+        200: c.noBody(),
+        500: errorMsgSchema
+      }
     }
   },
   { pathPrefix: '/org' }
