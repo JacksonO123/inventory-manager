@@ -71,6 +71,13 @@
       "when": 1793831322773,
       "tag": "0009_groovy_the_hand",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794184261188,
+      "tag": "0010_tranquil_leader",
+      "breakpoints": true
     }
   ]
 }
