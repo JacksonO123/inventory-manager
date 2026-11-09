@@ -96,5 +96,20 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
     } catch (err) {
       return errorResponse(err);
     }
+  },
+  getByPath: async ({ params, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const org = await Org.getByPath(params.path);
+
+      return { status: 200, body: { org } };
+    } catch (err) {
+      return errorResponse(err);
+    }
   }
 });

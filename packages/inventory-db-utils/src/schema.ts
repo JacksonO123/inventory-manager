@@ -137,13 +137,17 @@ export const adminTable = pgTable(
   (table) => [t.index('admin_user_id_index').on(table.user_id)]
 );
 
-export const orgTable = pgTable('organization', {
-  id: t.serial().primaryKey(),
-  name: t.text('name').notNull(),
-  description: t.text('description').notNull(),
-  svgDataUrl: t.text('svg_data_url'),
-  path: t.text('path').notNull()
-});
+export const orgTable = pgTable(
+  'organization',
+  {
+    id: t.serial().primaryKey(),
+    name: t.text('name').notNull(),
+    description: t.text('description').notNull(),
+    svgDataUrl: t.text('svg_data_url'),
+    path: t.text('path').notNull()
+  },
+  (table) => [t.index('organization_path_index').on(table.path)]
+);
 
 export const orgPositionsTable = pgTable(
   'org_positions',
