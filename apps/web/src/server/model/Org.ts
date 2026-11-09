@@ -48,4 +48,9 @@ export class Org {
       throw new Error('Failed to delete org');
     }
   }
+
+  static async getByPath(path: string) {
+    const [org] = await db.select().from(orgTable).where(eq(orgTable.path, path));
+    return org ?? null;
+  }
 }

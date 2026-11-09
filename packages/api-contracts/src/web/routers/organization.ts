@@ -60,6 +60,17 @@ export const organizationRouter = c.router(
         200: c.noBody(),
         500: errorMsgSchema
       }
+    },
+    getByPath: {
+      path: '/get/:path',
+      method: 'GET',
+      pathParams: z.object({
+        path: z.string().min(1)
+      }),
+      responses: {
+        200: z.object({ org: orgSchema.nullable() }),
+        500: errorMsgSchema
+      }
     }
   },
   { pathPrefix: '/org' }

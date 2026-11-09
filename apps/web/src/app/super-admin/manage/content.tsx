@@ -17,6 +17,7 @@ import {
 import { useElementSize } from '@mantine/hooks';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '../../../components/ui/button';
 
 type ContentProps = {
   initialAdmins: PartialAdminAndEmail[];
@@ -39,10 +40,13 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
   return (
     <main className="flex justify-center pt-8 px-20">
       <div className="w-full max-w-3xl flex flex-col gap-4">
-        <Link href="/super-admin" className="flex gap-2 items-center">
-          <ArrowLeft size={18} />
-          <span className="underline">Back to dashboard</span>
-        </Link>
+        <div>
+          <Link href="/super-admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft /> Back to dashboard
+            </Button>
+          </Link>
+        </div>
         <div className="w-full max-w-3xl p-4 rounded-md border">
           <Tabs>
             <TabGroup className="absolute" ref={ref}>
