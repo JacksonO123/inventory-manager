@@ -1,5 +1,5 @@
 {
-  "id": "2342c22e-3559-44f2-ab4e-ae634059b92c",
+  "id": "1cacd67f-4e94-4b79-b8db-f9748331330e",
   "prevId": "528e04ef-b1a1-4ad3-8adc-7d52d19ea07e",
   "version": "7",
   "dialect": "postgresql",
@@ -181,6 +181,45 @@
           "nullsNotDistinct": false,
           "columns": [
             "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.basic_user": {
+      "name": "basic_user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "basic_user_email_unique": {
+          "name": "basic_user_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
           ]
         }
       },
