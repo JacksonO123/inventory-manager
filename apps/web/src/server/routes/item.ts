@@ -9,7 +9,12 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       const createdItem = await Item.create(body);
       return {
         status: 200,
-        body: { id: createdItem.values.id, status: createdItem.values.status }
+        body: {
+          id: createdItem.values.id,
+          is_available: createdItem.values.is_available,
+          is_lent_out: createdItem.values.is_lent_out,
+          is_damaged: createdItem.values.is_damaged
+        }
       };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
@@ -37,6 +42,14 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
   returnItem: async ({ params }) => {
     try {
       await Item.return(params.id);
+      return { status: 200, body: { id: params.id } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  deleteItem: async ({ params }) => {
+    try {
+      await Item.delete(params.id);
       return { status: 200, body: { id: params.id } };
     } catch (err) {
       return errorResponse(err);
