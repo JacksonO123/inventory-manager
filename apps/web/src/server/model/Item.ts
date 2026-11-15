@@ -18,7 +18,9 @@ export class Item {
         id: itemTable.id,
         name: itemTable.name,
         description: itemTable.description,
-        status: itemTable.status,
+        is_available: itemTable.is_available,
+        is_lent_out: itemTable.is_lent_out,
+        is_damaged: itemTable.is_damaged,
         borrower: checkoutTable.borrowerId
       })
       .from(itemTable)
@@ -52,8 +54,14 @@ export class Item {
       // checking out the same item at once can't both succeed
       const [item] = await tx
         .update(itemTable)
-        .set({ status: 'booked' })
-        .where(and(eq(itemTable.id, itemId), eq(itemTable.status, 'available')))
+        .set({ is_available: false, is_lent_out: true })
+        .where(
+          and(
+            eq(itemTable.id, itemId),
+            eq(itemTable.is_available, true),
+            eq(itemTable.is_lent_out, false)
+          )
+        )
         .returning({ id: itemTable.id });
       if (item === undefined) {
         if (await Item.exists(itemId, tx)) {
@@ -77,7 +85,10 @@ export class Item {
         throw new HttpError(404, 'Item not found');
       }
 
-      await tx.update(itemTable).set({ status: 'available' }).where(eq(itemTable.id, itemId));
+      await tx
+        .update(itemTable)
+        .set({ is_available: true, is_lent_out: false })
+        .where(eq(itemTable.id, itemId));
     });
   }
 
