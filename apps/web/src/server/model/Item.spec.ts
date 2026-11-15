@@ -9,8 +9,9 @@ import { and } from 'drizzle-orm';
 import { checkoutTable, itemTable } from '@invm/inventory-db-utils';
 
 jest.mock('../db', () => ({
-  db: { insert: jest.fn(), select: jest.fn(), transaction: jest.fn() }
+  db: { insert: jest.fn(), select: jest.fn(), delete: jest.fn(), transaction: jest.fn() }
 }));
+
 jest.mock('@invm/inventory-db-utils', () => ({
   itemTable: {},
   basicUserTable: {},
@@ -191,5 +192,40 @@ describe('Item.exists', () => {
 
     await expect(Item.exists(1)).resolves.toBe(true);
     expect(db.select).toHaveBeenCalled();
+  });
+});
+
+describe('Item.delete', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  function mockDelete(rows: unknown[]) {
+    const returning = jest.fn().mockResolvedValue(rows);
+    const where = jest.fn().mockReturnValue({ returning });
+    (db.delete as jest.Mock).mockReturnValue({ where });
+    return { where, returning };
+  }
+
+  it('deletes an existing item from the item table', async () => {
+    const { where, returning } = mockDelete([{ id: 1 }]);
+
+    await expect(Item.delete(1)).resolves.toBeUndefined();
+    expect(db.delete).toHaveBeenCalledWith(itemTable);
+    expect(where).toHaveBeenCalledTimes(1);
+    expect(returning).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws 404 when no item matches the id', async () => {
+    mockDelete([]);
+
+    await expect(Item.delete(999)).rejects.toEqual(new HttpError(404, 'Item not found'));
+    expect(db.delete).toHaveBeenCalledWith(itemTable);
+  });
+
+  it('propagates unexpected DB errors instead of masking them as 404', async () => {
+    const returning = jest.fn().mockRejectedValue(new Error('connection lost'));
+    (db.delete as jest.Mock).mockReturnValue({ where: jest.fn().mockReturnValue({ returning }) });
+
+    await expect(Item.delete(1)).rejects.toThrow('connection lost');
   });
 });

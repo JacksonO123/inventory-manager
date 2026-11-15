@@ -89,4 +89,15 @@ export class Item {
       .limit(1);
     return row !== undefined;
   }
+
+  static async delete(ItemId: number) {
+    const [deleted] = await db
+      .delete(itemTable)
+      .where(eq(itemTable.id, ItemId))
+      .returning({ id: itemTable.id });
+
+    if (deleted === undefined) {
+      throw new HttpError(404, 'Item not found');
+    }
+  }
 }
