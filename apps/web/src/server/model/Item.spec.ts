@@ -62,7 +62,7 @@ describe('Item.create', () => {
   });
 
   it('valid create', async () => {
-    const input = { name: 'x', description: 'x' };
+    const input = { name: 'x', description: 'x', is_damaged: false };
     const returning = jest.fn().mockResolvedValue([{ id: 1, ...input }]);
     const values = jest.fn().mockReturnValue({ returning });
     (db.insert as jest.Mock).mockReturnValue({ values });
@@ -72,8 +72,20 @@ describe('Item.create', () => {
     expect(values).toHaveBeenCalledWith(input);
   });
 
+  it('allows creating an item that is already damaged', async () => {
+    const input = { name: 'x', description: null, is_damaged: true };
+    const returning = jest.fn().mockResolvedValue([{ id: 2, ...input }]);
+    const values = jest.fn().mockReturnValue({ returning });
+    (db.insert as jest.Mock).mockReturnValue({ values });
+
+    await expect(Item.create(input)).resolves.toBeInstanceOf(Item);
+    expect(values).toHaveBeenCalledWith(input);
+  });
+
   it('throws a ZodError for an empty name and never touches the DB', async () => {
-    await expect(Item.create({ name: '', description: 'x' })).rejects.toBeInstanceOf(ZodError);
+    await expect(
+      Item.create({ name: '', description: 'x', is_damaged: false })
+    ).rejects.toBeInstanceOf(ZodError);
     expect(db.insert).not.toHaveBeenCalled();
   });
 });
@@ -122,7 +134,7 @@ describe('Item.checkOut', () => {
     });
 
     await expect(Item.checkOut(1, 7)).resolves.toBeUndefined();
-    expect(updateSet).toHaveBeenCalledWith({ status: 'booked' });
+    expect(updateSet).toHaveBeenCalledWith({ is_available: false, is_lent_out: true });
     expect(insertValues).toHaveBeenCalledWith({ itemId: 1, borrowerId: 7 });
   });
 
@@ -165,7 +177,7 @@ describe('Item.return', () => {
 
     await expect(Item.return(1)).resolves.toBeUndefined();
     expect(updateSet).toHaveBeenNthCalledWith(1, { returnedAt: expect.any(Date) });
-    expect(updateSet).toHaveBeenNthCalledWith(2, { status: 'available' });
+    expect(updateSet).toHaveBeenNthCalledWith(2, { is_available: true, is_lent_out: false });
   });
 
   it('throws 404 when there is no open checkout for the item', async () => {

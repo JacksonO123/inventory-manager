@@ -6,7 +6,13 @@ import { Item } from '../model/Item';
 import { HttpError } from '../errors';
 
 jest.mock('../model/Item', () => ({
-  Item: { create: jest.fn(), getAll: jest.fn(), checkOut: jest.fn(), return: jest.fn() }
+  Item: {
+    create: jest.fn(),
+    getAll: jest.fn(),
+    checkOut: jest.fn(),
+    return: jest.fn(),
+    delete: jest.fn()
+  }
 }));
 
 const route = nextItemRoute as any;
@@ -16,13 +22,15 @@ describe('nextItemRoute.createItem', () => {
     jest.resetAllMocks();
   });
 
-  it('creates the item and returns its id and status', async () => {
+  it('creates the item and returns its id and flags', async () => {
     const body = { name: 'Laptop', description: 'Dell' };
-    (Item.create as jest.Mock).mockResolvedValue({ values: { id: 1, status: 'available' } });
+    (Item.create as jest.Mock).mockResolvedValue({
+      values: { id: 1, is_available: true, is_lent_out: false, is_damaged: false }
+    });
 
     await expect(route.createItem({ body })).resolves.toEqual({
       status: 200,
-      body: { id: 1, status: 'available' }
+      body: { id: 1, is_available: true, is_lent_out: false, is_damaged: false }
     });
     expect(Item.create).toHaveBeenCalledWith(body);
   });
@@ -76,34 +84,38 @@ describe('nextItemRoute.checkOut', () => {
   it('checks the item out to the borrower and returns its id', async () => {
     (Item.checkOut as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(
-      route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 200, body: { id: 1 } });
+    await expect(route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })).resolves.toEqual({
+      status: 200,
+      body: { id: 1 }
+    });
     expect(Item.checkOut).toHaveBeenCalledWith(1, 7);
   });
 
   it('returns 404 when the item or borrower is not found', async () => {
     (Item.checkOut as jest.Mock).mockRejectedValue(new HttpError(404, 'Item not found'));
 
-    await expect(
-      route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 404, body: { message: 'Item not found' } });
+    await expect(route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })).resolves.toEqual({
+      status: 404,
+      body: { message: 'Item not found' }
+    });
   });
 
   it('returns 409 when the item is not available', async () => {
     (Item.checkOut as jest.Mock).mockRejectedValue(new HttpError(409, 'Item is not available'));
 
-    await expect(
-      route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 409, body: { message: 'Item is not available' } });
+    await expect(route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })).resolves.toEqual({
+      status: 409,
+      body: { message: 'Item is not available' }
+    });
   });
 
   it('returns 500 when something other than an HttpError throws', async () => {
     (Item.checkOut as jest.Mock).mockRejectedValue(new Error('db down'));
 
-    await expect(
-      route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })
-    ).resolves.toEqual({ status: 500, body: { message: 'Error: db down' } });
+    await expect(route.checkOut({ params: { id: 1 }, body: { borrowerId: 7 } })).resolves.toEqual({
+      status: 500,
+      body: { message: 'Error: db down' }
+    });
   });
 });
 
@@ -135,6 +147,40 @@ describe('nextItemRoute.returnItem', () => {
     (Item.return as jest.Mock).mockRejectedValue(new Error('db down'));
 
     await expect(route.returnItem({ params: { id: 1 } })).resolves.toEqual({
+      status: 500,
+      body: { message: 'Error: db down' }
+    });
+  });
+});
+
+describe('nextItemRoute.deleteItem', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('deletes the item and returns its id', async () => {
+    (Item.delete as jest.Mock).mockResolvedValue(undefined);
+
+    await expect(route.deleteItem({ params: { id: 1 } })).resolves.toEqual({
+      status: 200,
+      body: { id: 1 }
+    });
+    expect(Item.delete).toHaveBeenCalledWith(1);
+  });
+
+  it('returns 404 when the item is not found', async () => {
+    (Item.delete as jest.Mock).mockRejectedValue(new HttpError(404, 'Item not found'));
+
+    await expect(route.deleteItem({ params: { id: 999 } })).resolves.toEqual({
+      status: 404,
+      body: { message: 'Item not found' }
+    });
+  });
+
+  it('returns 500 when something other than an HttpError throws', async () => {
+    (Item.delete as jest.Mock).mockRejectedValue(new Error('db down'));
+
+    await expect(route.deleteItem({ params: { id: 1 } })).resolves.toEqual({
       status: 500,
       body: { message: 'Error: db down' }
     });
