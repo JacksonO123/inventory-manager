@@ -1,7 +1,6 @@
 import { pgTable } from 'drizzle-orm/pg-core';
 import * as t from 'drizzle-orm/pg-core';
 import { isNull } from 'drizzle-orm';
-import { boolean } from 'zod';
 
 export const user = pgTable('user', {
   id: t.text('id').primaryKey(),
