@@ -12,7 +12,7 @@ import { z } from 'zod';
 
 export type Item = z.infer<typeof itemSchema>;
 
-export type ItemAndBasicUserBorrower = Item & { borrower: BasicUser['id'] | null };
+export type ItemAndBasicUserBorrower = Item & { borrower: string | null };
 
 export type PartialItem = z.infer<typeof partialItemSchema>;
 

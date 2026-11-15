@@ -81,12 +81,6 @@ export const itemTable = pgTable('item', {
   status: itemStatus().notNull().default('available')
 });
 
-export const basicUserTable = pgTable('basic_user', {
-  id: t.serial().primaryKey(),
-  name: t.text().notNull(),
-  email: t.text().notNull().unique()
-});
-
 export const checkoutTable = pgTable(
   'checkout',
   {
@@ -96,9 +90,9 @@ export const checkoutTable = pgTable(
       .notNull()
       .references(() => itemTable.id, { onDelete: 'cascade' }),
     borrowerId: t
-      .integer('borrower_id')
+      .text('borrower_id')
       .notNull()
-      .references(() => basicUserTable.id, { onDelete: 'cascade' }),
+      .references(() => user.id, { onDelete: 'cascade' }),
     checkedOutAt: t
       .timestamp('checked_out_at', { precision: 6, withTimezone: true })
       .notNull()
@@ -158,7 +152,7 @@ export const orgPositionsTable = pgTable(
       .notNull()
       .unique()
       .references(() => user.id, { onDelete: 'cascade' }),
-    positions: t.jsonb().$type<number[]>().notNull()
+    positions: t.jsonb('positions').$type<number[]>().notNull()
   },
   (table) => [t.index('org_positions_user_id_index').on(table.userId)]
 );

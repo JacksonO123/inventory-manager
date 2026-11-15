@@ -1,7 +1,6 @@
 import { ItemAndBasicUserBorrower } from '../../../types/types';
 import { Button } from '../../../components/ui/button';
 import { LoadingSpinner } from '../../../components/LoadingSpinner';
-import { useBasicAuth } from '../../../hooks/useBasicAuth';
 import {
   Dialog,
   DialogClose,
@@ -11,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../../../components/ui/dialog';
+import { authClient } from '../../../client/auth-client';
 
 type ItemProps = {
   item: ItemAndBasicUserBorrower;
@@ -20,7 +20,7 @@ type ItemProps = {
 };
 
 export function Item({ item, allowCheckInOut, onCheckOut, onReturn }: ItemProps) {
-  const { basicUser } = useBasicAuth();
+  const session = authClient.useSession();
   const isSaving = item.id === -1;
 
   const returnButton = (
@@ -47,7 +47,7 @@ export function Item({ item, allowCheckInOut, onCheckOut, onReturn }: ItemProps)
                 Check out
               </Button>
             ) : item.status === 'booked' ? (
-              item.borrower === basicUser?.id ? (
+              item.borrower === session.data?.user.id ? (
                 returnButton
               ) : (
                 <Dialog>

@@ -1,4 +1,3 @@
-import { BasicAuthProvider } from './BasicAuthProvider';
 import { ReactQueryProvider } from './ReactQueryProvider';
 
 type ProvidersProps = {
@@ -6,9 +5,5 @@ type ProvidersProps = {
 };
 
 export function Providers({ children }: ProvidersProps) {
-  return (
-    <ReactQueryProvider>
-      <BasicAuthProvider>{children}</BasicAuthProvider>
-    </ReactQueryProvider>
-  );
+  return <ReactQueryProvider>{children}</ReactQueryProvider>;
 }

@@ -5,16 +5,10 @@ import { Button } from '../../components/ui/button';
 import { useState } from 'react';
 import { CreateItemForm } from './components/CreateItemForm';
 import { tsr } from '../../server/tsr';
-import {
-  BasicUser,
-  ItemAndBasicUserBorrower,
-  Item as ItemType,
-  PartialItem
-} from '../../types/types';
+import { ItemAndBasicUserBorrower, Item as ItemType, PartialItem } from '../../types/types';
 import { Items } from './components/Items';
-import { AuthPopup } from '../../components/AuthPopup';
 import { toast } from '../../components/ui/toast';
-import { useBasicAuth } from '../../hooks/useBasicAuth';
+import { authClient } from '../../client/auth-client';
 
 type ContentProps = {
   items: ItemAndBasicUserBorrower[];
@@ -23,7 +17,7 @@ type ContentProps = {
 export function Content({ items: itemsFromServer }: ContentProps) {
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
-  const { basicUser } = useBasicAuth();
+  const session = authClient.useSession();
 
   async function handleSaveItem(item: PartialItem) {
     const fullItem: ItemAndBasicUserBorrower = {
@@ -50,11 +44,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
     }
   }
 
-  function setItemStatus(
-    itemId: number,
-    status: ItemType['status'],
-    borrowerId: BasicUser['id'] | null
-  ) {
+  function setItemStatus(itemId: number, status: ItemType['status'], borrowerId: string | null) {
     // replace the matching item with a copy that has the new status, leaving the rest unchanged
     setItems((items) =>
       items.map((item) => (item.id === itemId ? { ...item, status, borrower: borrowerId } : item))
@@ -62,17 +52,17 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   }
 
   async function handleCheckOut(itemId: number) {
-    if (basicUser === null) {
+    if (session.data === null || session === null) {
       toast.add({ type: 'error', title: 'Log in to check out an item' });
       return;
     }
 
     const oldItem = { ...items.find((item) => item.id === itemId)! };
 
-    setItemStatus(itemId, 'booked', basicUser.id);
+    setItemStatus(itemId, 'booked', session.data.user.id);
     const res = await tsr.item.checkOut.mutate({
       params: { id: itemId },
-      body: { borrowerId: basicUser.id }
+      body: { borrowerId: session.data.user.id }
     });
     if (res.status !== 200) {
       setItemStatus(itemId, oldItem.status, oldItem.borrower);
@@ -88,14 +78,14 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   }
 
   async function handleReturn(itemId: number) {
-    if (basicUser === null) {
+    if (session === null) {
       toast.add({ type: 'error', title: 'Log in to return an item' });
       return;
     }
 
     const oldItem = { ...items.find((item) => item.id === itemId)! };
 
-    setItemStatus(itemId, 'available', basicUser.id);
+    setItemStatus(itemId, 'available', session.data?.user.id ?? null);
     const res = await tsr.item.returnItem.mutate({ params: { id: itemId } });
     if (res.status !== 200) {
       setItemStatus(itemId, oldItem.status, oldItem.borrower);
@@ -112,7 +102,6 @@ export function Content({ items: itemsFromServer }: ContentProps) {
 
   return (
     <main>
-      <AuthPopup />
       <div className="p-8 flex flex-col gap-4">
         {creatingItem ? (
           <CreateItemForm onSave={handleSaveItem} onCancel={() => setCreatingItem(false)} />
@@ -125,7 +114,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
           items={items}
           onCheckOut={handleCheckOut}
           onReturn={handleReturn}
-          allowCheckInOut={basicUser !== null}
+          allowCheckInOut={session !== null}
         />
       </div>
     </main>

@@ -1,6 +1,6 @@
 import { c } from '../contract';
 import { z } from 'zod';
-import { basicAuthRouter, itemRouter } from './routers';
+import { itemRouter } from './routers';
 import { adminRouter } from './routers/admin';
 import { superAdminRouter } from './routers/superAdmin';
 import { organizationRouter } from './routers/organization';
@@ -16,7 +16,6 @@ export const rootWebRouter = c.router(
     },
 
     item: itemRouter,
-    auth: basicAuthRouter,
     admin: adminRouter,
     superAdmin: superAdminRouter,
     organizations: organizationRouter
