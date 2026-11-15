@@ -16,6 +16,7 @@ import { Org, PartialOrg } from '../../types/types';
 import { tsr } from '../../server/tsr';
 import { useState } from 'react';
 import { toast } from '../../components/ui/toast';
+import { Calendar } from '../../components/Calendar';
 
 type SuperAdminPageContentProps = {
   orgs: Org[];
@@ -118,7 +119,7 @@ export function SuperAdminPageContent({
   }
 
   return (
-    <main className="flex justify-center pt-8 px-20">
+    <main className="flex justify-center pt-8 px-20 flex-col">
       <div className="w-full max-w-5xl flex flex-col gap-8">
         <div className="flex justify-between gap-4 p-3 rounded-md border">
           <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
@@ -165,6 +166,8 @@ export function SuperAdminPageContent({
           onReorder={handleSetOrgPositions}
         />
       </div>
+
+      <Calendar />
     </main>
   );
 }
