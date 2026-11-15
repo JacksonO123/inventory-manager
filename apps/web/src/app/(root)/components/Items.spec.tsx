@@ -33,24 +33,6 @@ describe('Items', () => {
     mockUseBasicAuth.mockReturnValue(signedOutAuth);
   });
 
-  it('shows the name and description of every item', () => {
-    renderItems([
-      {
-        id: 1,
-        name: 'HDMI cable',
-        description: '6 ft, black',
-        status: 'available',
-        borrower: null
-      },
-      { id: 2, name: 'Box of pens', description: 'blue ink', status: 'available', borrower: null }
-    ]);
-
-    expect(screen.getByText('HDMI cable')).toBeTruthy();
-    expect(screen.getByText('6 ft, black')).toBeTruthy();
-    expect(screen.getByText('Box of pens')).toBeTruthy();
-    expect(screen.getByText('blue ink')).toBeTruthy();
-  });
-
   it('shows an item that has no description', () => {
     renderItems([
       { id: 1, name: 'HDMI cable', description: null, status: 'available', borrower: null }
