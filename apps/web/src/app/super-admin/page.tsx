@@ -1,9 +1,19 @@
-import Link from 'next/link';
+import { tsrFactory } from '../../server/tsrFactory';
+import { SuperAdminPageContent } from './content';
 
-export default function AdminPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function AdminPage() {
+  const tsr = await tsrFactory();
+  const [orgs, positions] = await Promise.all([
+    tsr.organizations.getAll.query(),
+    tsr.organizations.getPositions.query()
+  ]);
+
   return (
-    <div>
-      <Link href="/super-admin/manage">manage</Link>
-    </div>
+    <SuperAdminPageContent
+      orgs={orgs.status === 200 ? orgs.body : []}
+      positions={positions.status === 200 ? positions.body : []}
+    />
   );
 }
