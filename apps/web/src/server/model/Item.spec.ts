@@ -209,8 +209,10 @@ describe('Item.exists', () => {
 
 describe('Item.delete', () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
+
   function mockDelete(rows: unknown[]) {
     const returning = jest.fn().mockResolvedValue(rows);
     const where = jest.fn().mockReturnValue({ returning });
@@ -218,7 +220,8 @@ describe('Item.delete', () => {
     return { where, returning };
   }
 
-  it('deletes an existing item from the item table', async () => {
+  it('deletes the item when it exists and is not lent out', async () => {
+    jest.spyOn(Item, 'exists').mockResolvedValue(true);
     const { where, returning } = mockDelete([{ id: 1 }]);
 
     await expect(Item.delete(1)).resolves.toBeUndefined();
@@ -227,17 +230,17 @@ describe('Item.delete', () => {
     expect(returning).toHaveBeenCalledTimes(1);
   });
 
-  it('throws 404 when no item matches the id', async () => {
-    mockDelete([]);
+  it('throws 404 and does not delete when the item does not exist', async () => {
+    jest.spyOn(Item, 'exists').mockResolvedValue(false);
 
     await expect(Item.delete(999)).rejects.toEqual(new HttpError(404, 'Item not found'));
-    expect(db.delete).toHaveBeenCalledWith(itemTable);
+    expect(db.delete).not.toHaveBeenCalled();
   });
 
-  it('propagates unexpected DB errors instead of masking them as 404', async () => {
-    const returning = jest.fn().mockRejectedValue(new Error('connection lost'));
-    (db.delete as jest.Mock).mockReturnValue({ where: jest.fn().mockReturnValue({ returning }) });
+  it('throws 409 when the item exists but the delete removes nothing (lent out)', async () => {
+    jest.spyOn(Item, 'exists').mockResolvedValue(true);
+    mockDelete([]);
 
-    await expect(Item.delete(1)).rejects.toThrow('connection lost');
+    await expect(Item.delete(1)).rejects.toEqual(new HttpError(409, 'Item is currently lent out'));
   });
 });

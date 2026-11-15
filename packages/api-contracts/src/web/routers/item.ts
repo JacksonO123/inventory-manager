@@ -63,6 +63,7 @@ export const itemRouter = c.router(
       responses: {
         200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,
+        409: errorMsgSchema,
         500: errorMsgSchema
       }
     }

@@ -101,14 +101,18 @@ export class Item {
     return row !== undefined;
   }
 
-  static async delete(ItemId: number) {
+  static async delete(itemId: number) {
+    if (!(await Item.exists(itemId))) {
+      throw new HttpError(404, 'Item not found');
+    }
+
     const [deleted] = await db
       .delete(itemTable)
-      .where(eq(itemTable.id, ItemId))
+      .where(and(eq(itemTable.id, itemId), eq(itemTable.is_lent_out, false)))
       .returning({ id: itemTable.id });
 
-    if (deleted === undefined) {
-      throw new HttpError(404, 'Item not found');
+    if (!deleted) {
+      throw new HttpError(409, 'Item is currently lent out');
     }
   }
 }

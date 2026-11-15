@@ -177,6 +177,15 @@ describe('nextItemRoute.deleteItem', () => {
     });
   });
 
+  it('returns 409 when the item is lent out', async () => {
+    (Item.delete as jest.Mock).mockRejectedValue(new HttpError(409, 'Item is currently lent out'));
+
+    await expect(route.deleteItem({ params: { id: 1 } })).resolves.toEqual({
+      status: 409,
+      body: { message: 'Item is currently lent out' }
+    });
+  });
+
   it('returns 500 when something other than an HttpError throws', async () => {
     (Item.delete as jest.Mock).mockRejectedValue(new Error('db down'));
 
