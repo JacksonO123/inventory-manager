@@ -1,6 +1,7 @@
 import { pgTable } from 'drizzle-orm/pg-core';
 import * as t from 'drizzle-orm/pg-core';
 import { isNull } from 'drizzle-orm';
+import { boolean } from 'zod';
 
 export const user = pgTable('user', {
   id: t.text('id').primaryKey(),
@@ -78,7 +79,9 @@ export const itemTable = pgTable('item', {
   id: t.serial().primaryKey(),
   name: t.text().notNull(),
   description: t.text(),
-  status: itemStatus().notNull().default('available')
+  is_available: t.boolean().notNull().default(true),
+  is_lent_out: t.boolean().notNull().default(false),
+  is_damaged: t.boolean().notNull().default(false)
 });
 
 export const basicUserTable = pgTable('basic_user', {
