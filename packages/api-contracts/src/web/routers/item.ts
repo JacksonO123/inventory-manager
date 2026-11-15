@@ -12,7 +12,10 @@ export const itemRouter = c.router(
       method: 'PUT',
       body: partialItemSchema,
       responses: {
-        200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
+        200: z.object({
+          id: z.number().gte(0),
+          is_damaged: itemSchema.shape.is_damaged
+        }),
         500: errorMsgSchema
       }
     },
@@ -51,7 +54,19 @@ export const itemRouter = c.router(
         409: errorMsgSchema,
         500: errorMsgSchema
       }
+    },
+    deleteItem: {
+      path: '/:id',
+      method: 'DELETE',
+      pathParams: itemIdParamsSchema,
+      body: c.noBody(),
+      responses: {
+        200: z.object({ id: z.number().gte(0) }),
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
     }
   },
+
   { pathPrefix: '/item' }
 );
