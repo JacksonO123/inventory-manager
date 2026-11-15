@@ -9,7 +9,13 @@ import { and } from 'drizzle-orm';
 import { checkoutTable, itemTable } from '@invm/inventory-db-utils';
 
 jest.mock('../db', () => ({
-  db: { insert: jest.fn(), select: jest.fn(), delete: jest.fn(), transaction: jest.fn() }
+  db: {
+    insert: jest.fn(),
+    select: jest.fn(),
+    delete: jest.fn(),
+    update: jest.fn(),
+    transaction: jest.fn()
+  }
 }));
 
 jest.mock('@invm/inventory-db-utils', () => ({
@@ -242,5 +248,65 @@ describe('Item.delete', () => {
     mockDelete([]);
 
     await expect(Item.delete(1)).rejects.toEqual(new HttpError(409, 'Item is currently lent out'));
+  });
+});
+
+describe('Item.edit', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  function mockUpdate(rows: unknown[]) {
+    const returning = jest.fn().mockResolvedValue(rows);
+    const where = jest.fn().mockReturnValue({ returning });
+    const set = jest.fn().mockReturnValue({ where });
+    (db.update as jest.Mock).mockReturnValue({ set });
+    return { set, where, returning };
+  }
+
+  it('updates only the provided fields', async () => {
+    const { set, where } = mockUpdate([{ id: 1 }]);
+
+    await expect(Item.edit(1, { is_damaged: true })).resolves.toBeUndefined();
+    expect(db.update).toHaveBeenCalledWith(itemTable);
+    expect(set).toHaveBeenCalledWith({ is_damaged: true });
+    expect(where).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows an admin to edit availability and lent-out fields', async () => {
+    const { set } = mockUpdate([{ id: 1 }]);
+
+    await Item.edit(1, { is_available: false, is_lent_out: false });
+    expect(set).toHaveBeenCalledWith({ is_available: false, is_lent_out: false });
+  });
+
+  it('strips id and unknown keys before updating', async () => {
+    const { set } = mockUpdate([{ id: 1 }]);
+
+    await Item.edit(1, { id: 99, name: 'HDMI cable', foo: 'bar' } as never);
+    expect(set).toHaveBeenCalledWith({ name: 'HDMI cable' });
+  });
+
+  it.each([[{}], [{ id: 5 }], [{ foo: 'bar' }]])(
+    'throws 400 and does not update when there are no valid edits (%j)',
+    async (values) => {
+      await expect(Item.edit(1, values as never)).rejects.toEqual(
+        new HttpError(400, 'No valid edits provided')
+      );
+      expect(db.update).not.toHaveBeenCalled();
+    }
+  );
+
+  it('rejects invalid values without updating', async () => {
+    await expect(Item.edit(1, { name: '   ' })).rejects.toBeInstanceOf(ZodError);
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it('throws 404 when no item matches the id', async () => {
+    mockUpdate([]);
+
+    await expect(Item.edit(999, { name: 'HDMI cable' })).rejects.toEqual(
+      new HttpError(404, 'Item not found')
+    );
   });
 });

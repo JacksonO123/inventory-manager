@@ -1,5 +1,5 @@
 import { basicUserTable, checkoutTable, itemTable } from '@invm/inventory-db-utils';
-import { partialItemSchema } from '@invm/api-contracts/schemas';
+import { itemSchema, partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
 import { HttpError } from '../errors';
@@ -99,6 +99,17 @@ export class Item {
       .where(eq(itemTable.id, itemId))
       .limit(1);
     return row !== undefined;
+  }
+
+  static async edit(itemId: number, values: Partial<Omit<ItemType, 'id'>>) {
+    const parsed = itemSchema.omit({ id: true }).partial().parse(values);
+    if (Object.keys(parsed).length === 0) throw new HttpError(400, 'No valid edits provided');
+    const [updated] = await db
+      .update(itemTable)
+      .set(parsed)
+      .where(eq(itemTable.id, itemId))
+      .returning({ id: itemTable.id });
+    if (!updated) throw new HttpError(404, 'Item not found');
   }
 
   static async delete(itemId: number) {

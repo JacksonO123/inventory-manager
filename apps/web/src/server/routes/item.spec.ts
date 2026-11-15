@@ -11,6 +11,7 @@ jest.mock('../model/Item', () => ({
     getAll: jest.fn(),
     checkOut: jest.fn(),
     return: jest.fn(),
+    edit: jest.fn(),
     delete: jest.fn()
   }
 }));
@@ -150,6 +151,46 @@ describe('nextItemRoute.returnItem', () => {
       status: 500,
       body: { message: 'Error: db down' }
     });
+  });
+});
+
+describe('nextItemRoute.editItem', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('edits the item and returns its id', async () => {
+    (Item.edit as jest.Mock).mockResolvedValue(undefined);
+
+    await expect(
+      route.editItem({ params: { id: 1 }, body: { name: 'HDMI cable', is_damaged: true } })
+    ).resolves.toEqual({ status: 200, body: { id: 1 } });
+    expect(Item.edit).toHaveBeenCalledWith(1, { name: 'HDMI cable', is_damaged: true });
+  });
+
+  it('returns 400 when there are no valid edits', async () => {
+    (Item.edit as jest.Mock).mockRejectedValue(new HttpError(400, 'No valid edits provided'));
+
+    await expect(route.editItem({ params: { id: 1 }, body: {} })).resolves.toEqual({
+      status: 400,
+      body: { message: 'No valid edits provided' }
+    });
+  });
+
+  it('returns 404 when the item is not found', async () => {
+    (Item.edit as jest.Mock).mockRejectedValue(new HttpError(404, 'Item not found'));
+
+    await expect(
+      route.editItem({ params: { id: 999 }, body: { name: 'HDMI cable' } })
+    ).resolves.toEqual({ status: 404, body: { message: 'Item not found' } });
+  });
+
+  it('returns 500 when something other than an HttpError throws', async () => {
+    (Item.edit as jest.Mock).mockRejectedValue(new Error('db down'));
+
+    await expect(
+      route.editItem({ params: { id: 1 }, body: { name: 'HDMI cable' } })
+    ).resolves.toEqual({ status: 500, body: { message: 'Error: db down' } });
   });
 });
 

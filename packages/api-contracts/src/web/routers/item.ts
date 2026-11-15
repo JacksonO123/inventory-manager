@@ -55,6 +55,18 @@ export const itemRouter = c.router(
         500: errorMsgSchema
       }
     },
+    editItem: {
+      path: '/:id',
+      method: 'PUT',
+      pathParams: itemIdParamsSchema,
+      body: itemSchema.omit({ id: true }).partial(), // only what changed
+      responses: {
+        200: z.object({ id: z.number().gte(0) }),
+        400: errorMsgSchema,
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
     deleteItem: {
       path: '/:id',
       method: 'DELETE',

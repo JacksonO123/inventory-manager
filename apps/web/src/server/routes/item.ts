@@ -47,6 +47,15 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       return errorResponse(err);
     }
   },
+  editItem: async ({ params, body }) => {
+    try {
+      await Item.edit(params.id, body);
+      return { status: 200, body: { id: params.id } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+
   deleteItem: async ({ params }) => {
     try {
       await Item.delete(params.id);
