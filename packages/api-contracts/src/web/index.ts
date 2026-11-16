@@ -1,9 +1,12 @@
 import { c } from '../contract';
 import { z } from 'zod';
-import { itemRouter } from './routers';
-import { adminRouter } from './routers/admin';
-import { superAdminRouter } from './routers/superAdmin';
-import { organizationRouter } from './routers/organization';
+import {
+  adminRouter,
+  itemRouter,
+  organizationRouter,
+  reservationRouter,
+  superAdminRouter
+} from './routers';
 
 export const rootWebRouter = c.router(
   {
@@ -18,7 +21,8 @@ export const rootWebRouter = c.router(
     item: itemRouter,
     admin: adminRouter,
     superAdmin: superAdminRouter,
-    organizations: organizationRouter
+    organizations: organizationRouter,
+    reservation: reservationRouter
   },
   { pathPrefix: '/api' }
 );
