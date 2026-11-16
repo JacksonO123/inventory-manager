@@ -124,6 +124,7 @@ export function SuperAdminPageContent({
         <div className="flex justify-between gap-4 p-3 rounded-md border">
           <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
             <DialogTrigger
+              suppressHydrationWarning
               render={
                 <Button>
                   <Plus /> Create org

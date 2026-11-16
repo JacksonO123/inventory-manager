@@ -11,39 +11,56 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 
-export function Calendar() {
+type CalendarProps = React.ComponentProps<'div'>;
+
+export function Calendar(props: CalendarProps) {
   const [events, setEvents] = useState<EventInput[]>([]);
-  const [currentSelected, setCurrentSelected] = useState<DateSelectInfo | null>(null);
+  const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
 
-  const completeReservation = () => {
-    if (!currentSelected) return;
+  const handleSelectEvent = (info: DateSelectInfo) => {
+    info.view.calendar.unselect();
 
-    currentSelected.view.calendar.unselect();
+    const eventId = crypto.randomUUID();
+    setLastAddedEventId(eventId);
 
     setEvents((prev) => [
       ...prev,
       {
-        id: crypto.randomUUID(),
+        id: eventId,
         title: 'item reservation',
-        start: currentSelected.start,
-        end: currentSelected.end,
-        allDay: currentSelected.allDay
+        start: info.start,
+        end: info.end,
+        allDay: info.allDay
       }
     ]);
-    setCurrentSelected(null);
   };
+
+  function commitEvent() {
+    if (lastAddedEventId === null) return;
+    const event = events.find((event) => event.id === lastAddedEventId);
+    if (event === undefined) return;
+    if (event.start === undefined || event.end === undefined) return;
+
+    setLastAddedEventId(null);
+  }
+
+  function filterAddedEvent() {
+    if (lastAddedEventId === null) return;
+    setEvents((events) => events.filter((event) => event.id !== lastAddedEventId));
+    setLastAddedEventId(null);
+  }
 
   return (
     <>
-      <Dialog open={currentSelected !== null}>
+      <Dialog open={lastAddedEventId !== null} onOpenChange={(open) => !open && filterAddedEvent()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm reservation?</DialogTitle>
             <div className="flex gap-4">
-              <Button onClick={completeReservation} className="flex-1">
+              <Button onClick={commitEvent} className="flex-1">
                 Yes
               </Button>
-              <Button onClick={() => setCurrentSelected(null)} variant="outline" className="flex-1">
+              <Button onClick={filterAddedEvent} variant="outline" className="flex-1">
                 Cancel
               </Button>
             </div>
@@ -51,13 +68,13 @@ export function Calendar() {
         </DialogContent>
       </Dialog>
 
-      <div onWheel={(e) => console.log('here', e)}>
+      <div {...props}>
         <FullCalendar
           plugins={[themePlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
           selectable={true}
           selectMirror={true}
-          select={setCurrentSelected}
+          select={handleSelectEvent}
           events={events}
           editable={true}
           slotDuration="00:15:00"
