@@ -1,4 +1,4 @@
-import { basicUserTable, checkoutTable, itemTable } from '@invm/inventory-db-utils';
+import { checkoutTable, itemTable, user } from '@invm/inventory-db-utils';
 import { partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
@@ -37,12 +37,12 @@ export class Item {
     return new Item(createdItem);
   }
 
-  static async checkOut(itemId: number, borrowerId: number) {
+  static async checkOut(itemId: number, borrowerId: string) {
     await db.transaction(async (tx) => {
       const [borrower] = await tx
-        .select({ id: basicUserTable.id })
-        .from(basicUserTable)
-        .where(eq(basicUserTable.id, borrowerId))
+        .select({ id: user.id })
+        .from(user)
+        .where(eq(user.id, borrowerId))
         .limit(1);
       if (borrower === undefined) {
         throw new HttpError(404, 'Borrower not found');

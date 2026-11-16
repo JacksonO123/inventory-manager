@@ -3,7 +3,7 @@ import { c } from '../../contract';
 import { z } from 'zod';
 
 const itemIdParamsSchema = z.object({ id: z.coerce.number().int().gte(0) });
-const borrowerBodySchema = z.object({ borrowerId: z.number().int().gte(0) });
+const borrowerBodySchema = z.object({ borrowerId: z.string().min(1) });
 
 export const itemRouter = c.router(
   {
@@ -22,7 +22,7 @@ export const itemRouter = c.router(
       responses: {
         200: z.array(
           itemSchema.extend({
-            borrower: z.number().int().gte(0).nullable()
+            borrower: z.string().min(1).nullable()
           })
         ),
         500: errorMsgSchema
