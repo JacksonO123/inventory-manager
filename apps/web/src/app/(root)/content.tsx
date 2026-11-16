@@ -52,7 +52,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   }
 
   async function handleCheckOut(itemId: number) {
-    if (session.data === null || session === null) {
+    if (session.data === null) {
       toast.add({ type: 'error', title: 'Log in to check out an item' });
       return;
     }
@@ -78,7 +78,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
   }
 
   async function handleReturn(itemId: number) {
-    if (session === null) {
+    if (session.data === null) {
       toast.add({ type: 'error', title: 'Log in to return an item' });
       return;
     }
@@ -114,7 +114,7 @@ export function Content({ items: itemsFromServer }: ContentProps) {
           items={items}
           onCheckOut={handleCheckOut}
           onReturn={handleReturn}
-          allowCheckInOut={session !== null}
+          allowCheckInOut={session.data !== null}
         />
       </div>
     </main>
