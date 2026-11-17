@@ -162,7 +162,7 @@ export const eventStatusEnum = t.pgEnum('status', ['accepted', 'pending', 'cance
 export const eventTable = pgTable('event', {
   id: t.serial().primaryKey(),
   status: eventStatusEnum().notNull(),
-  start: t.date('start').notNull(),
-  end: t.date('end').notNull(),
+  start: t.date('start', { mode: 'date' }).notNull(),
+  end: t.date('end', { mode: 'date' }).notNull(),
   allDay: t.boolean('all_day').notNull()
 });
