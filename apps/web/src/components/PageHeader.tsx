@@ -1,18 +1,18 @@
 'use client';
 
-import { Popover, PopoverTrigger } from '../../components/ui/popover';
-import { Header } from '../../components/Header';
-import { PopoverContent } from '../../components/ui/popover';
-import { authClient } from '../../client/auth-client';
-import { Button } from '../../components/ui/button';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { Popover, PopoverTrigger } from './ui/popover';
+import { Header } from './Header';
+import { PopoverContent } from './ui/popover';
+import { authClient } from '../client/auth-client';
+import { Button } from './ui/button';
+import { LoadingSpinner } from './LoadingSpinner';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from 'cn';
-import { tsr } from '../../server/tsr';
+import { tsr } from '../server/tsr';
 import { useQuery } from '@tanstack/react-query';
 
-export function LayoutHeader() {
+export function PageHeader() {
   const pathname = usePathname();
   const session = authClient.useSession();
   const userId = session.data?.user.id;
