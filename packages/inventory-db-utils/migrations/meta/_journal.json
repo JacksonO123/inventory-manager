@@ -8,6 +8,13 @@
       "when": 1794888643475,
       "tag": "0000_careful_black_crow",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794892957923,
+      "tag": "0001_good_alice",
+      "breakpoints": true
     }
   ]
 }
