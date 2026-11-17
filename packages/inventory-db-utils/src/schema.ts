@@ -170,11 +170,11 @@ export const eventTable = pgTable('event', {
 export const orgItemTable = pgTable('org_item', {
   id: t.serial().primaryKey(),
   orgId: t
-    .serial()
+    .serial('org_id')
     .notNull()
     .references(() => orgTable.id, { onDelete: 'cascade' }),
   itemId: t
-    .serial()
+    .serial('item_id')
     .notNull()
     .references(() => itemTable.id, { onDelete: 'cascade' })
 });
