@@ -1,16 +1,15 @@
 import { useId } from 'react';
-import { ItemAndBasicUserBorrower, Org } from '../../../types/types';
+import { Org } from '../../../types/types';
 import { Item } from './Item';
+import { Item as ItemType } from '../../../types/types';
 
 type ItemsProps = {
-  items: ItemAndBasicUserBorrower[];
+  items: ItemType[];
   org: Org;
   allowCheckInOut: boolean;
-  onCheckOut: (itemId: number) => void;
-  onReturn: (itemId: number) => void;
 };
 
-export function Items({ items, org, allowCheckInOut, onCheckOut, onReturn }: ItemsProps) {
+export function Items({ items, org, allowCheckInOut }: ItemsProps) {
   const listId = useId();
 
   return (
@@ -19,8 +18,6 @@ export function Items({ items, org, allowCheckInOut, onCheckOut, onReturn }: Ite
         <Item
           item={item}
           org={org}
-          onCheckOut={() => onCheckOut(item.id)}
-          onReturn={() => onReturn(item.id)}
           key={`item-${index}-${listId}`}
           allowCheckInOut={allowCheckInOut}
         />

@@ -107,7 +107,7 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
 
       const org = await Org.getByPath(params.path);
 
-      return { status: 200, body: { org } };
+      return { status: 200, body: { org: org.values } };
     } catch (err) {
       return errorResponse(err);
     }

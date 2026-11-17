@@ -2,6 +2,7 @@ import { orgTable } from '@invm/inventory-db-utils';
 import { Org as OrgType, PartialOrg } from '../../types/types';
 import { db } from '../db';
 import { count, eq } from 'drizzle-orm';
+import { HttpError } from '../errors';
 
 export class Org {
   values: OrgType;
@@ -51,6 +52,10 @@ export class Org {
 
   static async getByPath(path: string) {
     const [org] = await db.select().from(orgTable).where(eq(orgTable.path, path));
-    return org ?? null;
+    if (org === undefined) {
+      throw new HttpError(404, 'Org not found');
+    }
+
+    return new Org(org);
   }
 }

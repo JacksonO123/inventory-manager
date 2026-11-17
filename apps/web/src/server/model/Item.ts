@@ -1,4 +1,4 @@
-import { checkoutTable, itemTable, orgItemTable, user } from '@invm/inventory-db-utils';
+import { checkoutTable, itemTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
 import { partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
@@ -12,32 +12,32 @@ export class Item {
     this.values = values;
   }
 
-  static async getAllFromOrg(orgId: number) {
-    return await db
+  static async getAllFromOrgPath(orgPath: string) {
+    const res = await db
       .select({
         id: itemTable.id,
         name: itemTable.name,
         description: itemTable.description,
-        status: itemTable.status,
-        borrower: checkoutTable.borrowerId
+        status: itemTable.status
       })
       .from(itemTable)
-      .leftJoin(
-        checkoutTable,
-        and(eq(checkoutTable.itemId, itemTable.id), isNull(checkoutTable.returnedAt))
-      )
+      .leftJoin(orgTable, eq(orgTable.path, orgPath))
       .innerJoin(
         orgItemTable,
-        and(eq(orgItemTable.orgId, orgId), eq(orgItemTable.itemId, itemTable.id))
+        and(eq(orgItemTable.orgId, orgTable.id), eq(orgItemTable.itemId, itemTable.id))
       );
+
+    return res.map((item) => new Item(item));
   }
 
-  static async create(values: PartialItem) {
+  static async create(values: PartialItem, orgId: number) {
     const parsed = partialItemSchema.parse(values);
-    const [createdItem] = await db.insert(itemTable).values(parsed).returning();
-    if (createdItem === undefined) {
-      throw new Error('Failed to create item');
-    }
+    const createdItem = await db.transaction(async (tx) => {
+      const [createdItem] = await tx.insert(itemTable).values(parsed).returning();
+      await tx.insert(orgItemTable).values({ itemId: createdItem!.id, orgId: orgId });
+      return createdItem!;
+    });
+
     return new Item(createdItem);
   }
 

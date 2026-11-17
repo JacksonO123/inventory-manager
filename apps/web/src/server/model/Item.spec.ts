@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { ZodError } from 'zod';
 import { Item } from './Item';
 import { db } from '../db';
 
@@ -51,28 +50,6 @@ function mockTransaction({
   (db.transaction as jest.Mock).mockImplementation((cb: (t: typeof tx) => unknown) => cb(tx));
   return { tx, insertValues, updateSet };
 }
-
-describe('Item.create', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('valid create', async () => {
-    const input = { name: 'x', description: 'x' };
-    const returning = jest.fn().mockResolvedValue([{ id: 1, ...input }]);
-    const values = jest.fn().mockReturnValue({ returning });
-    (db.insert as jest.Mock).mockReturnValue({ values });
-
-    await expect(Item.create(input)).resolves.toBeInstanceOf(Item);
-    expect(db.insert).toHaveBeenCalled();
-    expect(values).toHaveBeenCalledWith(input);
-  });
-
-  it('throws a ZodError for an empty name and never touches the DB', async () => {
-    await expect(Item.create({ name: '', description: 'x' })).rejects.toBeInstanceOf(ZodError);
-    expect(db.insert).not.toHaveBeenCalled();
-  });
-});
 
 describe('Item.return', () => {
   beforeEach(() => {

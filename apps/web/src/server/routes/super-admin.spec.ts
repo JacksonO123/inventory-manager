@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { superAdminRoute } from './superAdmin';
+import { superAdminRoute } from './super-admin';
 import { auth } from '../auth';
 import { User } from '../model/User';
 import { Admin } from '../model/Admin';
@@ -111,7 +111,9 @@ describe('superAdminRoute.isValidSuperAdminEmail', () => {
     (SuperAdmin.isSuperAdmin as jest.Mock).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
     (User.getByEmail as jest.Mock).mockResolvedValue({ id: 'u1' });
 
-    await expect(route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual({
+    await expect(
+      route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })
+    ).resolves.toEqual({
       status: 200,
       body: { status: 'success' }
     });
@@ -121,7 +123,9 @@ describe('superAdminRoute.isValidSuperAdminEmail', () => {
     loginAsSuperAdmin();
     (User.getByEmail as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(route.isValidSuperAdminEmail({ body: { email: 'ghost@x.com' }, req })).resolves.toEqual({
+    await expect(
+      route.isValidSuperAdminEmail({ body: { email: 'ghost@x.com' }, req })
+    ).resolves.toEqual({
       status: 200,
       body: { status: 'no_user_exists' }
     });
@@ -131,7 +135,9 @@ describe('superAdminRoute.isValidSuperAdminEmail', () => {
     loginAsSuperAdmin();
     (User.getByEmail as jest.Mock).mockResolvedValue({ id: 'u1' });
 
-    await expect(route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual({
+    await expect(
+      route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })
+    ).resolves.toEqual({
       status: 200,
       body: { status: 'super_admin_exists' }
     });
@@ -140,13 +146,17 @@ describe('superAdminRoute.isValidSuperAdminEmail', () => {
   it('returns 401 when there is no session', async () => {
     getSession.mockResolvedValue(null);
 
-    await expect(route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual(unauthorized);
+    await expect(
+      route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })
+    ).resolves.toEqual(unauthorized);
   });
 
   it('returns 401 when the caller is not a super admin', async () => {
     loginAsRegularUser();
 
-    await expect(route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual(unauthorized);
+    await expect(
+      route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })
+    ).resolves.toEqual(unauthorized);
     expect(User.getByEmail).not.toHaveBeenCalled();
   });
 
@@ -154,7 +164,9 @@ describe('superAdminRoute.isValidSuperAdminEmail', () => {
     loginAsSuperAdmin();
     (User.getByEmail as jest.Mock).mockRejectedValue(new Error('db down'));
 
-    await expect(route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual({
+    await expect(
+      route.isValidSuperAdminEmail({ body: { email: 'a@x.com' }, req })
+    ).resolves.toEqual({
       status: 500,
       body: { message: 'Error: db down' }
     });
@@ -181,10 +193,12 @@ describe('superAdminRoute.isValidAdminEmail', () => {
     loginAsSuperAdmin();
     (User.getByEmail as jest.Mock).mockResolvedValue(undefined);
 
-    await expect(route.isValidAdminEmail({ body: { email: 'ghost@x.com' }, req })).resolves.toEqual({
-      status: 200,
-      body: { status: 'no_user_exists' }
-    });
+    await expect(route.isValidAdminEmail({ body: { email: 'ghost@x.com' }, req })).resolves.toEqual(
+      {
+        status: 200,
+        body: { status: 'no_user_exists' }
+      }
+    );
   });
 
   it('returns admin_exists when that user is already an admin', async () => {
@@ -201,13 +215,17 @@ describe('superAdminRoute.isValidAdminEmail', () => {
   it('returns 401 when there is no session', async () => {
     getSession.mockResolvedValue(null);
 
-    await expect(route.isValidAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual(unauthorized);
+    await expect(route.isValidAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual(
+      unauthorized
+    );
   });
 
   it('returns 401 when the caller is not a super admin', async () => {
     loginAsRegularUser();
 
-    await expect(route.isValidAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual(unauthorized);
+    await expect(route.isValidAdminEmail({ body: { email: 'a@x.com' }, req })).resolves.toEqual(
+      unauthorized
+    );
     expect(User.getByEmail).not.toHaveBeenCalled();
   });
 
@@ -242,13 +260,17 @@ describe('superAdminRoute.addSuperAdmin', () => {
   it('returns 401 when there is no session', async () => {
     getSession.mockResolvedValue(null);
 
-    await expect(route.addSuperAdmin({ body: { email: 'a@x.com' }, req })).resolves.toEqual(unauthorized);
+    await expect(route.addSuperAdmin({ body: { email: 'a@x.com' }, req })).resolves.toEqual(
+      unauthorized
+    );
   });
 
   it('returns 401 when the caller is not a super admin and creates nothing', async () => {
     loginAsRegularUser();
 
-    await expect(route.addSuperAdmin({ body: { email: 'a@x.com' }, req })).resolves.toEqual(unauthorized);
+    await expect(route.addSuperAdmin({ body: { email: 'a@x.com' }, req })).resolves.toEqual(
+      unauthorized
+    );
     expect(SuperAdmin.create).not.toHaveBeenCalled();
   });
 
@@ -354,13 +376,17 @@ describe('superAdminRoute.revokeSuperAdmin', () => {
   it('returns 401 when there is no session', async () => {
     getSession.mockResolvedValue(null);
 
-    await expect(route.revokeSuperAdmin({ body: { userId: 'u1' }, req })).resolves.toEqual(unauthorized);
+    await expect(route.revokeSuperAdmin({ body: { userId: 'u1' }, req })).resolves.toEqual(
+      unauthorized
+    );
   });
 
   it('returns 401 when the caller is not a super admin and revokes nothing', async () => {
     loginAsRegularUser();
 
-    await expect(route.revokeSuperAdmin({ body: { userId: 'u1' }, req })).resolves.toEqual(unauthorized);
+    await expect(route.revokeSuperAdmin({ body: { userId: 'u1' }, req })).resolves.toEqual(
+      unauthorized
+    );
     expect(SuperAdmin.revoke).not.toHaveBeenCalled();
   });
 

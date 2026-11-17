@@ -10,24 +10,20 @@ export const itemRouter = c.router(
     createItem: {
       path: '/create',
       method: 'PUT',
-      body: partialItemSchema,
+      body: partialItemSchema.extend({ orgId: z.number().int().gte(0) }),
       responses: {
         200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
         500: errorMsgSchema
       }
     },
-    getItemsFromOrg: {
-      path: '/list/:orgId',
+    getItemsFromOrgPath: {
+      path: '/list/:orgPath',
       method: 'GET',
       pathParams: z.object({
-        orgId: z.coerce.number().int().gte(0)
+        orgPath: z.string().min(1)
       }),
       responses: {
-        200: z.array(
-          itemSchema.extend({
-            borrower: z.string().min(1).nullable()
-          })
-        ),
+        200: z.array(itemSchema),
         500: errorMsgSchema
       }
     },

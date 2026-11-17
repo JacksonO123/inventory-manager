@@ -9,7 +9,8 @@ import { unauthorizedResponse } from './utils/constants';
 export const nextItemRoute = createNextRoute(rootWebRouter.item, {
   createItem: async ({ body }) => {
     try {
-      const createdItem = await Item.create(body);
+      const { orgId, ...partialItem } = body;
+      const createdItem = await Item.create(partialItem, orgId);
       return {
         status: 200,
         body: { id: createdItem.values.id, status: createdItem.values.status }
@@ -19,10 +20,10 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
     }
   },
 
-  getItemsFromOrg: async ({ params }) => {
+  getItemsFromOrgPath: async ({ params }) => {
     try {
-      const items = await Item.getAllFromOrg(params.orgId);
-      return { status: 200, body: items };
+      const items = await Item.getAllFromOrgPath(params.orgPath);
+      return { status: 200, body: items.map((item) => item.values) };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }

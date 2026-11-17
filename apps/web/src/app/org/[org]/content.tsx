@@ -20,7 +20,7 @@ import { CreateItemForm } from './components/CreateItemForm';
 import { Items } from '../../(root)/components/Items';
 
 type OrgPageContentProps = {
-  items: ItemAndBasicUserBorrower[];
+  items: Item[];
   path: string;
   org: Org;
 };
@@ -39,7 +39,7 @@ export function OrgPageContent({ items: itemsFromServer, path, org }: OrgPageCon
     };
     setItems((prev) => [...prev, fullItem]);
     setCreatingItem(false);
-    const res = await tsr.item.createItem.mutate({ body: item });
+    const res = await tsr.item.createItem.mutate({ body: { ...item, orgId: org.id } });
     if (res.status === 200) {
       setItems((items) =>
         items.map((item) =>
@@ -55,62 +55,6 @@ export function OrgPageContent({ items: itemsFromServer, path, org }: OrgPageCon
     }
   }
 
-  function setItemStatus(itemId: number, status: Item['status'], borrowerId: string | null) {
-    // replace the matching item with a copy that has the new status, leaving the rest unchanged
-    setItems((items) =>
-      items.map((item) => (item.id === itemId ? { ...item, status, borrower: borrowerId } : item))
-    );
-  }
-
-  async function handleCheckOut(itemId: number) {
-    if (session.data === null) {
-      toast.add({ type: 'error', title: 'Log in to check out an item' });
-      return;
-    }
-
-    const oldItem = { ...items.find((item) => item.id === itemId)! };
-
-    setItemStatus(itemId, 'booked', session.data.user.id);
-    const res = await tsr.item.checkOut.mutate({
-      params: { id: itemId },
-      body: { borrowerId: session.data.user.id }
-    });
-    if (res.status !== 200) {
-      setItemStatus(itemId, oldItem.status, oldItem.borrower);
-
-      toast.add({
-        type: 'error',
-        title:
-          res.status === 404 || res.status === 409 || res.status === 500
-            ? res.body.message
-            : 'Failed to check out item'
-      });
-    }
-  }
-
-  async function handleReturn(itemId: number) {
-    if (session.data === null) {
-      toast.add({ type: 'error', title: 'Log in to return an item' });
-      return;
-    }
-
-    const oldItem = { ...items.find((item) => item.id === itemId)! };
-
-    setItemStatus(itemId, 'available', session.data?.user.id ?? null);
-    const res = await tsr.item.returnItem.mutate({ params: { id: itemId } });
-    if (res.status !== 200) {
-      setItemStatus(itemId, oldItem.status, oldItem.borrower);
-
-      toast.add({
-        type: 'error',
-        title:
-          res.status === 404 || res.status === 409 || res.status === 500
-            ? res.body.message
-            : 'Failed to return item'
-      });
-    }
-  }
-
   return (
     <main className="flex justify-center pt-8 px-20">
       {creatingItem ? (
@@ -120,13 +64,7 @@ export function OrgPageContent({ items: itemsFromServer, path, org }: OrgPageCon
           Create Item <Plus />
         </Button>
       )}
-      <Items
-        items={items}
-        org={org}
-        onCheckOut={handleCheckOut}
-        onReturn={handleReturn}
-        allowCheckInOut={session.data !== null}
-      />
+      <Items items={items} org={org} allowCheckInOut={session.data !== null} />
       <div className="w-full max-w-3xl flex flex-col gap-6">
         <div>
           <Link href="/">

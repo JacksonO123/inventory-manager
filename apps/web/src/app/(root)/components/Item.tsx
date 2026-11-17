@@ -1,35 +1,16 @@
-import { ItemAndBasicUserBorrower, Org } from '../../../types/types';
+import { Org, Item as ItemType } from '../../../types/types';
 import { Button } from '../../../components/ui/button';
 import { LoadingSpinner } from '../../../components/LoadingSpinner';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '../../../components/ui/dialog';
-import { authClient } from '../../../client/auth-client';
 import Link from 'next/link';
 
 type ItemProps = {
-  item: ItemAndBasicUserBorrower;
+  item: ItemType;
   org: Org;
   allowCheckInOut: boolean;
-  onCheckOut: () => void;
-  onReturn: () => void;
 };
 
-export function Item({ item, org, allowCheckInOut, onCheckOut, onReturn }: ItemProps) {
-  const session = authClient.useSession();
+export function Item({ item, org, allowCheckInOut }: ItemProps) {
   const isSaving = item.id === -1;
-
-  const returnButton = (
-    <Button size="xs" variant="outline" onClick={onReturn}>
-      Return
-    </Button>
-  );
 
   return (
     <Link href={`/item/${org.id}/${item.id}`}>
@@ -46,41 +27,11 @@ export function Item({ item, org, allowCheckInOut, onCheckOut, onReturn }: ItemP
               {isSaving ? (
                 <LoadingSpinner />
               ) : !allowCheckInOut ? null : item.status === 'available' ? (
-                <Button size="xs" onClick={onCheckOut}>
-                  Check out
-                </Button>
+                // TODO - do this
+                <Button size="xs">Check out</Button>
               ) : item.status === 'booked' ? (
-                item.borrower === session.data?.user.id ? (
-                  returnButton
-                ) : (
-                  <Dialog>
-                    <DialogTrigger
-                      render={
-                        <Button size="xs" variant="outline">
-                          Return
-                        </Button>
-                      }
-                    />
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Are you sure you want to return?</DialogTitle>
-                        <DialogDescription>You are not the borrower of this item</DialogDescription>
-                      </DialogHeader>
-                      <div className="flex gap-4">
-                        <DialogClose
-                          render={
-                            <Button className="flex-1" variant="outline">
-                              Cancel
-                            </Button>
-                          }
-                        />
-                        <Button onClick={onReturn} className="flex-1">
-                          Yes
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )
+                // TODO - do this
+                <span>booked</span>
               ) : (
                 item.status === 'out_of_service' && (
                   <span className="text-sm text-muted-foreground">Out of service</span>
