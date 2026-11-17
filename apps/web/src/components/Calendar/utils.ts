@@ -5,7 +5,3 @@ export function toDate(input: DateInput): Date {
     ? new Date(...(input as [number, number, number, number, number, number, number]))
     : new Date(input);
 }
-
-export function hoursBetween(dateStart: Date, dateEnd: Date) {
-  return (dateEnd.getTime() - dateStart.getTime()) / (1000 * 60 * 60);
-}
