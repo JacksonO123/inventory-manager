@@ -1,7 +1,6 @@
 'use client';
 
 import { Popover, PopoverTrigger } from './ui/popover';
-import { Header } from './Header';
 import { PopoverContent } from './ui/popover';
 import { authClient } from '../client/auth-client';
 import { Button } from './ui/button';
@@ -23,9 +22,11 @@ export function PageHeader() {
   });
 
   return (
-    <Header className="flex justify-between h-16 items-center">
-      <h1 className="text-lg">Inventory Manager</h1>
-      <div className="flex gap-6 items-center text-md">
+    <header className="flex justify-between h-16 items-center border-b">
+      <Link href="/" className="h-full flex items-center px-4">
+        <h1 className="text-lg">Inventory Manager</h1>
+      </Link>
+      <div className="flex gap-6 items-center text-md p-4">
         {isSuperAdmin?.status === 200 && isSuperAdmin.body.isAdmin === true && (
           <Link
             href="/super-admin"
@@ -38,7 +39,7 @@ export function PageHeader() {
           </Link>
         )}
         {session.isPending ? (
-          <LoadingSpinner className="size-6" />
+          <LoadingSpinner className="size-8" />
         ) : session.data ? (
           <Popover>
             <PopoverTrigger
@@ -61,6 +62,6 @@ export function PageHeader() {
           </div>
         )}
       </div>
-    </Header>
+    </header>
   );
 }

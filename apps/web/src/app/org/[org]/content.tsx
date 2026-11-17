@@ -1,4 +1,6 @@
-import { ArrowLeft, Building2, Check, Globe, Hash, Link2, SearchX } from 'lucide-react';
+'use client';
+
+import { ArrowLeft, Building2, Check, Globe, Hash, Link2, Plus, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../../../components/ui/button';
 import {
@@ -9,16 +11,122 @@ import {
   CardTitle
 } from '../../../components/ui/card';
 import { Separator } from '../../../components/ui/separator';
-import type { Org } from '../../../types/types';
+import type { Item, ItemAndBasicUserBorrower, Org, PartialItem } from '../../../types/types';
+import { useState } from 'react';
+import { tsr } from '../../../server/tsr';
+import { toast } from '../../../components/ui/toast';
+import { authClient } from '../../../client/auth-client';
+import { CreateItemForm } from './components/CreateItemForm';
+import { Items } from '../../(root)/components/Items';
 
 type OrgPageContentProps = {
+  items: ItemAndBasicUserBorrower[];
   path: string;
-  org: Org | null;
+  org: Org;
 };
 
-export function OrgPageContent({ path, org }: OrgPageContentProps) {
+export function OrgPageContent({ items: itemsFromServer, path, org }: OrgPageContentProps) {
+  const [creatingItem, setCreatingItem] = useState(false);
+  const [items, setItems] = useState([...itemsFromServer]);
+  const session = authClient.useSession();
+
+  async function handleSaveItem(item: PartialItem) {
+    const fullItem: ItemAndBasicUserBorrower = {
+      ...item,
+      id: -1,
+      status: 'available',
+      borrower: null
+    };
+    setItems((prev) => [...prev, fullItem]);
+    setCreatingItem(false);
+    const res = await tsr.item.createItem.mutate({ body: item });
+    if (res.status === 200) {
+      setItems((items) =>
+        items.map((item) =>
+          item.id === -1 ? { ...item, id: res.body.id, status: res.body.status } : item
+        )
+      );
+    } else {
+      setItems((items) => items.filter((item) => item.id !== -1));
+      toast.add({
+        type: 'error',
+        title: res.status === 500 ? res.body.message : 'Failed to create item'
+      });
+    }
+  }
+
+  function setItemStatus(itemId: number, status: Item['status'], borrowerId: string | null) {
+    // replace the matching item with a copy that has the new status, leaving the rest unchanged
+    setItems((items) =>
+      items.map((item) => (item.id === itemId ? { ...item, status, borrower: borrowerId } : item))
+    );
+  }
+
+  async function handleCheckOut(itemId: number) {
+    if (session.data === null) {
+      toast.add({ type: 'error', title: 'Log in to check out an item' });
+      return;
+    }
+
+    const oldItem = { ...items.find((item) => item.id === itemId)! };
+
+    setItemStatus(itemId, 'booked', session.data.user.id);
+    const res = await tsr.item.checkOut.mutate({
+      params: { id: itemId },
+      body: { borrowerId: session.data.user.id }
+    });
+    if (res.status !== 200) {
+      setItemStatus(itemId, oldItem.status, oldItem.borrower);
+
+      toast.add({
+        type: 'error',
+        title:
+          res.status === 404 || res.status === 409 || res.status === 500
+            ? res.body.message
+            : 'Failed to check out item'
+      });
+    }
+  }
+
+  async function handleReturn(itemId: number) {
+    if (session.data === null) {
+      toast.add({ type: 'error', title: 'Log in to return an item' });
+      return;
+    }
+
+    const oldItem = { ...items.find((item) => item.id === itemId)! };
+
+    setItemStatus(itemId, 'available', session.data?.user.id ?? null);
+    const res = await tsr.item.returnItem.mutate({ params: { id: itemId } });
+    if (res.status !== 200) {
+      setItemStatus(itemId, oldItem.status, oldItem.borrower);
+
+      toast.add({
+        type: 'error',
+        title:
+          res.status === 404 || res.status === 409 || res.status === 500
+            ? res.body.message
+            : 'Failed to return item'
+      });
+    }
+  }
+
   return (
     <main className="flex justify-center pt-8 px-20">
+      {creatingItem ? (
+        <CreateItemForm onSave={handleSaveItem} onCancel={() => setCreatingItem(false)} />
+      ) : (
+        <Button onClick={() => setCreatingItem(true)} className="w-fit">
+          Create Item <Plus />
+        </Button>
+      )}
+      <Items
+        items={items}
+        org={org}
+        onCheckOut={handleCheckOut}
+        onReturn={handleReturn}
+        allowCheckInOut={session.data !== null}
+      />
       <div className="w-full max-w-3xl flex flex-col gap-6">
         <div>
           <Link href="/">

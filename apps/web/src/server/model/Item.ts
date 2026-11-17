@@ -1,4 +1,4 @@
-import { checkoutTable, itemTable, user } from '@invm/inventory-db-utils';
+import { checkoutTable, itemTable, orgItemTable, user } from '@invm/inventory-db-utils';
 import { partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
@@ -12,7 +12,7 @@ export class Item {
     this.values = values;
   }
 
-  static async getAll() {
+  static async getAllFromOrg(orgId: number) {
     return await db
       .select({
         id: itemTable.id,
@@ -25,6 +25,10 @@ export class Item {
       .leftJoin(
         checkoutTable,
         and(eq(checkoutTable.itemId, itemTable.id), isNull(checkoutTable.returnedAt))
+      )
+      .innerJoin(
+        orgItemTable,
+        and(eq(orgItemTable.orgId, orgId), eq(orgItemTable.itemId, itemTable.id))
       );
   }
 
@@ -88,5 +92,14 @@ export class Item {
       .where(eq(itemTable.id, itemId))
       .limit(1);
     return row !== undefined;
+  }
+
+  static async getByIdAndOrgId(itemId: number, orgId: number) {
+    const [item] = await db.select().from(itemTable).where(eq(itemTable.id, itemId));
+    if (item === undefined) {
+      throw new HttpError(404, 'Item not found');
+    }
+
+    return new Item(item);
   }
 }

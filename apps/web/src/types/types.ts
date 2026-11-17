@@ -2,12 +2,13 @@ import {
   adminSchema,
   basicUserSchema,
   basicUserSchemaOmitId,
-  eventSchema,
+  unrefinedEventSchema,
   itemSchema,
   orgPositionsSchema,
   orgSchema,
   partialItemSchema,
-  userSchema
+  userSchema,
+  partialEventSchema
 } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
@@ -45,6 +46,6 @@ export type PartialOrg = Omit<Org, 'id'>;
 
 export type OrgPositions = z.infer<typeof orgPositionsSchema>;
 
-export type Event = z.infer<typeof eventSchema>;
+export type Event = z.infer<typeof unrefinedEventSchema>;
 
-export type PartialEvent = Omit<Event, 'id'>;
+export type PartialEvent = z.infer<typeof partialEventSchema>;

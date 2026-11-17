@@ -1,4 +1,4 @@
-import { errorMsgSchema, eventSchema } from '@invm/api-contracts/schemas';
+import { errorMsgSchema, partialEventSchema } from '@invm/api-contracts/schemas';
 import { c } from '../../contract';
 import { z } from 'zod';
 
@@ -10,7 +10,7 @@ export const reservationRouter = c.router(
       body: z.object({
         orgId: z.number().int().gte(0),
         itemId: z.number().int().gte(0),
-        event: eventSchema
+        event: partialEventSchema
       }),
       responses: {
         200: z.object({

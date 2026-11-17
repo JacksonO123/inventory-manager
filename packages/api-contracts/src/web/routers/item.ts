@@ -16,9 +16,12 @@ export const itemRouter = c.router(
         500: errorMsgSchema
       }
     },
-    getItems: {
-      path: '/list',
+    getItemsFromOrg: {
+      path: '/list/:orgId',
       method: 'GET',
+      pathParams: z.object({
+        orgId: z.coerce.number().int().gte(0)
+      }),
       responses: {
         200: z.array(
           itemSchema.extend({
@@ -49,6 +52,17 @@ export const itemRouter = c.router(
         200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,
         409: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getByIdAndOrgId: {
+      path: '/get/:id',
+      method: 'GET',
+      pathParams: itemIdParamsSchema.extend({
+        orgId: z.coerce.number().int().gte(0)
+      }),
+      responses: {
+        200: itemSchema,
         500: errorMsgSchema
       }
     }

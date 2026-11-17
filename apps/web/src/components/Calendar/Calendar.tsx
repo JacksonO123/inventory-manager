@@ -13,13 +13,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
 import { PENDING_CLASS_NAME } from './constants';
-import { hoursBetween, toDate } from './utils';
+import { toDate } from './utils';
+import { hoursBetween } from '../../utils/utils';
+import { tsr } from '../../server/tsr';
+import { toast } from '../ui/toast';
+import { Item, Org } from '../../types/types';
 
 type CalendarProps = React.ComponentProps<'div'> & {
-  itemTitle: string;
+  org: Org;
+  item: Item;
 };
 
-export function Calendar({ itemTitle, ...props }: CalendarProps) {
+export function Calendar({ org, item, ...props }: CalendarProps) {
   const [events, setEvents] = useState<EventInput[]>([]);
   const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
 
@@ -33,7 +38,7 @@ export function Calendar({ itemTitle, ...props }: CalendarProps) {
       ...prev,
       {
         id: eventId,
-        title: itemTitle,
+        title: item.name,
         start: info.start,
         end: info.end,
         allDay: info.allDay
@@ -43,7 +48,33 @@ export function Calendar({ itemTitle, ...props }: CalendarProps) {
 
   function handleAddEventRequest(event: EventInput) {}
 
-  function handleAddReservation(event: EventInput) {}
+  async function handleAddReservation(event: EventInput) {
+    if (event.start === undefined || event.end === undefined) return;
+
+    const res = await tsr.reservation.addReservation.mutate({
+      body: {
+        orgId: org.id,
+        itemId: item.id,
+        event: {
+          start: toDate(event.start),
+          end: toDate(event.end),
+          allDay: !!event.allDay
+        }
+      }
+    });
+
+    if (res.status === 200) {
+      toast.add({
+        type: 'success',
+        title: 'Successfully added item reservation'
+      });
+    } else {
+      toast.add({
+        type: 'error',
+        title: res.status === 500 ? res.body.message : 'Failed to add item reservation'
+      });
+    }
+  }
 
   function commitEvent() {
     if (lastAddedEventId === null) return;
@@ -54,15 +85,16 @@ export function Calendar({ itemTitle, ...props }: CalendarProps) {
     setLastAddedEventId(null);
 
     const difference = hoursBetween(toDate(event.start), toDate(event.end));
+    console.log(difference);
     if (difference > MAX_FREE_RESERVE_HOURS) {
       let newEvent: EventInput | null = null;
       setEvents((events) =>
         events.map((item) => {
           if (item.id === lastAddedEventId) {
-            newEvent = {
+            return (newEvent = {
               ...item,
               className: PENDING_CLASS_NAME
-            };
+            });
           }
           return item;
         })
