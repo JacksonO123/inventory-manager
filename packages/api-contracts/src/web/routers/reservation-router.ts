@@ -13,7 +13,9 @@ export const reservationRouter = c.router(
         event: eventSchema
       }),
       responses: {
-        200: c.noBody(),
+        200: z.object({
+          id: z.string().min(1)
+        }),
         500: errorMsgSchema
       }
     }

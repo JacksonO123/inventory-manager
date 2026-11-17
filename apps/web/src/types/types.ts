@@ -2,6 +2,7 @@ import {
   adminSchema,
   basicUserSchema,
   basicUserSchemaOmitId,
+  eventSchema,
   itemSchema,
   orgPositionsSchema,
   orgSchema,
@@ -43,3 +44,7 @@ export type Org = z.infer<typeof orgSchema>;
 export type PartialOrg = Omit<Org, 'id'>;
 
 export type OrgPositions = z.infer<typeof orgPositionsSchema>;
+
+export type Event = z.infer<typeof eventSchema>;
+
+export type PartialEvent = Omit<Event, 'id'>;

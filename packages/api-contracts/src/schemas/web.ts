@@ -46,9 +46,12 @@ export const orgPositionsSchema = z.object({
   positions: z.array(z.number().int().gte(0))
 });
 
+export const eventStatusEnum = z.enum(['accepted', 'pending', 'canceled']);
+
 export const eventSchema = z
   .object({
     id: z.string().min(1),
+    status: eventStatusEnum,
     start: z.date(),
     end: z.date(),
     allDay: z.boolean()
