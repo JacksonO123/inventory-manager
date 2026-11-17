@@ -1,1 +1,0 @@
-CREATE INDEX "organization_path_index" ON "organization" USING btree ("path");
