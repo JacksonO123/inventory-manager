@@ -157,7 +157,7 @@ export const orgPositionsTable = pgTable(
   (table) => [t.index('org_positions_user_id_index').on(table.userId)]
 );
 
-const eventStatusEnum = t.pgEnum('status', ['accepted', 'pending', 'canceled']);
+export const eventStatusEnum = t.pgEnum('status', ['accepted', 'pending', 'canceled']);
 
 export const eventTable = pgTable('event', {
   id: t.serial().primaryKey(),
