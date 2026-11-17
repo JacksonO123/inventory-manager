@@ -166,3 +166,15 @@ export const eventTable = pgTable('event', {
   end: t.date('end', { mode: 'date' }).notNull(),
   allDay: t.boolean('all_day').notNull()
 });
+
+export const orgItemTable = pgTable('org_item', {
+  id: t.serial().primaryKey(),
+  orgId: t
+    .serial()
+    .notNull()
+    .references(() => orgTable.id, { onDelete: 'cascade' }),
+  itemId: t
+    .serial()
+    .notNull()
+    .references(() => itemTable.id, { onDelete: 'cascade' })
+});
