@@ -45,3 +45,12 @@ export const orgPositionsSchema = z.object({
   userId: z.string().min(1),
   positions: z.array(z.number().int().gte(0))
 });
+
+export const eventSchema = z
+  .object({
+    id: z.string().min(1),
+    start: z.date(),
+    end: z.date(),
+    allDay: z.boolean()
+  })
+  .refine((obj) => obj.start < obj.end, { message: 'End date must be after start date' });

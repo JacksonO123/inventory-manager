@@ -11,6 +11,10 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
+      if (body.event.end <= body.event.start) {
+        return { status: 500, body: { message: 'End date is less than or equal to start date' } };
+      }
+
       return { status: 200, body: undefined };
     } catch (err) {
       return errorResponse(err);
