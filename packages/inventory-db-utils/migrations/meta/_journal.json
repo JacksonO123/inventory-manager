@@ -15,6 +15,13 @@
       "when": 1794894472255,
       "tag": "0001_chemical_sheva_callister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794986881868,
+      "tag": "0002_calm_ben_urich",
+      "breakpoints": true
     }
   ]
 }
