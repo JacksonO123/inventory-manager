@@ -8,6 +8,27 @@
       "when": 1794888643475,
       "tag": "0000_careful_black_crow",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794894472255,
+      "tag": "0001_chemical_sheva_callister",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794986881868,
+      "tag": "0002_calm_ben_urich",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794986947083,
+      "tag": "0003_vengeful_radioactive_man",
+      "breakpoints": true
     }
   ]
 }
