@@ -6,7 +6,7 @@ import { auth } from '../auth';
 import { errorResponse } from './utils/errors';
 import { hoursBetween } from '../../utils/utils';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
-import { CalendarEvent } from '../model/Event';
+import { Reservation } from '../model/Reservation';
 
 export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
   addReservation: async ({ body, req }) => {
@@ -23,7 +23,7 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
         return { status: 500, body: { message: 'Event too long, send a request instead' } };
       }
 
-      const event = await CalendarEvent.create(body.event, 'accepted');
+      const event = await Reservation.create(body.event, 'accepted');
 
       return { status: 200, body: { id: event.values.id } };
     } catch (err) {
