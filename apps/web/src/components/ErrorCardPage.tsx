@@ -3,6 +3,8 @@ import { PageHeader } from './PageHeader';
 import { Card, CardContent } from './ui/card';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { PageWrapper } from './PageWrapper';
+import { PageContentWrapper } from './PageContentWrapper';
 
 type ErrorCardProps = {
   children: React.ReactNode;
@@ -11,12 +13,12 @@ type ErrorCardProps = {
 
 export function ErrorCardPage(props: ErrorCardProps) {
   return (
-    <div className="w-screen h-screen flex flex-col">
+    <PageWrapper>
       <PageHeader />
-      <div className="h-full w-full flex justify-center items-center">
+      <PageContentWrapper>
         <ErrorCard {...props} />
-      </div>
-    </div>
+      </PageContentWrapper>
+    </PageWrapper>
   );
 }
 

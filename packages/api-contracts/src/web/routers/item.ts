@@ -51,11 +51,12 @@ export const itemRouter = c.router(
         500: errorMsgSchema
       }
     },
-    getByIdAndOrgId: {
-      path: '/get/:id',
+    getByIdAndOrgPath: {
+      path: '/get/:orgPath/:id',
       method: 'GET',
       pathParams: itemIdParamsSchema.extend({
-        orgId: z.coerce.number().int().gte(0)
+        orgPath: z.string().min(1),
+        id: z.coerce.number().int().gte(0)
       }),
       responses: {
         200: itemSchema,

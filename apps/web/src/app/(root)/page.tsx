@@ -1,10 +1,11 @@
 import { PageHeader } from '../../components/PageHeader';
+import { PageWrapper } from '../../components/PageWrapper';
 
 export default async function Index() {
   return (
-    <div>
+    <PageWrapper>
       <PageHeader />
       here
-    </div>
+    </PageWrapper>
   );
 }

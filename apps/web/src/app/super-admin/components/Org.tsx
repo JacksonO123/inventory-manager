@@ -29,7 +29,11 @@ export type OrgProps = React.ComponentProps<typeof Card> & {
 export function Org(props: OrgProps) {
   const content = <OrgContent {...props} />;
 
-  return props.editable ? content : <Link href={`/org/${props.org.path}`}>{content}</Link>;
+  return props.editable ? (
+    content
+  ) : (
+    <Link href={`/super-admin/orgs/${props.org.path}`}>{content}</Link>
+  );
 }
 
 export function OrgContent({

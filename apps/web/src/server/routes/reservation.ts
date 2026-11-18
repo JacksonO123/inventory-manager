@@ -29,5 +29,17 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
     } catch (err) {
       return errorResponse(err);
     }
+  },
+  getByItemIdAndOrgPath: async ({ params, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const items = await Reservation.getByItemIdAndOrgPath(params.itemId, params.orgPath);
+
+      return { status: 200, body: items.map((res) => res.values) };
+    } catch (err) {
+      return errorResponse(err);
+    }
   }
 });

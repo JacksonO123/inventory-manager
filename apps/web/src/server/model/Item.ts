@@ -94,8 +94,18 @@ export class Item {
     return row !== undefined;
   }
 
-  static async getByIdAndOrgId(itemId: number, orgId: number) {
-    const [item] = await db.select().from(itemTable).where(eq(itemTable.id, itemId));
+  static async getByIdAndOrgPath(itemId: number, orgPath: string) {
+    const [item] = await db
+      .select({
+        id: itemTable.id,
+        name: itemTable.name,
+        description: itemTable.description,
+        status: itemTable.status
+      })
+      .from(itemTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.itemId, itemTable.id))
+      .innerJoin(orgTable, and(eq(orgTable.id, orgItemTable.orgId), eq(orgTable.path, orgPath)))
+      .where(eq(itemTable.id, itemId));
     if (item === undefined) {
       throw new HttpError(404, 'Item not found');
     }

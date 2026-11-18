@@ -4,6 +4,10 @@ import { ItemPageContents } from './content';
 import { tsrFactory } from '../../../../server/tsrFactory';
 import { headers } from 'next/headers';
 import { z } from 'zod';
+import { PageContentWrapper } from '../../../../components/PageContentWrapper';
+import { PageHeader } from '../../../../components/PageHeader';
+import { PageWrapper } from '../../../../components/PageWrapper';
+import { ErrorCardPage } from '../../../../components/ErrorCardPage';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +20,9 @@ const idSchema = z.number().int().gte(0);
 export default async function OrgPage({ params }: OrgPageProps) {
   const { item: itemIdString, org: orgPath } = await params;
 
-  const itemIdParseRes = idSchema.safeParse(itemIdString);
+  const itemIdParseRes = idSchema.safeParse(+itemIdString);
 
-  if (itemIdParseRes.error !== undefined) {
-    // TODO - make better
+  if (!itemIdParseRes.success) {
     return <div>Invalid item id</div>;
   }
 
@@ -29,20 +32,38 @@ export default async function OrgPage({ params }: OrgPageProps) {
   }
 
   const tsr = await tsrFactory();
-  const org = await tsr.organizations.getByPath.query({ params: { path: orgPath } });
+  const [org, item, itemReservations] = await Promise.all([
+    tsr.organizations.getByPath.query({ params: { path: orgPath } }),
+    tsr.item.getByIdAndOrgPath.query({
+      params: { id: itemIdParseRes.data, orgPath }
+    }),
+    tsr.reservation.getByItemIdAndOrgPath.query({
+      params: { orgPath, itemId: itemIdParseRes.data }
+    })
+  ]);
 
-  if (org.status !== 200 || org.body.org === null) {
-    // TODO - make better
-    return <div>Org not found</div>;
+  if (item.status !== 200 || org.status !== 200 || org.body.org === null) {
+    return <ErrorCardPage title="Item not found">That item could not be found</ErrorCardPage>;
   }
 
-  const item = await tsr.item.getByIdAndOrgId.query({
-    params: { id: itemIdParseRes.data, orgId: org.body.org.id }
-  });
-
-  if (item.status !== 200) {
-    return <div>Item not found</div>;
+  if (itemReservations.status !== 200) {
+    return (
+      <ErrorCardPage title="Failed fetching item reservations">
+        There was an error getting reservation for this item
+      </ErrorCardPage>
+    );
   }
 
-  return <ItemPageContents item={item.body} org={org.body.org} />;
+  return (
+    <PageWrapper>
+      <PageHeader />
+      <PageContentWrapper className="h-full">
+        <ItemPageContents
+          item={item.body}
+          org={org.body.org}
+          defaultReservations={itemReservations.body}
+        />
+      </PageContentWrapper>
+    </PageWrapper>
+  );
 }

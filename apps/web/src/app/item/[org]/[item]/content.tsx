@@ -1,21 +1,21 @@
 'use client';
 
 import { Calendar } from '../../../../components/Calendar';
-import { PageHeader } from '../../../../components/PageHeader';
-import { Item, Org } from '../../../../types/types';
+import { Item, Org, Reservation } from '../../../../types/types';
 
 type ItemPageContentsProps = {
+  defaultReservations: Reservation[];
   item: Item;
   org: Org;
 };
 
-export function ItemPageContents({ item, org }: ItemPageContentsProps) {
+export function ItemPageContents({ item, org, defaultReservations }: ItemPageContentsProps) {
   return (
-    <main className="h-screen flex flex-col">
-      <PageHeader />
-      <div className="p-20 h-full">
-        <Calendar className="h-full" item={item} org={org} />
-      </div>
-    </main>
+    <Calendar
+      className="h-full w-full"
+      item={item}
+      org={org}
+      defaultReservation={defaultReservations}
+    />
   );
 }

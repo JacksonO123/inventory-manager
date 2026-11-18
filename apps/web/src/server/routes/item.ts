@@ -47,12 +47,12 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
     }
   },
 
-  getByIdAndOrgId: async ({ params, req }) => {
+  getByIdAndOrgPath: async ({ params, req }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const item = await Item.getByIdAndOrgId(params.id, params.orgId);
+      const item = await Item.getByIdAndOrgPath(params.id, params.orgPath);
 
       return { status: 200, body: item.values };
     } catch (err) {

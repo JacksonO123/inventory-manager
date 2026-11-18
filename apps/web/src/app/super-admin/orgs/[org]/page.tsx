@@ -1,6 +1,8 @@
-import { tsrFactory } from '../../../server/tsrFactory';
+import { tsrFactory } from '../../../../server/tsrFactory';
 import { OrgPageContent } from './content';
-import { ErrorCardPage } from '../../../components/ErrorCardPage';
+import { ErrorCardPage } from '../../../../components/ErrorCardPage';
+import { PageContentWrapper } from '../../../../components/PageContentWrapper';
+import { PageHeader } from '../../../../components/PageHeader';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,11 +33,16 @@ export default async function OrgPage({ params }: OrgPageProps) {
     );
   }
 
-  console.log(items);
-
   if (items.status !== 200) {
     return <ErrorCardPage title="Error fetching items">asdf</ErrorCardPage>;
   }
 
-  return <OrgPageContent path={orgPath} org={org.body.org} items={items.body} />;
+  return (
+    <div className="h-screen flex flex-col">
+      <PageHeader />
+      <PageContentWrapper>
+        <OrgPageContent org={org.body.org} items={items.body} />
+      </PageContentWrapper>
+    </div>
+  );
 }

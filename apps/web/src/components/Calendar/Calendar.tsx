@@ -17,15 +17,17 @@ import { toDate } from './utils';
 import { hoursBetween } from '../../utils/utils';
 import { tsr } from '../../server/tsr';
 import { toast } from '../ui/toast';
-import { Item, Org } from '../../types/types';
+import { Item, Org, Reservation } from '../../types/types';
 
 type CalendarProps = React.ComponentProps<'div'> & {
+  defaultReservation: Reservation[];
   org: Org;
   item: Item;
 };
 
-export function Calendar({ org, item, ...props }: CalendarProps) {
-  const [events, setEvents] = useState<EventInput[]>([]);
+export function Calendar({ org, item, defaultReservation, ...props }: CalendarProps) {
+  console.log(defaultReservation);
+  const [events, setEvents] = useState<EventInput[]>(defaultReservation);
   const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
 
   const handleSelectEvent = (info: DateSelectInfo) => {
@@ -85,7 +87,6 @@ export function Calendar({ org, item, ...props }: CalendarProps) {
     setLastAddedEventId(null);
 
     const difference = hoursBetween(toDate(event.start), toDate(event.end));
-    console.log(difference);
     if (difference > MAX_FREE_RESERVE_HOURS) {
       let newEvent: EventInput | null = null;
       setEvents((events) =>
