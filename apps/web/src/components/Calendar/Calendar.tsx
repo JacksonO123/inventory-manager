@@ -22,7 +22,7 @@ import { toDate } from './utils';
 import { hoursBetween } from '../../utils/utils';
 import { tsr } from '../../server/tsr';
 import { toast } from '../ui/toast';
-import { Item, Org, Reservation } from '../../types/types';
+import { Item, Org, Reservation, ServerErrorRes } from '../../types/types';
 
 type CalendarProps = React.ComponentProps<'div'> & {
   defaultReservation: Reservation[];
@@ -31,8 +31,11 @@ type CalendarProps = React.ComponentProps<'div'> & {
 };
 
 export function Calendar({ org, item, defaultReservation, ...props }: CalendarProps) {
-  console.log(defaultReservation);
-  const [events, setEvents] = useState<EventInput[]>(defaultReservation);
+  const [events, setReservations] = useState<EventInput[]>(
+    defaultReservation.map(({ status, ...res }) =>
+      status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
+    )
+  );
   const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
 
   const handleSelectEvent = (info: DateSelectInfo) => {
@@ -41,7 +44,7 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
     const eventId = crypto.randomUUID();
     setLastAddedEventId(eventId);
 
-    setEvents((prev) => [
+    setReservations((prev) => [
       ...prev,
       {
         id: eventId,
@@ -53,16 +56,20 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
     ]);
   };
 
-  function handleAddEventRequest(event: EventInput) {}
-
-  async function handleAddReservation(event: EventInput) {
-    if (event.start === undefined || event.end === undefined) return;
+  async function handleAddReservation(
+    event: EventInput,
+    status: Reservation['status']
+  ): Promise<ServerErrorRes<string>> {
+    if (event.start === undefined || event.end === undefined) {
+      return { status: 'error' };
+    }
 
     const res = await tsr.reservation.addReservation.mutate({
       body: {
         orgId: org.id,
         itemId: item.id,
         event: {
+          status,
           start: toDate(event.start),
           end: toDate(event.end),
           allDay: !!event.allDay
@@ -75,15 +82,18 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
         type: 'success',
         title: 'Successfully added item reservation'
       });
-    } else {
-      toast.add({
-        type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to add item reservation'
-      });
+      return { status: 'success', body: res.body.id };
     }
+
+    toast.add({
+      type: 'error',
+      title: res.status === 500 ? res.body.message : 'Failed to add item reservation'
+    });
+
+    return { status: 'error' };
   }
 
-  function commitEvent() {
+  async function commitEvent() {
     if (lastAddedEventId === null) return;
     const event = events.find((event) => event.id === lastAddedEventId);
     if (event === undefined) return;
@@ -91,34 +101,44 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
 
     setLastAddedEventId(null);
 
+    let successStatus: ServerErrorRes<string>;
+
     const difference = hoursBetween(toDate(event.start), toDate(event.end));
     if (difference > MAX_FREE_RESERVE_HOURS) {
-      let newEvent: EventInput | null = null;
-      setEvents((events) =>
+      const newEvent = events.find((res) => res.id === lastAddedEventId);
+      setReservations((events) =>
         events.map((item) => {
           if (item.id === lastAddedEventId) {
-            return (newEvent = {
+            return {
               ...item,
               className: PENDING_CLASS_NAME
-            });
+            };
           }
           return item;
         })
       );
 
-      if (newEvent === null) return;
+      if (newEvent === undefined) return;
 
-      handleAddEventRequest(newEvent);
+      successStatus = await handleAddReservation(newEvent, 'pending');
     } else {
       const newEvent = events.find((event) => event.id === lastAddedEventId) ?? null;
       if (newEvent === null) return;
-      handleAddReservation(newEvent);
+      successStatus = await handleAddReservation(newEvent, 'accepted');
+    }
+
+    if (successStatus.status === 'success') {
+      setReservations((prev) =>
+        prev.map((res) => (res.id === lastAddedEventId ? { ...res, id: successStatus.body } : res))
+      );
+    } else {
+      setReservations((prev) => prev.filter((res) => res.id !== lastAddedEventId));
     }
   }
 
   function filterAddedEvent() {
     if (lastAddedEventId === null) return;
-    setEvents((events) => events.filter((event) => event.id !== lastAddedEventId));
+    setReservations((events) => events.filter((event) => event.id !== lastAddedEventId));
     setLastAddedEventId(null);
   }
 

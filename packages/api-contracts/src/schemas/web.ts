@@ -60,4 +60,4 @@ export const reservationSchema = unrefinedReservationSchema.refine((obj) => obj.
   message: 'End date must be after start date'
 });
 
-export const partialReservationSchema = unrefinedReservationSchema.omit({ id: true, status: true });
+export const partialReservationSchema = unrefinedReservationSchema.omit({ id: true });

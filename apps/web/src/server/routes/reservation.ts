@@ -19,11 +19,11 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
       }
 
       const numHours = hoursBetween(body.event.start, body.event.end);
-      if (numHours > MAX_FREE_RESERVE_HOURS) {
+      if (numHours > MAX_FREE_RESERVE_HOURS && body.event.status !== 'pending') {
         return { status: 500, body: { message: 'Event too long, send a request instead' } };
       }
 
-      const event = await Reservation.create(body.event, 'accepted');
+      const event = await Reservation.create(body.event, body.event.status);
 
       return { status: 200, body: { id: event.values.id } };
     } catch (err) {
