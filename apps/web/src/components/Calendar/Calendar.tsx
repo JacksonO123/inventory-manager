@@ -1,4 +1,4 @@
-import FullCalendar, { DateSelectInfo, EventInput } from '@fullcalendar/react';
+import type { DateSelectInfo, EventInput } from '@fullcalendar/react';
 import themePlugin from '@fullcalendar/react/themes/breezy';
 import timeGridPlugin from '@fullcalendar/react/timegrid';
 import interactionPlugin from '@fullcalendar/react/interaction';
@@ -8,7 +8,12 @@ import '@fullcalendar/react/themes/breezy/theme.css';
 import '@fullcalendar/react/themes/breezy/palettes/indigo.css';
 import './style.css';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
+
+const FullCalendar = dynamic(() => import('@fullcalendar/react').then((mod) => mod.default), {
+  ssr: false
+});
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
