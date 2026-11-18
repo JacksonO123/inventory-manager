@@ -159,7 +159,7 @@ export const orgPositionsTable = pgTable(
 
 export const eventStatusPgEnum = t.pgEnum('status', ['accepted', 'pending', 'canceled']);
 
-export const eventTable = pgTable('event', {
+export const reservationTable = pgTable('reservation', {
   id: t.serial().primaryKey(),
   status: eventStatusPgEnum().notNull(),
   start: t.date('start', { mode: 'date' }).notNull(),
