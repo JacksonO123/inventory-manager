@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
     '@better-auth/kysely-adapter',
     'kysely',
     'jose',
-    '@noble/ciphers'
+    '@noble/ciphers',
+    '@noble/hashes'
   ],
   turbopack: {
     root: path.resolve(__dirname, '../..')
