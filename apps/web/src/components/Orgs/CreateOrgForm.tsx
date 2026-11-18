@@ -1,10 +1,10 @@
 import { useForm, useSelector } from '@tanstack/react-form';
-import { PartialOrg } from '../../../types/types';
-import { Field, FieldError, FieldLabel } from '../../../components/ui/field';
-import { Input } from '../../../components/ui/input';
+import { PartialOrg } from '../../types/types';
+import { Field, FieldError, FieldLabel } from '../ui/field';
+import { Input } from '../ui/input';
 import { useId } from 'react';
-import { Textarea } from '../../../components/ui/textarea';
-import { Button } from '../../../components/ui/button';
+import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
 import { z } from 'zod';
 
 type CreateOrgFormProps = {

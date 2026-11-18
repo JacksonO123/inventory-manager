@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '../../../../server/auth';
 import { ItemPageContents } from './content';
-import { tsrFactory } from '../../../../server/tsrFactory';
+import { tsrFactory } from '../../../../server/tsr-factory';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import { PageContentWrapper } from '../../../../components/PageContentWrapper';

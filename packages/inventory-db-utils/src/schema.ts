@@ -109,26 +109,26 @@ export const superAdminTable = pgTable(
   'super_admin',
   {
     id: t.serial().primaryKey(),
-    user_id: t
+    userId: t
       .text('user_id')
       .notNull()
       .unique()
       .references(() => user.id, { onDelete: 'cascade' })
   },
-  (table) => [t.index('super_admin_user_id_index').on(table.user_id)]
+  (table) => [t.index('super_admin_user_id_index').on(table.userId)]
 );
 
 export const adminTable = pgTable(
   'admin',
   {
     id: t.serial().primaryKey(),
-    user_id: t
+    userId: t
       .text('user_id')
       .notNull()
       .unique()
       .references(() => user.id, { onDelete: 'cascade' })
   },
-  (table) => [t.index('admin_user_id_index').on(table.user_id)]
+  (table) => [t.index('admin_user_id_index').on(table.userId)]
 );
 
 export const orgTable = pgTable(

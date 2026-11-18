@@ -7,6 +7,7 @@ import { auth } from '../auth';
 import { incomingHeadersToHeaders } from './utils/headers';
 import { OrgPositions } from '../model/OrgPositions';
 import { SuperAdmin } from '../model/SuperAdmin';
+import { AdminWithEmail } from '../model/Admin';
 
 export const orgRoute = createNextRoute(rootWebRouter.organizations, {
   getAll: async ({ req }) => {
@@ -108,6 +109,45 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const org = await Org.getByPath(params.path);
 
       return { status: 200, body: { org: org.values } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  getInfoForAdmin: async ({ req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const info = await Org.getInfoFromAdminMemberId(session.user.id);
+
+      return {
+        status: 200,
+        body: info.map((group) => ({
+          org: group.org.values,
+          items: group.items.map((item) => item.values)
+        }))
+      };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  getMembers: async ({ params, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const members = await AdminWithEmail.getMembersOfOrgByPath(params.orgPath);
+
+      return {
+        status: 200,
+        body: members.map((member) => {
+          const { id: _, ...values } = member.values;
+          return { ...values, email: member.email };
+        })
+      };
     } catch (err) {
       return errorResponse(err);
     }

@@ -1,27 +1,27 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import type { Item, ItemAndBasicUserBorrower, Org, PartialItem } from '../../../../types/types';
+import { Button } from '../../../../../components/ui/button';
+import type { Item, ItemAndBasicUserBorrower, Org, PartialItem } from '../../../../../types/types';
 import { useState } from 'react';
-import { tsr } from '../../../../server/tsr';
-import { toast } from '../../../../components/ui/toast';
-import { CreateItemForm } from './components/CreateItemForm';
-import { Items } from './components/Items';
+import { tsr } from '../../../../../server/tsr';
+import { toast } from '../../../../../components/ui/toast';
+import { CreateItemForm } from '../../components/CreateItemForm';
+import { Items } from '../../components/Items';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '../../../../components/ui/dialog';
+} from '../../../../../components/ui/dialog';
 
-type OrgPageContentProps = {
+type AdminContentsProps = {
   items: Item[];
   org: Org;
 };
 
-export function OrgPageContent({ items: itemsFromServer, org }: OrgPageContentProps) {
+export function AdminContents({ items: itemsFromServer, org }: AdminContentsProps) {
   const [creatingItem, setCreatingItem] = useState(false);
   const [items, setItems] = useState([...itemsFromServer]);
 

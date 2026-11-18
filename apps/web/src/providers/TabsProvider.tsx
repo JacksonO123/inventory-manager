@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { SelectorStyles, tabsContext } from '../contexts/tabs';
 
 type TabsContextProviderProps = {
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
   onTabChange?: (tab: string) => void;
 };
 

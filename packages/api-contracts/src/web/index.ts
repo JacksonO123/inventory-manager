@@ -5,7 +5,8 @@ import {
   itemRouter,
   organizationRouter,
   reservationRouter,
-  superAdminRouter
+  superAdminRouter,
+  userRouter
 } from './routers';
 
 export const rootWebRouter = c.router(
@@ -22,7 +23,8 @@ export const rootWebRouter = c.router(
     admin: adminRouter,
     superAdmin: superAdminRouter,
     organizations: organizationRouter,
-    reservation: reservationRouter
+    reservation: reservationRouter,
+    user: userRouter
   },
   { pathPrefix: '/api' }
 );

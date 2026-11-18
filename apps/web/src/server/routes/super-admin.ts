@@ -94,7 +94,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
         return { status: 500, body: { message: 'Failed to create admin' } };
       }
 
-      return { status: 200, body: { userId: admin.values.user_id, id: admin.values.id } };
+      return { status: 200, body: { userId: admin.values.userId, id: admin.values.id } };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }
@@ -113,7 +113,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
         body: {
           admins: allAdmins.map((item) => ({
             id: item.values.id,
-            user_id: item.values.user_id,
+            userId: item.values.userId,
             email: item.email
           }))
         }
@@ -150,7 +150,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
       }
 
       await SuperAdmin.revoke(body.userId);
-      await Admin.create(superAdmin.user_id);
+      await Admin.create(superAdmin.userId);
 
       return { status: 200 };
     } catch (err) {

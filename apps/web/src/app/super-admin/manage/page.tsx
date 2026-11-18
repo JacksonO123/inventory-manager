@@ -1,4 +1,7 @@
-import { tsrFactory } from '../../../server/tsrFactory';
+import { PageContentWrapper } from '../../../components/PageContentWrapper';
+import { PageHeader } from '../../../components/PageHeader';
+import { PageWrapper } from '../../../components/PageWrapper';
+import { tsrFactory } from '../../../server/tsr-factory';
 import Content from './content';
 
 export default async function ManageSuperAdminPage() {
@@ -10,9 +13,16 @@ export default async function ManageSuperAdminPage() {
   ]);
 
   return (
-    <Content
-      initialSuperAdmins={initialSuperAdmins.status === 200 ? initialSuperAdmins.body.admins : []}
-      initialAdmins={initialAdmins.status === 200 ? initialAdmins.body.admins : []}
-    />
+    <PageWrapper>
+      <PageHeader />
+      <PageContentWrapper>
+        <Content
+          initialSuperAdmins={
+            initialSuperAdmins.status === 200 ? initialSuperAdmins.body.admins : []
+          }
+          initialAdmins={initialAdmins.status === 200 ? initialAdmins.body.admins : []}
+        />
+      </PageContentWrapper>
+    </PageWrapper>
   );
 }

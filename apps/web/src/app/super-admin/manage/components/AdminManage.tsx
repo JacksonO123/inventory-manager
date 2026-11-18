@@ -56,7 +56,7 @@ export function AdminManage({
   }, [admins, emailFilter]);
 
   async function handleAddAdmin(email: string) {
-    setAdmins((prev) => [{ email, user_id: '' }, ...prev]);
+    setAdmins((prev) => [{ email, userId: '' }, ...prev]);
     setAdminOpen(false);
 
     const result = await addAdminFn(email);
@@ -82,7 +82,7 @@ export function AdminManage({
 
   async function handleRevokeEmail(userId: string) {
     let before = [...admins];
-    setAdmins((prev) => prev.filter((admin) => admin.user_id !== userId));
+    setAdmins((prev) => prev.filter((admin) => admin.userId !== userId));
 
     const result = await revokeFn(userId);
     if (result.status === 'error') {
@@ -104,8 +104,8 @@ export function AdminManage({
 
   async function handleAction(userId: string) {
     let before = [...admins];
-    const actionTarget = admins.find((item) => item.user_id === userId);
-    setAdmins((prev) => prev.filter((admin) => admin.user_id !== userId));
+    const actionTarget = admins.find((item) => item.userId === userId);
+    setAdmins((prev) => prev.filter((admin) => admin.userId !== userId));
 
     const result = await actionFn(userId);
     if (result.status === 'error') {
@@ -167,7 +167,7 @@ export function AdminManage({
         <AdminEmailList
           userEmail={session.data?.user.email ?? null}
           admins={filteredAdmins}
-          actionRender={({ email, user_id: userId }) => (
+          actionRender={({ email, userId }) => (
             <>
               <Dialog>
                 <DialogTrigger

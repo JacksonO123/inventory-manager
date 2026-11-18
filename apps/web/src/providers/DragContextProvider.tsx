@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { draggingContext } from '../contexts/dragging-context';
 
 type DragContextProviderProps = {
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
   positions: number[];
 
   onReorder: (newOrder: number[]) => void;

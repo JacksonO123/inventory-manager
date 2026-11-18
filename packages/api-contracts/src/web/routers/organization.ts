@@ -1,4 +1,9 @@
-import { errorMsgSchema, orgSchema } from '@invm/api-contracts/schemas';
+import {
+  errorMsgSchema,
+  itemSchema,
+  orgSchema,
+  partialAdminSchema
+} from '@invm/api-contracts/schemas';
 import { c } from '../../contract';
 import { z } from 'zod';
 
@@ -69,6 +74,25 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: z.object({ org: orgSchema.nullable() }),
+        500: errorMsgSchema
+      }
+    },
+    getInfoForAdmin: {
+      path: '/get',
+      method: 'GET',
+      responses: {
+        200: z.array(z.object({ org: orgSchema, items: z.array(itemSchema) })),
+        500: errorMsgSchema
+      }
+    },
+    getMembers: {
+      path: '/get-members/:orgPath',
+      method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.array(partialAdminSchema.extend({ email: z.email() })),
         500: errorMsgSchema
       }
     }

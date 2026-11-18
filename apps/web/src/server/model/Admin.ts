@@ -1,7 +1,7 @@
-import { adminTable, user } from '@invm/inventory-db-utils';
+import { adminTable, orgMemberSchema, orgTable, user } from '@invm/inventory-db-utils';
 import type { Admin as AdminType } from '../../types/types';
 import { db } from '../db';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 export class Admin {
   values: AdminType;
@@ -11,7 +11,7 @@ export class Admin {
   }
 
   static async create(userId: string) {
-    const [res] = await db.insert(adminTable).values({ user_id: userId }).returning();
+    const [res] = await db.insert(adminTable).values({ userId: userId }).returning();
     if (res === undefined) {
       throw new Error('Failed to create new admin');
     }
@@ -22,16 +22,16 @@ export class Admin {
     const [admin] = await db
       .select({ id: adminTable.id })
       .from(adminTable)
-      .where(eq(adminTable.user_id, userId));
+      .where(eq(adminTable.userId, userId));
     return admin !== undefined;
   }
 
   static async revoke(userId: string) {
-    await db.delete(adminTable).where(eq(adminTable.user_id, userId));
+    await db.delete(adminTable).where(eq(adminTable.userId, userId));
   }
 
   static async getByUserId(userId: string) {
-    const [res] = await db.select().from(adminTable).where(eq(adminTable.user_id, userId));
+    const [res] = await db.select().from(adminTable).where(eq(adminTable.userId, userId));
     return res;
   }
 }
@@ -40,15 +40,25 @@ export class AdminWithEmail extends Admin {
   email: string;
 
   constructor(values: AdminType & { email: string }) {
-    super({ id: values.id, user_id: values.user_id });
+    super({ id: values.id, userId: values.userId });
     this.email = values.email;
   }
 
   static async getAll() {
     const res = await db
-      .select({ id: adminTable.id, user_id: adminTable.user_id, email: user.email })
+      .select({ id: adminTable.id, userId: adminTable.userId, email: user.email })
       .from(adminTable)
-      .innerJoin(user, eq(adminTable.user_id, user.id));
+      .innerJoin(user, eq(adminTable.userId, user.id));
     return res.map((item) => new AdminWithEmail(item));
+  }
+
+  static async getMembersOfOrgByPath(orgPath: string) {
+    const res = await db
+      .select({ id: adminTable.id, userId: adminTable.userId, email: user.email })
+      .from(adminTable)
+      .innerJoin(user, eq(user.id, orgMemberSchema.userId))
+      .innerJoin(orgTable, and(eq(orgTable.id, orgMemberSchema.orgId), eq(orgTable.path, orgPath)));
+
+    return res.map((member) => new AdminWithEmail(member));
   }
 }

@@ -1,10 +1,10 @@
 import { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
-import { useTabs } from '../hooks/useTabs';
+import { useTabs } from '../hooks/use-tabs';
 import { TabsContextProvider } from '../providers/TabsProvider';
 import { cn } from 'cn';
 
 type TabsProps = {
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
   onTabChange?: (tab: string) => void;
 };
 
@@ -14,7 +14,7 @@ export function Tabs(props: TabsProps) {
 
 type TabContentProps = {
   tab: string;
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
 };
 
 export function TabContent({ tab, children }: TabContentProps) {
@@ -23,7 +23,7 @@ export function TabContent({ tab, children }: TabContentProps) {
 }
 
 type TabGroupProps = React.ComponentProps<'div'> & {
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
 };
 
 export const TabGroup = forwardRef(function TabGroup(
@@ -55,7 +55,7 @@ export const TabGroup = forwardRef(function TabGroup(
 
 type TabProps = {
   value: string;
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
 };
 
 export function Tab({ value, children }: TabProps) {
