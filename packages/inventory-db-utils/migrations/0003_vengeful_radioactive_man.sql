@@ -1,0 +1,2 @@
+ALTER TABLE "reservation" ALTER COLUMN "start" SET DATA TYPE timestamp (6) with time zone;--> statement-breakpoint
+ALTER TABLE "reservation" ALTER COLUMN "end" SET DATA TYPE timestamp (6) with time zone;
