@@ -4,6 +4,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   // Next.js options go here
   // See: https://nextjs.org/docs/app/api-reference/config/next-config-js
+  transpilePackages: ['better-auth'],
   turbopack: {
     root: path.resolve(__dirname, '../..')
   },
