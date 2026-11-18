@@ -9,6 +9,10 @@ jest.mock('../model/Item', () => ({
   Item: { create: jest.fn(), getAll: jest.fn(), checkOut: jest.fn(), return: jest.fn() }
 }));
 
+jest.mock('../auth', () => ({
+  auth: { api: { getSession: jest.fn() } }
+}));
+
 const route = nextItemRoute as any;
 
 describe('nextItemRoute.createItem', () => {
@@ -24,7 +28,7 @@ describe('nextItemRoute.createItem', () => {
       status: 200,
       body: { id: 1, status: 'available' }
     });
-    expect(Item.create).toHaveBeenCalledWith(body);
+    expect(Item.create).toHaveBeenCalledWith(body, undefined);
   });
 
   it('returns 500 when creating the item throws', async () => {
