@@ -10,21 +10,20 @@ export const itemRouter = c.router(
     createItem: {
       path: '/create',
       method: 'PUT',
-      body: partialItemSchema,
+      body: partialItemSchema.extend({ orgId: z.number().int().gte(0) }),
       responses: {
         200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
         500: errorMsgSchema
       }
     },
-    getItems: {
-      path: '/list',
+    getItemsFromOrgPath: {
+      path: '/list/:orgPath',
       method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
       responses: {
-        200: z.array(
-          itemSchema.extend({
-            borrower: z.string().min(1).nullable()
-          })
-        ),
+        200: z.array(itemSchema),
         500: errorMsgSchema
       }
     },
@@ -49,6 +48,18 @@ export const itemRouter = c.router(
         200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,
         409: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getByIdAndOrgPath: {
+      path: '/get/:orgPath/:id',
+      method: 'GET',
+      pathParams: itemIdParamsSchema.extend({
+        orgPath: z.string().min(1),
+        id: z.coerce.number().int().gte(0)
+      }),
+      responses: {
+        200: itemSchema,
         500: errorMsgSchema
       }
     }

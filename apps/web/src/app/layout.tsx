@@ -1,6 +1,5 @@
 import { Toaster } from '../components/ui/toast';
 import { Providers } from '../providers';
-import { LayoutHeader } from './components/LayoutHeader';
 import './global.css';
 
 export const metadata = {
@@ -13,7 +12,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <Providers>
         <body>
-          <LayoutHeader />
           {children}
           <Toaster />
         </body>
