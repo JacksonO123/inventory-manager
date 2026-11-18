@@ -162,8 +162,8 @@ export const eventStatusPgEnum = t.pgEnum('status', ['accepted', 'pending', 'can
 export const reservationTable = pgTable('reservation', {
   id: t.serial().primaryKey(),
   status: eventStatusPgEnum().notNull(),
-  start: t.date('start', { mode: 'date' }).notNull(),
-  end: t.date('end', { mode: 'date' }).notNull(),
+  start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
+  end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
   allDay: t.boolean('all_day').notNull()
 });
 
