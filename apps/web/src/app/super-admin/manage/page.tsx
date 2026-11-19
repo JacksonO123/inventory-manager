@@ -4,6 +4,8 @@ import { PageWrapper } from '../../../components/PageWrapper';
 import { tsrFactory } from '../../../server/tsr-factory';
 import Content from './content';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ManageSuperAdminPage() {
   const tsr = await tsrFactory();
 

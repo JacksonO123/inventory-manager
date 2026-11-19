@@ -7,7 +7,8 @@ import { auth } from '../auth';
 import { incomingHeadersToHeaders } from './utils/headers';
 import { OrgPositions } from '../model/OrgPositions';
 import { SuperAdmin } from '../model/SuperAdmin';
-import { AdminWithEmail } from '../model/Admin';
+import { Admin, AdminWithEmail } from '../model/Admin';
+import { OrgMember } from '../model/OrgMember';
 
 export const orgRoute = createNextRoute(rootWebRouter.organizations, {
   getAll: async ({ req }) => {
@@ -148,6 +149,59 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
           return { ...values, email: member.email };
         })
       };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  addMember: async ({ params, body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const member = await OrgMember.getByOrgPath(params.orgPath, body.email);
+
+      return { status: 200, body: { userId: member.values.userId } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  removeMember: async ({ params, body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      await OrgMember.removeByIdFromOrgByPath(params.orgPath, body.userId);
+
+      return { status: 200, body: undefined };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  isValidNewMember: async ({ body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const admin = await Admin.isAdminByEmail(body.email);
+      if (admin === undefined) {
+        return { status: 200, body: { valid: false } };
+      }
+
+      const belongsTo = await OrgMember.getBelongsToPaths(admin.id);
+      if (belongsTo.includes(body.orgPath)) {
+        return { status: 200, body: { valid: false } };
+      }
+
+      return { status: 200, body: { valid: true } };
     } catch (err) {
       return errorResponse(err);
     }

@@ -60,7 +60,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
   return (
     <div className="h-screen flex flex-col">
       <PageHeader />
-      <div className="h-full flex">
+      <div className="h-full w-full flex">
         {adminStatus.body.superAdmin && <Sidebar current={orgPath} />}
         <PageContentWrapper>
           {adminStatus.body.superAdmin ? (

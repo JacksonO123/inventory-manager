@@ -22,11 +22,8 @@ export class Reservation {
         allDay: partialEvent.allDay
       })
       .returning();
-    if (res === undefined) {
-      throw new Error('Failed to create event');
-    }
 
-    const { id, ...others } = res;
+    const { id, ...others } = res!;
     const newEvent = { ...others, id: id + '' };
     return new Reservation(newEvent);
   }

@@ -12,10 +12,7 @@ export class SuperAdmin {
 
   static async create(userId: string) {
     const [res] = await db.insert(superAdminTable).values({ userId: userId }).returning();
-    if (res === undefined) {
-      throw new Error('Failed to create super admin');
-    }
-    return new SuperAdmin(res);
+    return new SuperAdmin(res!);
   }
 
   static async isSuperAdmin(userId: string) {

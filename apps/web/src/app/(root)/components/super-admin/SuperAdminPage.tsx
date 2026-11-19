@@ -3,6 +3,8 @@ import { tsrFactory } from '../../../../server/tsr-factory';
 import { Org } from '../../../../types/types';
 import { SuperAdminContent } from './content';
 
+export const dynamic = 'force-dynamic';
+
 export async function SuperAdminPage() {
   const tsr = await tsrFactory();
 

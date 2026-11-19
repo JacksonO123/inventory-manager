@@ -1,4 +1,4 @@
-import { adminTable, orgMemberSchema, orgTable, user } from '@invm/inventory-db-utils';
+import { adminTable, orgMemberTable, orgTable, user } from '@invm/inventory-db-utils';
 import type { Admin as AdminType } from '../../types/types';
 import { db } from '../db';
 import { and, eq } from 'drizzle-orm';
@@ -12,10 +12,7 @@ export class Admin {
 
   static async create(userId: string) {
     const [res] = await db.insert(adminTable).values({ userId: userId }).returning();
-    if (res === undefined) {
-      throw new Error('Failed to create new admin');
-    }
-    return new Admin(res);
+    return new Admin(res!);
   }
 
   static async isAdmin(userId: string) {
@@ -32,6 +29,16 @@ export class Admin {
 
   static async getByUserId(userId: string) {
     const [res] = await db.select().from(adminTable).where(eq(adminTable.userId, userId));
+    return res;
+  }
+
+  static async isAdminByEmail(email: string) {
+    const [res] = await db
+      .select({
+        id: adminTable.userId
+      })
+      .from(adminTable)
+      .innerJoin(user, and(eq(user.id, adminTable.userId), eq(user.email, email)));
     return res;
   }
 }
@@ -56,8 +63,8 @@ export class AdminWithEmail extends Admin {
     const res = await db
       .select({ id: adminTable.id, userId: adminTable.userId, email: user.email })
       .from(adminTable)
-      .innerJoin(user, eq(user.id, orgMemberSchema.userId))
-      .innerJoin(orgTable, and(eq(orgTable.id, orgMemberSchema.orgId), eq(orgTable.path, orgPath)));
+      .innerJoin(user, eq(user.id, orgMemberTable.userId))
+      .innerJoin(orgTable, and(eq(orgTable.id, orgMemberTable.orgId), eq(orgTable.path, orgPath)));
 
     return res.map((member) => new AdminWithEmail(member));
   }

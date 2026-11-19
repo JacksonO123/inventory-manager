@@ -63,3 +63,9 @@ export const reservationSchema = unrefinedReservationSchema.refine((obj) => obj.
 });
 
 export const partialReservationSchema = unrefinedReservationSchema.omit({ id: true });
+
+export const orgMemberSchema = z.object({
+  id: z.number().int().gte(0),
+  userId: z.string().min(1),
+  orgId: z.number().int().gte(0)
+});

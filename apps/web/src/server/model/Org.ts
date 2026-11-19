@@ -1,4 +1,4 @@
-import { itemTable, orgItemTable, orgMemberSchema, orgTable } from '@invm/inventory-db-utils';
+import { itemTable, orgItemTable, orgMemberTable, orgTable } from '@invm/inventory-db-utils';
 import { Org as OrgType, PartialOrg, Item as ItemType } from '../../types/types';
 import { db } from '../db';
 import { and, count, eq, sql } from 'drizzle-orm';
@@ -25,11 +25,7 @@ export class Org {
       }
 
       const [table] = await db.insert(orgTable).values(partialOrg).returning();
-      if (table === undefined) {
-        throw new Error('Failed to create org');
-      }
-
-      return new Org(table);
+      return new Org(table!);
     });
   }
 
@@ -72,8 +68,8 @@ export class Org {
       .leftJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
       .leftJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
       .innerJoin(
-        orgMemberSchema,
-        and(eq(orgMemberSchema.orgId, orgTable.id), eq(orgMemberSchema.userId, userId))
+        orgMemberTable,
+        and(eq(orgMemberTable.orgId, orgTable.id), eq(orgMemberTable.userId, userId))
       )
       .groupBy(
         orgTable.id,

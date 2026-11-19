@@ -95,6 +95,44 @@ export const organizationRouter = c.router(
         200: z.array(partialAdminSchema.extend({ email: z.email() })),
         500: errorMsgSchema
       }
+    },
+    addMember: {
+      path: '/add-member/:orgPath',
+      method: 'POST',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: z.object({ email: z.email() }),
+      responses: {
+        200: partialAdminSchema,
+        500: errorMsgSchema
+      }
+    },
+    removeMember: {
+      path: '/remove-member/:orgPath',
+      method: 'DELETE',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: partialAdminSchema,
+      responses: {
+        200: c.noBody(),
+        500: errorMsgSchema
+      }
+    },
+    isValidNewMember: {
+      path: '/check-valid-new-member',
+      method: 'POST',
+      body: z.object({
+        email: z.email(),
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.object({
+          valid: z.boolean()
+        }),
+        500: errorMsgSchema
+      }
     }
   },
   { pathPrefix: '/org' }

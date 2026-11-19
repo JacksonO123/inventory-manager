@@ -179,7 +179,7 @@ export const orgItemTable = pgTable('org_item', {
     .references(() => itemTable.id, { onDelete: 'cascade' })
 });
 
-export const orgMemberSchema = pgTable('org_member', {
+export const orgMemberTable = pgTable('org_member', {
   id: t.serial().primaryKey(),
   userId: t
     .text('user_id')
