@@ -129,7 +129,8 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: z.object({
-          valid: z.boolean()
+          valid: z.boolean(),
+          error: z.string().min(1).optional()
         }),
         500: errorMsgSchema
       }

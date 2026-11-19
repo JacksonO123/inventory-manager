@@ -9,6 +9,7 @@ import { OrgPositions } from '../model/OrgPositions';
 import { SuperAdmin } from '../model/SuperAdmin';
 import { Admin, AdminWithEmail } from '../model/Admin';
 import { OrgMember } from '../model/OrgMember';
+import { User } from '../model/User';
 
 export const orgRoute = createNextRoute(rootWebRouter.organizations, {
   getAll: async ({ req }) => {
@@ -191,14 +192,22 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
       if (!isSuperAdmin) return unauthorizedResponse;
 
-      const admin = await Admin.isAdminByEmail(body.email);
+      const [user, admin] = await Promise.all([
+        User.getByEmail(body.email),
+        Admin.isAdminByEmail(body.email)
+      ]);
+
+      if (user === undefined) {
+        return { status: 200, body: { valid: false, error: 'User does not exist' } };
+      }
+
       if (admin === undefined) {
-        return { status: 200, body: { valid: false } };
+        return { status: 200, body: { valid: false, error: 'User is not admin' } };
       }
 
       const belongsTo = await OrgMember.getBelongsToPaths(admin.id);
       if (belongsTo.includes(body.orgPath)) {
-        return { status: 200, body: { valid: false } };
+        return { status: 200, body: { valid: false, error: 'User already belongs to org' } };
       }
 
       return { status: 200, body: { valid: true } };

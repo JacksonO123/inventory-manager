@@ -13,9 +13,9 @@ import {
 import { toast } from '../../../../components/ui/toast';
 import { IdServerErrorRes, PartialAdminAndEmail, ServerErrorRes } from '../../../../types/types';
 import { Button } from '../../../../components/ui/button';
-import { AdminEmailList } from './AdminList';
 import { Input } from '../../../../components/ui/input';
 import { authClient } from '../../../../client/auth-client';
+import { AdminEmailList } from '../../../../components/AdminEmailList';
 
 type AdminManageProps = {
   admins: PartialAdminAndEmail[];

@@ -61,10 +61,12 @@ export class AdminWithEmail extends Admin {
 
   static async getMembersOfOrgByPath(orgPath: string) {
     const res = await db
-      .select({ id: adminTable.id, userId: adminTable.userId, email: user.email })
-      .from(adminTable)
+      .select({ id: adminTable.id, userId: orgMemberTable.userId, email: user.email })
+      .from(orgTable)
+      .innerJoin(orgMemberTable, eq(orgMemberTable.orgId, orgTable.id))
       .innerJoin(user, eq(user.id, orgMemberTable.userId))
-      .innerJoin(orgTable, and(eq(orgTable.id, orgMemberTable.orgId), eq(orgTable.path, orgPath)));
+      .innerJoin(adminTable, eq(adminTable.userId, user.id))
+      .where(eq(orgTable.path, orgPath));
 
     return res.map((member) => new AdminWithEmail(member));
   }

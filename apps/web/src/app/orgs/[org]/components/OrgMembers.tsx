@@ -18,6 +18,7 @@ import { tsr } from '../../../../server/tsr';
 import { PartialAdminAndEmail } from '../../../../types/types';
 import { Card, CardContent } from '../../../../components/ui/card';
 import { Input } from '../../../../components/ui/input';
+import { AdminEmailList } from '../../../../components/AdminEmailList';
 
 type OrgMembersProps = {
   members: PartialAdminAndEmail[];
@@ -29,7 +30,7 @@ export function OrgMembers({ members: defaultMembers, orgPath }: OrgMembersProps
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [emailFilter, setEmailFilter] = useState('');
 
-  const filteredAdmins = useMemo(() => {
+  const filteredMembers = useMemo(() => {
     return members.filter((admin) =>
       emailFilter.trim().length > 0 ? admin.email.includes(emailFilter.trim()) : true
     );
@@ -89,7 +90,11 @@ export function OrgMembers({ members: defaultMembers, orgPath }: OrgMembersProps
       body: { email, orgPath }
     });
     return isValidMemberRes.status === 200
-      ? true
+      ? isValidMemberRes.body.valid
+        ? true
+        : isValidMemberRes.body.error !== undefined
+          ? isValidMemberRes.body.error
+          : 'Not a valid new member'
       : isValidMemberRes.status === 500
         ? isValidMemberRes.body.message
         : 'Failed to validate new member email';
@@ -97,7 +102,7 @@ export function OrgMembers({ members: defaultMembers, orgPath }: OrgMembersProps
 
   return (
     <Card className="w-full">
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
         <div className="flex justify-between gap-4">
           <Input
             value={emailFilter}
@@ -127,55 +132,52 @@ export function OrgMembers({ members: defaultMembers, orgPath }: OrgMembersProps
             </DialogContent>
           </Dialog>
         </div>
-        {/* {members.length > 0 && ( */}
-        {/*   <div className="flex flex-col gap-2"> */}
-        {/*     {members.map((member) => ( */}
-        {/*       <div */}
-        {/*         key={member.email} */}
-        {/*         className="flex items-center justify-between gap-4 px-3 py-2 rounded-md border" */}
-        {/*       > */}
-        {/*         <span>{member.email}</span> */}
-        {/*         <Dialog> */}
-        {/*           <DialogTrigger */}
-        {/*             render={ */}
-        {/*               <Button variant="destructive" size="sm"> */}
-        {/*                 Remove */}
-        {/*               </Button> */}
-        {/*             } */}
-        {/*           /> */}
-        {/*           <DialogContent> */}
-        {/*             <DialogHeader> */}
-        {/*               <DialogTitle>Remove member?</DialogTitle> */}
-        {/*               <DialogDescription> */}
-        {/*                 This will remove {member.email} from the organization. */}
-        {/*               </DialogDescription> */}
-        {/*             </DialogHeader> */}
-        {/*             <div className="flex gap-4 w-full"> */}
-        {/*               <DialogClose */}
-        {/*                 render={ */}
-        {/*                   <Button variant="outline" className="flex-1"> */}
-        {/*                     Cancel */}
-        {/*                   </Button> */}
-        {/*                 } */}
-        {/*               /> */}
-        {/*               <DialogClose */}
-        {/*                 render={ */}
-        {/*                   <Button */}
-        {/*                     className="flex-1" */}
-        {/*                     variant="destructive" */}
-        {/*                     onClick={() => handleRemoveMember(member.userId)} */}
-        {/*                   > */}
-        {/*                     Yes */}
-        {/*                   </Button> */}
-        {/*                 } */}
-        {/*               /> */}
-        {/*             </div> */}
-        {/*           </DialogContent> */}
-        {/*         </Dialog> */}
-        {/*       </div> */}
-        {/*     ))} */}
-        {/*   </div> */}
-        {/* )} */}
+
+        {filteredMembers.length > 0 && (
+          <AdminEmailList
+            userEmail=""
+            admins={filteredMembers}
+            actionRender={(member) => (
+              <Dialog>
+                <DialogTrigger
+                  render={
+                    <Button variant="destructive" size="sm">
+                      Remove
+                    </Button>
+                  }
+                />
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Remove member?</DialogTitle>
+                    <DialogDescription>
+                      This will remove {member.email} from the organization.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex gap-4 w-full">
+                    <DialogClose
+                      render={
+                        <Button variant="outline" className="flex-1">
+                          Cancel
+                        </Button>
+                      }
+                    />
+                    <DialogClose
+                      render={
+                        <Button
+                          className="flex-1"
+                          variant="destructive"
+                          onClick={() => handleRemoveMember(member.userId)}
+                        >
+                          Yes
+                        </Button>
+                      }
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          />
+        )}
       </CardContent>
     </Card>
   );

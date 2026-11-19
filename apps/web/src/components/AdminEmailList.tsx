@@ -1,7 +1,7 @@
 import { Fragment, useId } from 'react';
-import { Separator } from '../../../../components/ui/separator';
+import { Separator } from './ui/separator';
 import { cn } from 'cn';
-import { PartialAdminAndEmail } from '../../../../types/types';
+import { PartialAdminAndEmail } from '../types/types';
 
 type AdminEmailListProps = {
   userEmail: string | null;
