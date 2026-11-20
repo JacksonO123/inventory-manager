@@ -1,8 +1,9 @@
-import { orgTable } from '@invm/inventory-db-utils';
-import { Org as OrgType, PartialOrg } from '../../types/types';
+import { itemTable, orgItemTable, orgMemberTable, orgTable } from '@invm/inventory-db-utils';
+import { Org as OrgType, PartialOrg, Item as ItemType } from '../../types/types';
 import { db } from '../db';
-import { count, eq } from 'drizzle-orm';
+import { and, count, eq, sql } from 'drizzle-orm';
 import { HttpError } from '../errors';
+import { Item } from './Item';
 
 export class Org {
   values: OrgType;
@@ -24,11 +25,7 @@ export class Org {
       }
 
       const [table] = await db.insert(orgTable).values(partialOrg).returning();
-      if (table === undefined) {
-        throw new Error('Failed to create org');
-      }
-
-      return new Org(table);
+      return new Org(table!);
     });
   }
 
@@ -57,5 +54,34 @@ export class Org {
     }
 
     return new Org(org);
+  }
+
+  static async getInfoFromAdminMemberId(userId: string) {
+    const res = await db
+      .select({
+        org: orgTable,
+        items: sql<
+          ItemType[]
+        >`coalesce(json_agg(${itemTable}.*) filter (where ${itemTable.id} is not null), '[]'::json)`
+      })
+      .from(orgTable)
+      .leftJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+      .leftJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
+      .innerJoin(
+        orgMemberTable,
+        and(eq(orgMemberTable.orgId, orgTable.id), eq(orgMemberTable.userId, userId))
+      )
+      .groupBy(
+        orgTable.id,
+        orgTable.name,
+        orgTable.description,
+        orgTable.svgDataUrl,
+        orgTable.path
+      );
+
+    return res.map(({ org, items }) => ({
+      org: new Org(org),
+      items: items.map((item) => new Item(item))
+    }));
   }
 }

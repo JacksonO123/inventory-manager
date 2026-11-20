@@ -6,37 +6,29 @@ import { authClient } from '../client/auth-client';
 import { Button } from './ui/button';
 import { LoadingSpinner } from './LoadingSpinner';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from 'cn';
-import { tsr } from '../server/tsr';
-import { useQuery } from '@tanstack/react-query';
+import { useAdmin } from '../hooks/use-admin';
+import { Badge } from './ui/badge';
 
 export function PageHeader() {
-  const pathname = usePathname();
   const session = authClient.useSession();
-  const userId = session.data?.user.id;
-  const { data: isSuperAdmin } = useQuery({
-    queryKey: ['is_super_admin', userId],
-    queryFn: () => tsr.superAdmin.isSuperAdmin.mutate({ body: { id: userId! } }),
-    enabled: !!userId
-  });
+  const { admin, superAdmin } = useAdmin();
 
   return (
     <header className="flex justify-between h-16 items-center border-b">
       <Link href="/" className="h-full flex items-center px-4">
-        <h1 className="text-lg">Inventory Manager</h1>
+        <h1 className="text-lg text-nowrap">Inventory Manager</h1>
       </Link>
       <div className="flex gap-6 items-center text-md p-4">
-        {isSuperAdmin?.status === 200 && isSuperAdmin.body.isAdmin === true && (
-          <Link
-            href="/super-admin"
-            className={cn(
-              'cursor-pointer underline',
-              pathname?.startsWith('/super-admin') && 'text-primary'
-            )}
-          >
-            Admin Panel
-          </Link>
+        {superAdmin ? (
+          <Badge className="p-3" variant="outline">
+            Super Admin
+          </Badge>
+        ) : admin ? (
+          <Badge className="p-3" variant="outline">
+            Admin
+          </Badge>
+        ) : (
+          <></>
         )}
         {session.isPending ? (
           <LoadingSpinner className="size-8" />

@@ -1,32 +1,30 @@
 'use client';
 
 import { Pencil, Plus, UserRoundShield, X } from 'lucide-react';
-import { Button } from '../../components/ui/button';
+import { CreateOrgForm, Orgs } from '../../../../components/Orgs';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '../../components/ui/dialog';
-import { CreateOrgForm } from './components/CreateOrgForm';
-import Link from 'next/link';
-import { Orgs } from './components/Orgs';
-import { Org, PartialOrg } from '../../types/types';
-import { tsr } from '../../server/tsr';
+} from '../../../../components/ui/dialog';
+import { Button } from '../../../../components/ui/button';
 import { useState } from 'react';
-import { toast } from '../../components/ui/toast';
-import { PageHeader } from '../../components/PageHeader';
+import { Org, PartialOrg } from '../../../../types/types';
+import { tsr } from '../../../../server/tsr';
+import { toast } from '../../../../components/ui/toast';
+import Link from 'next/link';
 
-type SuperAdminPageContentProps = {
+type SuperAdminContentProps = {
   orgs: Org[];
   positions: number[];
 };
 
-export function SuperAdminPageContent({
+export function SuperAdminContent({
   orgs: initialOrgs,
   positions: initialOrgPositions
-}: SuperAdminPageContentProps) {
+}: SuperAdminContentProps) {
   const [orgs, setOrgs] = useState(initialOrgs);
   const [orgPositions, setOrgPositions] = useState([
     ...initialOrgPositions,
@@ -119,57 +117,52 @@ export function SuperAdminPageContent({
   }
 
   return (
-    <div className="h-screen flex flex-col">
-      <PageHeader />
-      <main className="flex justify-center py-8 px-20">
-        <div className="w-full max-w-5xl flex flex-col gap-8">
-          <div className="flex justify-between gap-4 p-3 rounded-md border">
-            <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
-              <DialogTrigger
-                suppressHydrationWarning
-                render={
-                  <Button>
-                    <Plus /> Create org
-                  </Button>
-                }
-              />
-              <DialogContent className="max-w-md!">
-                <DialogHeader>
-                  <DialogTitle>Create organization</DialogTitle>
-                </DialogHeader>
-                <CreateOrgForm
-                  onSubmit={handleCreateOrgSubmit}
-                  onCancel={() => setCreateOrgOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-            <div className="flex gap-4">
-              {editing ? (
-                <Button variant="outline" onClick={() => setEditing(false)}>
-                  <X /> Cancel
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={() => setEditing(true)}>
-                  <Pencil /> Edit orgs
-                </Button>
-              )}
-              <Link href="/super-admin/manage">
-                <Button variant="outline">
-                  <UserRoundShield /> Manage Admins
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <Orgs
-            orgs={orgs}
-            managing={editing}
-            positions={orgPositions}
-            onUpdate={handleUpdateOrg}
-            onDelete={handleDeleteOrg}
-            onReorder={handleSetOrgPositions}
+    <div className="h-full flex flex-col gap-8">
+      <div className="flex justify-between gap-4 p-3 rounded-md border">
+        <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
+          <DialogTrigger
+            suppressHydrationWarning
+            render={
+              <Button>
+                <Plus /> Create org
+              </Button>
+            }
           />
+          <DialogContent className="max-w-md!">
+            <DialogHeader>
+              <DialogTitle>Create organization</DialogTitle>
+            </DialogHeader>
+            <CreateOrgForm
+              onSubmit={handleCreateOrgSubmit}
+              onCancel={() => setCreateOrgOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
+        <div className="flex gap-4">
+          {editing ? (
+            <Button variant="outline" onClick={() => setEditing(false)}>
+              <X /> Cancel
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => setEditing(true)}>
+              <Pencil /> Edit orgs
+            </Button>
+          )}
+          <Link href="/super-admin/manage">
+            <Button variant="outline">
+              <UserRoundShield /> Manage Admins
+            </Button>
+          </Link>
         </div>
-      </main>
+      </div>
+      <Orgs
+        orgs={orgs}
+        managing={editing}
+        positions={orgPositions}
+        onUpdate={handleUpdateOrg}
+        onDelete={handleDeleteOrg}
+        onReorder={handleSetOrgPositions}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { useDragging } from '../../../hooks/use-dragging';
-import { useMousePosition } from '../../../hooks/useMousePosition';
-import { Org as OrgType } from '../../../types/types';
+import { useDragging } from '../../hooks/use-dragging';
+import { useMousePosition } from '../../hooks/use-mouse-position';
+import { Org as OrgType } from '../../types/types';
 import { Org } from './Org';
 
 type OrgDragGhostProps = {

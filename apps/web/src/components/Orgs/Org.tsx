@@ -1,8 +1,8 @@
-import { Card, CardContent } from '../../../components/ui/card';
-import type { Org as OrgType } from '../../../types/types';
+import { Card, CardContent } from '../ui/card';
+import type { Org as OrgType } from '../../types/types';
 import { cn } from 'cn';
 import { Globe, GripVertical, Pencil, Trash2 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
+import { Button } from '../ui/button';
 import {
   Dialog,
   DialogClose,
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '../../../components/ui/dialog';
+} from '../ui/dialog';
 import Link from 'next/link';
 import { useState, type MouseEvent } from 'react';
 import { CreateOrgForm } from './CreateOrgForm';
@@ -29,11 +29,7 @@ export type OrgProps = React.ComponentProps<typeof Card> & {
 export function Org(props: OrgProps) {
   const content = <OrgContent {...props} />;
 
-  return props.editable ? (
-    content
-  ) : (
-    <Link href={`/super-admin/orgs/${props.org.path}`}>{content}</Link>
-  );
+  return props.editable ? content : <Link href={`/orgs/${props.org.path}`}>{content}</Link>;
 }
 
 export function OrgContent({

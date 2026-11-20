@@ -1,9 +1,9 @@
 import { useId, useMemo } from 'react';
-import { Org as OrgType } from '../../../types/types';
+import { Org as OrgType } from '../../types/types';
 import { Org, OrgProps } from './Org';
 import { OrgDragGhost } from './OrgDragGhost';
-import { DraggableItems } from '../../../components/DraggableItems';
-import { useDragging } from '../../../hooks/use-dragging';
+import { DraggableItems } from '../../components/DraggableItems';
+import { useDragging } from '../../hooks/use-dragging';
 
 type DraggableLinkEntryListProps = {
   orgs: OrgType[];

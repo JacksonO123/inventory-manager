@@ -8,7 +8,8 @@ import {
   partialItemSchema,
   userSchema,
   partialReservationSchema,
-  unrefinedReservationSchema
+  unrefinedReservationSchema,
+  orgMemberSchema
 } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
@@ -49,3 +50,7 @@ export type OrgPositions = z.infer<typeof orgPositionsSchema>;
 export type Reservation = z.infer<typeof unrefinedReservationSchema>;
 
 export type PartialReservation = z.infer<typeof partialReservationSchema>;
+
+export type OrgMember = z.infer<typeof orgMemberSchema>;
+
+export type PartialOrgMember = Omit<OrgMember, 'id'>;

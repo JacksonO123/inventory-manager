@@ -1,7 +1,7 @@
 import { useId } from 'react';
-import { Org } from '../../../../../types/types';
+import { Org } from '../../../../types/types';
 import { Item } from './Item';
-import { Item as ItemType } from '../../../../../types/types';
+import { Item as ItemType } from '../../../../types/types';
 
 type ItemsProps = {
   items: ItemType[];

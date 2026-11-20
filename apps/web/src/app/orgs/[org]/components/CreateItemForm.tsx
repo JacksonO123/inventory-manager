@@ -1,10 +1,10 @@
 import { useForm } from '@tanstack/react-form';
-import { Field, FieldLabel, FieldError } from '../../../../../components/ui/field';
-import { Input } from '../../../../../components/ui/input';
+import { Field, FieldLabel, FieldError } from '../../../../components/ui/field';
+import { Input } from '../../../../components/ui/input';
 import { useId } from 'react';
-import { Textarea } from '../../../../../components/ui/textarea';
-import { Button } from '../../../../../components/ui/button';
-import { PartialItem } from '../../../../../types/types';
+import { Textarea } from '../../../../components/ui/textarea';
+import { Button } from '../../../../components/ui/button';
+import { PartialItem } from '../../../../types/types';
 import { z } from 'zod';
 
 type CreateItemFormProps = {

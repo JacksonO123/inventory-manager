@@ -38,52 +38,50 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
   }
 
   return (
-    <main className="flex justify-center pt-8 px-20">
-      <div className="w-full max-w-3xl flex flex-col gap-4">
-        <div>
-          <Link href="/super-admin">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft /> Back to dashboard
-            </Button>
-          </Link>
-        </div>
-        <div className="w-full max-w-3xl p-4 rounded-md border">
-          <Tabs>
-            <TabGroup className="absolute" ref={ref}>
-              <Tab value="super-admin">Super Admin</Tab>
-              <Tab value="admin">Admin</Tab>
-            </TabGroup>
-            <div className="min-h-9">
-              <TabContent tab="super-admin">
-                <AdminManage
-                  admins={superAdmins}
-                  setAdmins={setSuperAdmins}
-                  actionFn={demoteSuperAdmin}
-                  revokeFn={revokeSuperAdmin}
-                  validateFn={validateSuperAdminEmail}
-                  addAdminFn={addSuperAdmin}
-                  onActionComplete={handleDemote}
-                  adminType="super"
-                  tabWidth={width}
-                />
-              </TabContent>
-              <TabContent tab="admin">
-                <AdminManage
-                  admins={admins}
-                  setAdmins={setAdmins}
-                  actionFn={promoteAdmin}
-                  revokeFn={revokeAdmin}
-                  validateFn={validateAdminEmail}
-                  addAdminFn={addAdmin}
-                  onActionComplete={handlePromote}
-                  adminType="regular"
-                  tabWidth={width}
-                />
-              </TabContent>
-            </div>
-          </Tabs>
-        </div>
+    <div className="w-full flex flex-col gap-4">
+      <div>
+        <Link href="/">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft /> Back to dashboard
+          </Button>
+        </Link>
       </div>
-    </main>
+      <div className="w-full p-4 rounded-md border">
+        <Tabs>
+          <TabGroup className="absolute" ref={ref}>
+            <Tab value="super-admin">Super Admin</Tab>
+            <Tab value="admin">Admin</Tab>
+          </TabGroup>
+          <div className="min-h-9">
+            <TabContent tab="super-admin">
+              <AdminManage
+                admins={superAdmins}
+                setAdmins={setSuperAdmins}
+                actionFn={demoteSuperAdmin}
+                revokeFn={revokeSuperAdmin}
+                validateFn={validateSuperAdminEmail}
+                addAdminFn={addSuperAdmin}
+                onActionComplete={handleDemote}
+                adminType="super"
+                tabWidth={width}
+              />
+            </TabContent>
+            <TabContent tab="admin">
+              <AdminManage
+                admins={admins}
+                setAdmins={setAdmins}
+                actionFn={promoteAdmin}
+                revokeFn={revokeAdmin}
+                validateFn={validateAdminEmail}
+                addAdminFn={addAdmin}
+                onActionComplete={handlePromote}
+                adminType="regular"
+                tabWidth={width}
+              />
+            </TabContent>
+          </div>
+        </Tabs>
+      </div>
+    </div>
   );
 }

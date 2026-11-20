@@ -1,4 +1,4 @@
-import { Org, Item as ItemType } from '../../../../../types/types';
+import { Org, Item as ItemType } from '../../../../types/types';
 import Link from 'next/link';
 
 type ItemProps = {

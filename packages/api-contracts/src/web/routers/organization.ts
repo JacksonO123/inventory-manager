@@ -1,4 +1,9 @@
-import { errorMsgSchema, orgSchema } from '@invm/api-contracts/schemas';
+import {
+  errorMsgSchema,
+  itemSchema,
+  orgSchema,
+  partialAdminSchema
+} from '@invm/api-contracts/schemas';
 import { c } from '../../contract';
 import { z } from 'zod';
 
@@ -69,6 +74,64 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: z.object({ org: orgSchema.nullable() }),
+        500: errorMsgSchema
+      }
+    },
+    getInfoForAdmin: {
+      path: '/get',
+      method: 'GET',
+      responses: {
+        200: z.array(z.object({ org: orgSchema, items: z.array(itemSchema) })),
+        500: errorMsgSchema
+      }
+    },
+    getMembers: {
+      path: '/get-members/:orgPath',
+      method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.array(partialAdminSchema.extend({ email: z.email() })),
+        500: errorMsgSchema
+      }
+    },
+    addMember: {
+      path: '/add-member/:orgPath',
+      method: 'POST',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: z.object({ email: z.email() }),
+      responses: {
+        200: partialAdminSchema,
+        500: errorMsgSchema
+      }
+    },
+    removeMember: {
+      path: '/remove-member/:orgPath',
+      method: 'DELETE',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: partialAdminSchema,
+      responses: {
+        200: c.noBody(),
+        500: errorMsgSchema
+      }
+    },
+    isValidNewMember: {
+      path: '/check-valid-new-member',
+      method: 'POST',
+      body: z.object({
+        email: z.email(),
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.object({
+          valid: z.boolean(),
+          error: z.string().min(1).optional()
+        }),
         500: errorMsgSchema
       }
     }
