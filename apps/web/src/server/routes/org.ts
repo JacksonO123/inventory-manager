@@ -133,7 +133,7 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       return errorResponse(err);
     }
   },
-  getMembers: async ({ params, req }) => {
+  getAdminMembers: async ({ params, req }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
@@ -142,6 +142,7 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       if (!isSuperAdmin) return unauthorizedResponse;
 
       const members = await AdminWithEmail.getMembersOfOrgByPath(params.orgPath);
+      console.log('HERE 1');
 
       return {
         status: 200,
@@ -154,37 +155,7 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       return errorResponse(err);
     }
   },
-  addMember: async ({ params, body, req }) => {
-    try {
-      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
-      if (session === null) return unauthorizedResponse;
-
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
-
-      const member = await OrgMember.getByOrgPath(params.orgPath, body.email);
-
-      return { status: 200, body: { userId: member.values.userId } };
-    } catch (err) {
-      return errorResponse(err);
-    }
-  },
-  removeMember: async ({ params, body, req }) => {
-    try {
-      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
-      if (session === null) return unauthorizedResponse;
-
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
-
-      await OrgMember.removeByIdFromOrgByPath(params.orgPath, body.userId);
-
-      return { status: 200, body: undefined };
-    } catch (err) {
-      return errorResponse(err);
-    }
-  },
-  isValidNewMember: async ({ body, req }) => {
+  addAdminMember: async ({ params, body, req }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
@@ -198,6 +169,65 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       ]);
 
       if (user === undefined) {
+        return { status: 404, body: { message: 'User not found' } };
+      }
+
+      if (!admin) {
+        return { status: 500, body: { message: 'User to add is not an admin' } };
+      }
+
+      const member = await OrgMember.createWithOrgPathAndEmail(params.orgPath, body.email);
+
+      return { status: 200, body: { userId: member.values.userId } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  removeAdminMember: async ({ params, body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const [user, admin] = await Promise.all([
+        User.getById(body.userId),
+        Admin.isAdmin(body.userId)
+      ]);
+
+      if (user === undefined) {
+        return { status: 404, body: { message: 'User not found' } };
+      }
+
+      if (!admin) {
+        return {
+          status: 500,
+          body: { message: 'Cannot remove member as admin, they are not admin' }
+        };
+      }
+
+      await OrgMember.removeByIdFromOrgByPath(params.orgPath, body.userId);
+
+      return { status: 200, body: undefined };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  isValidNewAdminMember: async ({ body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const [user, admin] = await Promise.all([
+        User.getByEmail(body.email),
+        Admin.getByUserId(body.email)
+      ]);
+
+      if (user === undefined) {
         return { status: 200, body: { valid: false, error: 'User does not exist' } };
       }
 
@@ -205,12 +235,118 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
         return { status: 200, body: { valid: false, error: 'User is not admin' } };
       }
 
-      const belongsTo = await OrgMember.getBelongsToPaths(admin.id);
+      const belongsTo = await OrgMember.getBelongsToPaths(admin.userId);
       if (belongsTo.includes(body.orgPath)) {
         return { status: 200, body: { valid: false, error: 'User already belongs to org' } };
       }
 
       return { status: 200, body: { valid: true } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  addUserMember: async ({ req, body, params }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const [user, admin, superAdmin] = await Promise.all([
+        User.getByEmail(body.email),
+        Admin.isAdminByEmail(body.email),
+        SuperAdmin.isSuperAdminByEmail(body.email)
+      ]);
+
+      if (user === undefined) {
+        return { status: 404, body: { message: 'User not found' } };
+      }
+
+      if (admin || superAdmin) {
+        return { status: 500, body: { message: 'Cannot add admin as user member' } };
+      }
+
+      const member = await OrgMember.createWithOrgPathAndEmail(params.orgPath, body.email);
+
+      return { status: 200, body: { userId: member.values.userId } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  removeUserMember: async ({ req, body, params }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const [user, admin, superAdmin] = await Promise.all([
+        User.getById(body.userId),
+        Admin.isAdmin(body.userId),
+        SuperAdmin.isSuperAdmin(body.userId)
+      ]);
+
+      if (user === undefined) {
+        return { status: 404, body: { message: 'User not found' } };
+      }
+
+      if (admin || superAdmin) {
+        return { status: 500, body: { message: 'Cannot remove admin as user member' } };
+      }
+
+      await OrgMember.removeByIdFromOrgByPath(params.orgPath, body.userId);
+
+      return { status: 200, body: undefined };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  isValidNewUserMember: async ({ req, body }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const [user, admin, superAdmin] = await Promise.all([
+        User.getByEmail(body.email),
+        Admin.isAdminByEmail(body.email),
+        SuperAdmin.isSuperAdminByEmail(body.email)
+      ]);
+
+      if (user === undefined) {
+        return { status: 200, body: { valid: false, error: 'User does not exist' } };
+      }
+
+      if (admin || superAdmin) {
+        return { status: 200, body: { valid: false, error: 'User is an admin' } };
+      }
+
+      return { status: 200, body: { valid: true } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  getUserMembers: async ({ params, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const members = await User.getMembersOfOrgByPath(params.orgPath);
+      console.log('HERE', members);
+
+      return {
+        status: 200,
+        body: members.map((member) => {
+          return { userId: member.values.id, email: member.values.email };
+        })
+      };
     } catch (err) {
       return errorResponse(err);
     }

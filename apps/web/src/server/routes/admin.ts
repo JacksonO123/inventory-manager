@@ -18,7 +18,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
 
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
 
-      if (userIsSuperAdmin || queriedUser.email === session.user.email) {
+      if (userIsSuperAdmin || queriedUser.values.email === session.user.email) {
         let isAdmin = await Admin.isAdmin(body.id);
         if (!isAdmin) {
           isAdmin = await SuperAdmin.isSuperAdmin(body.id);
@@ -45,7 +45,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
         return { status: 500, body: { message: 'User does not exist' } };
       }
 
-      const admin = await Admin.create(queriedUser.id);
+      const admin = await Admin.create(queriedUser.values.id);
       if (admin === undefined) {
         return { status: 500, body: { message: 'Failed to create admin' } };
       }

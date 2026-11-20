@@ -39,6 +39,14 @@ export class Admin {
       })
       .from(adminTable)
       .innerJoin(user, and(eq(user.id, adminTable.userId), eq(user.email, email)));
+    return res !== undefined;
+  }
+
+  static async getByUserEmail(email: string) {
+    const [res] = await db
+      .select()
+      .from(adminTable)
+      .innerJoin(user, and(eq(user.id, adminTable.userId), eq(user.email, email)));
     return res;
   }
 }

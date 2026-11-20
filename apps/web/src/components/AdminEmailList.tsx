@@ -15,6 +15,9 @@ export function AdminEmailList({ userEmail, admins, actionRender }: AdminEmailLi
 
   return (
     <div className="flex flex-col gap-2">
+      {admins.length === 0 && (
+        <div className="w-full text-center text-muted-foreground">No items</div>
+      )}
       {admins.map((admin, index) => (
         <Fragment key={`email-${index}-${listId}`}>
           <div className="flex justify-between gap-4 items-center min-h-7">
