@@ -62,7 +62,7 @@ export class Org {
         org: orgTable,
         items: sql<
           ItemType[]
-        >`json_agg(${itemTable}.*::json) filter (where ${itemTable.id} is not null)`
+        >`coalesce(json_agg(${itemTable}.*) filter (where ${itemTable.id} is not null), '[]'::json)`
       })
       .from(orgTable)
       .leftJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))

@@ -46,9 +46,7 @@ export default async function Index() {
   return (
     <PageWrapper>
       <PageHeader />
-      <PageContentWrapper>
-        {adminStatus.superAdmin ? <SuperAdminPage /> : adminStatus.admin ? <AdminPage /> : <></>}
-      </PageContentWrapper>
+      {adminStatus.superAdmin ? <SuperAdminPage /> : adminStatus.admin ? <AdminPage /> : <></>}
     </PageWrapper>
   );
 }

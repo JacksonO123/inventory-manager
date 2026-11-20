@@ -1,3 +1,4 @@
+import { PageContentWrapper } from '../../../../components/PageContentWrapper';
 import { RenderClientErrors } from '../../../../components/RenderClientErrors';
 import { tsrFactory } from '../../../../server/tsr-factory';
 import { Org } from '../../../../types/types';
@@ -35,9 +36,9 @@ export async function SuperAdminPage() {
   }
 
   return (
-    <>
+    <PageContentWrapper>
       <SuperAdminContent orgs={orgs} positions={positions} />
       <RenderClientErrors errors={errors} />
-    </>
+    </PageContentWrapper>
   );
 }
