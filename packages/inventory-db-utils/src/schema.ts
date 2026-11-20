@@ -159,14 +159,19 @@ export const reservationTable = pgTable(
       .integer('item_id')
       .notNull()
       .references(() => itemTable.id, { onDelete: 'cascade' }),
+    borrower: t
+      .text()
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
     status: eventStatusPgEnum().notNull(),
     start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
     end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
     allDay: t.boolean('all_day').notNull()
   },
   (table) => [
-    t.unique('reservation_org_item_unique').on(table.orgId, table.itemId),
-    t.index('reservation_item_id_idx').on(table.itemId)
+    t.index('reservation_item_start_idx').on(table.itemId, table.start),
+    t.index('reservation_org_start_idx').on(table.orgId, table.start),
+    t.index('reservation_borrower_idx').on(table.borrower)
   ]
 );
 
