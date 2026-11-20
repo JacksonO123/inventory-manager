@@ -12,14 +12,17 @@ export class Reservation {
     this.values = values;
   }
 
-  static async create(partialEvent: PartialReservation, status: z.infer<typeof eventStatusEnum>) {
+  static async create(
+    partialEvent: PartialReservation,
+    borrowerId: string,
+    status: z.infer<typeof eventStatusEnum>
+  ) {
     const [res] = await db
       .insert(reservationTable)
       .values({
         status: status,
-        start: partialEvent.start,
-        end: partialEvent.end,
-        allDay: partialEvent.allDay
+        borrower: borrowerId,
+        ...partialEvent
       })
       .returning();
 
@@ -31,11 +34,7 @@ export class Reservation {
   static async getByItemIdAndOrgPath(itemId: number, orgPath: string) {
     const res = await db
       .select({
-        id: reservationTable.id,
-        status: reservationTable.status,
-        start: reservationTable.start,
-        end: reservationTable.end,
-        allDay: reservationTable.allDay
+        reservation: reservationTable
       })
       .from(reservationTable)
       .leftJoin(orgTable, eq(orgTable.path, orgPath))
@@ -44,6 +43,8 @@ export class Reservation {
         and(eq(orgItemTable.orgId, orgTable.id), eq(orgItemTable.itemId, itemId))
       );
 
-    return res.map(({ id, ...event }) => new Reservation({ id: id + '', ...event }));
+    return res.map(
+      ({ reservation: { id, ...event } }) => new Reservation({ id: id + '', ...event })
+    );
   }
 }

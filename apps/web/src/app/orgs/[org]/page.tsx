@@ -2,10 +2,12 @@ import { tsrFactory } from '../../../server/tsr-factory';
 import { ErrorCardPage } from '../../../components/ErrorCardPage';
 import { PageContentWrapper } from '../../../components/PageContentWrapper';
 import { PageHeader } from '../../../components/PageHeader';
-import { Sidebar } from './components/Sidebar';
 import { AdminContents } from './components/admin/AdminContents';
 import { redirect } from 'next/navigation';
 import { SuperAdminPage } from './components/super-admin/SuperAdminPage';
+import { PageWrapper } from '../../../components/PageWrapper';
+import { SuperAdminSidebar } from './components/super-admin/SuperAdminSidebar';
+import { AdminSidebar } from './components/admin/AdminSidebar';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
     tsr.user.getAdminStatus.query()
   ]);
 
+  console.log(org);
   if (org.status !== 200) {
     return (
       <ErrorCardPage title="Error fetching organization">
@@ -53,15 +56,19 @@ export default async function OrgPage({ params }: OrgPageProps) {
     );
   }
 
-  if (!adminStatus.body.superAdmin || !adminStatus.body.admin) {
+  if (!adminStatus.body.superAdmin && !adminStatus.body.admin) {
     redirect('/');
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <PageWrapper>
       <PageHeader />
-      <div className="h-full w-full flex">
-        {adminStatus.body.superAdmin && <Sidebar current={orgPath} />}
+      <div className="flex-1 min-h-0 flex">
+        {adminStatus.body.superAdmin ? (
+          <SuperAdminSidebar current={orgPath} />
+        ) : (
+          adminStatus.body.admin && <AdminSidebar current={orgPath} />
+        )}
         <PageContentWrapper>
           {adminStatus.body.superAdmin ? (
             <SuperAdminPage org={org.body.org} />
@@ -72,6 +79,6 @@ export default async function OrgPage({ params }: OrgPageProps) {
           )}
         </PageContentWrapper>
       </div>
-    </div>
+    </PageWrapper>
   );
 }

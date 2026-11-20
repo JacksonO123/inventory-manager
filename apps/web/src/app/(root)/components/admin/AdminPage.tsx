@@ -11,7 +11,7 @@ export async function AdminPage() {
   const orgInfo = orgInfoRes.status === 200 ? orgInfoRes.body : [];
 
   return (
-    <div className="flex w-full h-full">
+    <div className="flex flex-1 min-h-0">
       <OrgSidebar orgs={orgInfo.map((info) => info.org)} current="" />
       <PageContentWrapper>
         <AdminContent orgInfo={orgInfo} />

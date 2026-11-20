@@ -77,8 +77,17 @@ export const organizationRouter = c.router(
         500: errorMsgSchema
       }
     },
+    getOrgsForAdmin: {
+      path: '/get-orgs-for-admin',
+      method: 'GET',
+      responses: {
+        200: z.array(orgSchema),
+        401: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
     getInfoForAdmin: {
-      path: '/get',
+      path: '/get-info-for-admin',
       method: 'GET',
       responses: {
         200: z.array(z.object({ org: orgSchema, items: z.array(itemSchema) })),

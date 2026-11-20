@@ -112,7 +112,7 @@ export function OrgMembers({
 
       <div
         className={cn(
-          'max-h-120 overflow-y-scroll inset-shadow-black p-4 duration-150',
+          'max-h-120 overflow-y-scroll inset-shadow-black p-4 pt-0 duration-150',
           !atScrollTop && 'shadow-[inset_0_8px_6px_-6px_rgba(0,0,0,0.2)]'
         )}
         onScroll={onScroll}

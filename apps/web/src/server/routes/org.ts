@@ -105,8 +105,11 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+      if (!isAdmin && !isSuperAdmin) return unauthorizedResponse;
 
       const org = await Org.getByPath(params.path);
 
@@ -120,7 +123,7 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const info = await Org.getInfoFromAdminMemberId(session.user.id);
+      const info = await Org.getInfoFromAdminUserId(session.user.id);
 
       return {
         status: 200,
@@ -142,7 +145,6 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       if (!isSuperAdmin) return unauthorizedResponse;
 
       const members = await AdminWithEmail.getMembersOfOrgByPath(params.orgPath);
-      console.log('HERE 1');
 
       return {
         status: 200,
@@ -224,8 +226,10 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
 
       const [user, admin] = await Promise.all([
         User.getByEmail(body.email),
-        Admin.getByUserId(body.email)
+        Admin.getByUserEmail(body.email)
       ]);
+
+      console.log('HERE', admin);
 
       if (user === undefined) {
         return { status: 200, body: { valid: false, error: 'User does not exist' } };
@@ -235,7 +239,7 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
         return { status: 200, body: { valid: false, error: 'User is not admin' } };
       }
 
-      const belongsTo = await OrgMember.getBelongsToPaths(admin.userId);
+      const belongsTo = await OrgMember.getBelongsToPaths(admin.values.userId);
       if (belongsTo.includes(body.orgPath)) {
         return { status: 200, body: { valid: false, error: 'User already belongs to org' } };
       }
@@ -339,7 +343,6 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       if (!isSuperAdmin) return unauthorizedResponse;
 
       const members = await User.getMembersOfOrgByPath(params.orgPath);
-      console.log('HERE', members);
 
       return {
         status: 200,
@@ -347,6 +350,27 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
           return { userId: member.values.id, email: member.values.email };
         })
       };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  getOrgsForAdmin: async ({ req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+
+      if (!isAdmin && !isSuperAdmin) {
+        return unauthorizedResponse;
+      }
+
+      const orgs = await Org.getOrgsForAdminUserId(session.user.id);
+
+      return { status: 200, body: orgs.map((org) => org.values) };
     } catch (err) {
       return errorResponse(err);
     }

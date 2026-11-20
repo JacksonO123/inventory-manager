@@ -23,7 +23,7 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
         return { status: 500, body: { message: 'Event too long, send a request instead' } };
       }
 
-      const event = await Reservation.create(body.event, body.event.status);
+      const event = await Reservation.create(body.event, body.borrowerId, body.event.status);
 
       return { status: 200, body: { id: event.values.id } };
     } catch (err) {

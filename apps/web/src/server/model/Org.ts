@@ -56,7 +56,7 @@ export class Org {
     return new Org(org);
   }
 
-  static async getInfoFromAdminMemberId(userId: string) {
+  static async getInfoFromAdminUserId(userId: string) {
     const res = await db
       .select({
         org: orgTable,
@@ -83,5 +83,17 @@ export class Org {
       org: new Org(org),
       items: items.map((item) => new Item(item))
     }));
+  }
+
+  static async getOrgsForAdminUserId(userId: string) {
+    const res = await db
+      .select({ org: orgTable })
+      .from(orgTable)
+      .innerJoin(
+        orgMemberTable,
+        and(eq(orgMemberTable.orgId, orgTable.id), eq(orgMemberTable.userId, userId))
+      );
+
+    return res.map((row) => new Org(row.org));
   }
 }

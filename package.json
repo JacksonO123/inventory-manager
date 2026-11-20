@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "dev": "NODE_OPTIONS=--max-old-space-size=12288 nx dev web",
     "lint": "nx run-many -t lint --all",
     "tsc": "nx run-many -t tsc --all",
     "test": "nx run-many -t test --all",
@@ -55,6 +56,7 @@
     "@base-ui/react": "^1.8.0",
     "@fullcalendar/interaction": "^6.1.22",
     "@fullcalendar/react": "^7.1.5",
+    "@fullcalendar/react-scheduler": "^7.1.5",
     "@mantine/hooks": "^9.7.4",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-query": "^5.103.1",

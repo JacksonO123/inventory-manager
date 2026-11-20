@@ -5,6 +5,8 @@ import { errorResponse } from './utils/errors';
 import { auth } from '../auth';
 import { incomingHeadersToHeaders } from './utils/headers';
 import { unauthorizedResponse } from './utils/constants';
+import { Admin } from '../model/Admin';
+import { SuperAdmin } from '../model/SuperAdmin';
 
 export const nextItemRoute = createNextRoute(rootWebRouter.item, {
   createItem: async ({ body }) => {
@@ -55,6 +57,32 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       const item = await Item.getByIdAndOrgPath(params.id, params.orgPath);
 
       return { status: 200, body: item.values };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+
+  getItemsFromOrgPathWithReservationsBetweenDates: async ({ params, body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const [admin, superAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+
+      if (!admin && !superAdmin) {
+        return unauthorizedResponse;
+      }
+
+      const info = await Item.getAllFromOrgPathWithReservationsBetweenDates(
+        params.orgPath,
+        body.start,
+        body.end
+      );
+
+      return { status: 200, body: info };
     } catch (err) {
       return errorResponse(err);
     }

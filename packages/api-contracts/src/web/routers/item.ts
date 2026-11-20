@@ -1,4 +1,9 @@
-import { errorMsgSchema, itemSchema, partialItemSchema } from '@invm/api-contracts/schemas';
+import {
+  errorMsgSchema,
+  itemSchema,
+  partialItemSchema,
+  reservationSchema
+} from '@invm/api-contracts/schemas';
 import { c } from '../../contract';
 import { z } from 'zod';
 
@@ -60,6 +65,26 @@ export const itemRouter = c.router(
       }),
       responses: {
         200: itemSchema,
+        500: errorMsgSchema
+      }
+    },
+    getItemsFromOrgPathWithReservationsBetweenDates: {
+      path: '/list-with-reservations-between-dates/:orgPath',
+      method: 'POST',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: z.object({
+        start: z.coerce.date(),
+        end: z.coerce.date()
+      }),
+      responses: {
+        200: z.array(
+          z.object({
+            item: itemSchema,
+            reservations: z.array(reservationSchema)
+          })
+        ),
         500: errorMsgSchema
       }
     }

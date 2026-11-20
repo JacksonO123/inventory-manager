@@ -1,9 +1,16 @@
-import { checkoutTable, itemTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
+import {
+  checkoutTable,
+  itemTable,
+  orgItemTable,
+  orgTable,
+  reservationTable,
+  user
+} from '@invm/inventory-db-utils';
 import { partialItemSchema } from '@invm/api-contracts/schemas';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { HttpError } from '../errors';
-import { PartialItem, Item as ItemType } from '../../types/types';
+import { PartialItem, Item as ItemType, Reservation } from '../../types/types';
 
 export class Item {
   values: ItemType;
@@ -111,5 +118,35 @@ export class Item {
     }
 
     return new Item(item);
+  }
+
+  static async getAllFromOrgPathWithReservationsBetweenDates(
+    orgPath: string,
+    start: Date,
+    end: Date
+  ) {
+    const res = await db
+      .select({
+        item: itemTable,
+        reservations: sql<
+          Reservation[]
+        >`coalesce(json_agg(${reservationTable}.*) filter (where ${reservationTable.id} is not null), '[]'::json)`
+      })
+      .from(orgTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+      .innerJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
+      .leftJoin(
+        reservationTable,
+        and(
+          eq(reservationTable.itemId, itemTable.id),
+          eq(reservationTable.orgId, orgTable.id),
+          lt(reservationTable.start, end),
+          gt(reservationTable.end, start)
+        )
+      )
+      .where(eq(orgTable.path, orgPath))
+      .groupBy(itemTable.id);
+
+    return res;
   }
 }

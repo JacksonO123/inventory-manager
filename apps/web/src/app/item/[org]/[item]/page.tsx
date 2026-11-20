@@ -57,7 +57,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
   return (
     <PageWrapper>
       <PageHeader />
-      <PageContentWrapper className="h-full">
+      <PageContentWrapper>
         <ItemPageContents
           item={item.body}
           org={org.body.org}
