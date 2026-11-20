@@ -147,13 +147,28 @@ export const orgPositionsTable = pgTable('org_positions', {
 
 export const eventStatusPgEnum = t.pgEnum('status', ['accepted', 'pending', 'canceled']);
 
-export const reservationTable = pgTable('reservation', {
-  id: t.serial().primaryKey(),
-  status: eventStatusPgEnum().notNull(),
-  start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
-  end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
-  allDay: t.boolean('all_day').notNull()
-});
+export const reservationTable = pgTable(
+  'reservation',
+  {
+    id: t.serial().primaryKey(),
+    orgId: t
+      .integer('org_id')
+      .notNull()
+      .references(() => orgTable.id, { onDelete: 'cascade' }),
+    itemId: t
+      .integer('item_id')
+      .notNull()
+      .references(() => itemTable.id, { onDelete: 'cascade' }),
+    status: eventStatusPgEnum().notNull(),
+    start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
+    end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
+    allDay: t.boolean('all_day').notNull()
+  },
+  (table) => [
+    t.unique('reservation_org_item_unique').on(table.orgId, table.itemId),
+    t.index('reservation_item_id_idx').on(table.itemId)
+  ]
+);
 
 export const orgItemTable = pgTable(
   'org_item',
