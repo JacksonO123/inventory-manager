@@ -3,18 +3,18 @@ import { Separator } from './ui/separator';
 import { cn } from 'cn';
 import { PartialAdminAndEmail } from '../types/types';
 
-type AdminEmailListProps = {
+type AdminEmailListProps = React.ComponentProps<'div'> & {
   userEmail: string | null;
   admins: PartialAdminAndEmail[];
 
   actionRender?: (admin: PartialAdminAndEmail) => React.ReactNode;
 };
 
-export function AdminEmailList({ userEmail, admins, actionRender }: AdminEmailListProps) {
+export function AdminEmailList({ userEmail, admins, actionRender, ...props }: AdminEmailListProps) {
   const listId = useId();
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" {...props}>
       {admins.length === 0 && (
         <div className="w-full text-center text-muted-foreground">No items</div>
       )}
