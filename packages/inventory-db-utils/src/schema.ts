@@ -162,7 +162,8 @@ export const reservationTable = pgTable(
     status: eventStatusPgEnum().notNull(),
     start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
     end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
-    allDay: t.boolean('all_day').notNull()
+    allDay: t.boolean('all_day').notNull(),
+    title: t.text().notNull()
   },
   (table) => [
     t.unique('reservation_org_item_unique').on(table.orgId, table.itemId),
