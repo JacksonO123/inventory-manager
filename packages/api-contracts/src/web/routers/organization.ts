@@ -85,8 +85,8 @@ export const organizationRouter = c.router(
         500: errorMsgSchema
       }
     },
-    getMembers: {
-      path: '/get-members/:orgPath',
+    getAdminMembers: {
+      path: '/get-admin-members/:orgPath',
       method: 'GET',
       pathParams: z.object({
         orgPath: z.string().min(1)
@@ -96,8 +96,8 @@ export const organizationRouter = c.router(
         500: errorMsgSchema
       }
     },
-    addMember: {
-      path: '/add-member/:orgPath',
+    addAdminMember: {
+      path: '/add-admin-member/:orgPath',
       method: 'POST',
       pathParams: z.object({
         orgPath: z.string().min(1)
@@ -105,11 +105,12 @@ export const organizationRouter = c.router(
       body: z.object({ email: z.email() }),
       responses: {
         200: partialAdminSchema,
+        404: errorMsgSchema,
         500: errorMsgSchema
       }
     },
-    removeMember: {
-      path: '/remove-member/:orgPath',
+    removeAdminMember: {
+      path: '/remove-admin-member/:orgPath',
       method: 'DELETE',
       pathParams: z.object({
         orgPath: z.string().min(1)
@@ -117,11 +118,12 @@ export const organizationRouter = c.router(
       body: partialAdminSchema,
       responses: {
         200: c.noBody(),
+        404: errorMsgSchema,
         500: errorMsgSchema
       }
     },
-    isValidNewMember: {
-      path: '/check-valid-new-member',
+    isValidNewAdminMember: {
+      path: '/check-valid-new-admin-member',
       method: 'POST',
       body: z.object({
         email: z.email(),
@@ -134,7 +136,60 @@ export const organizationRouter = c.router(
         }),
         500: errorMsgSchema
       }
+    },
+    isValidNewUserMember: {
+      path: '/check-valid-new-user-member',
+      method: 'POST',
+      body: z.object({
+        email: z.email(),
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.object({
+          valid: z.boolean(),
+          error: z.string().min(1).optional()
+        }),
+        500: errorMsgSchema
+      }
+    },
+    addUserMember: {
+      path: '/add-user-member/:orgPath',
+      method: 'POST',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: z.object({ email: z.email() }),
+      responses: {
+        200: partialAdminSchema,
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    removeUserMember: {
+      path: '/remove-user-member/:orgPath',
+      method: 'DELETE',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      body: partialAdminSchema,
+      responses: {
+        200: c.noBody(),
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getUserMembers: {
+      path: '/get-user-members/:orgPath',
+      method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.array(partialAdminSchema.extend({ email: z.email() })),
+        500: errorMsgSchema
+      }
     }
   },
+
   { pathPrefix: '/org' }
 );

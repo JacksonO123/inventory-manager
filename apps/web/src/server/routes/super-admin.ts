@@ -18,7 +18,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
 
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
       if (!userIsSuperAdmin) {
-        if (queriedUser.email === session.user.email) {
+        if (queriedUser.values.email === session.user.email) {
           return { status: 200, body: { isAdmin: false } };
         }
         return unauthorizedResponse;
@@ -43,7 +43,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
         return { status: 200, body: { status: 'no_user_exists' } };
       }
 
-      const isQueriedUserSuperAdmin = await SuperAdmin.isSuperAdmin(queriedUser.id);
+      const isQueriedUserSuperAdmin = await SuperAdmin.isSuperAdmin(queriedUser.values.id);
       if (isQueriedUserSuperAdmin) {
         return { status: 200, body: { status: 'super_admin_exists' } };
       }
@@ -66,7 +66,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
         return { status: 200, body: { status: 'no_user_exists' } };
       }
 
-      const isQueriedUserAdmin = await Admin.isAdmin(queriedUser.id);
+      const isQueriedUserAdmin = await Admin.isAdmin(queriedUser.values.id);
       if (isQueriedUserAdmin) {
         return { status: 200, body: { status: 'admin_exists' } };
       }
@@ -89,7 +89,7 @@ export const superAdminRoute = createNextRoute(rootWebRouter.superAdmin, {
         return { status: 500, body: { message: 'User does not exist' } };
       }
 
-      const admin = await SuperAdmin.create(queriedUser.id);
+      const admin = await SuperAdmin.create(queriedUser.values.id);
       if (admin === undefined) {
         return { status: 500, body: { message: 'Failed to create admin' } };
       }

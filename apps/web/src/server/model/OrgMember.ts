@@ -10,7 +10,7 @@ export class OrgMember {
     this.values = values;
   }
 
-  static async getByOrgPath(orgPath: string, email: string) {
+  static async createWithOrgPathAndEmail(orgPath: string, email: string) {
     const userInfo = await db
       .select({ userId: user.id, orgId: orgTable.id })
       .from(user)

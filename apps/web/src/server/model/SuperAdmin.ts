@@ -1,7 +1,7 @@
 import { superAdminTable, user } from '@invm/inventory-db-utils';
 import { AdminAndEmail, Admin as AdminType } from '../../types/types';
 import { db } from '../db';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 export class SuperAdmin {
   values: AdminType;
@@ -20,6 +20,14 @@ export class SuperAdmin {
       .select({ id: superAdminTable.id })
       .from(superAdminTable)
       .where(eq(superAdminTable.userId, userId));
+    return admin !== undefined;
+  }
+
+  static async isSuperAdminByEmail(email: string) {
+    const [admin] = await db
+      .select({ id: superAdminTable.id })
+      .from(superAdminTable)
+      .innerJoin(user, and(eq(user.id, superAdminTable.userId), eq(user.email, email)));
     return admin !== undefined;
   }
 

@@ -5,7 +5,7 @@ import { PageHeader } from '../../../components/PageHeader';
 import { Sidebar } from './components/Sidebar';
 import { AdminContents } from './components/admin/AdminContents';
 import { redirect } from 'next/navigation';
-import { SuperAdminContents } from './components/super-admin/SuperAdminContents';
+import { SuperAdminPage } from './components/super-admin/SuperAdminPage';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +64,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
         {adminStatus.body.superAdmin && <Sidebar current={orgPath} />}
         <PageContentWrapper>
           {adminStatus.body.superAdmin ? (
-            <SuperAdminContents org={org.body.org} />
+            <SuperAdminPage org={org.body.org} />
           ) : adminStatus.body.admin ? (
             <AdminContents org={org.body.org} items={items.body} />
           ) : (

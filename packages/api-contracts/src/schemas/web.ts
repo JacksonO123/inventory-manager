@@ -29,9 +29,9 @@ export const userSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
   emailVerified: z.boolean(),
-  image: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string()
+  image: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date()
 });
 
 export const orgSchema = z.object({
