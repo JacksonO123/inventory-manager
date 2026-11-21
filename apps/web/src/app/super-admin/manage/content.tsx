@@ -14,7 +14,7 @@ import {
   validateAdminEmail,
   validateSuperAdminEmail
 } from './utils/adminActions';
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize, useLocalStorage } from '@mantine/hooks';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../../../components/ui/button';
@@ -27,6 +27,10 @@ type ContentProps = {
 export default function Content({ initialAdmins, initialSuperAdmins }: ContentProps) {
   const [superAdmins, setSuperAdmins] = useState(initialSuperAdmins);
   const [admins, setAdmins] = useState(initialAdmins);
+  const [tab, setTab] = useLocalStorage<string | null>({
+    key: 'manage-admins-tab-group-state',
+    defaultValue: null
+  });
   const { ref, width } = useElementSize();
 
   function handleDemote(admin: PartialAdminAndEmail) {
@@ -47,7 +51,7 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
         </Link>
       </div>
       <div className="w-full p-4 rounded-md border">
-        <Tabs>
+        <Tabs tab={tab} onTabChange={setTab}>
           <TabGroup className="absolute" ref={ref}>
             <Tab value="super-admin">Super Admin</Tab>
             <Tab value="admin">Admin</Tab>
