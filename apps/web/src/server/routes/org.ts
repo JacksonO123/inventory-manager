@@ -229,8 +229,6 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
         Admin.getByUserEmail(body.email)
       ]);
 
-      console.log('HERE', admin);
-
       if (user === undefined) {
         return { status: 200, body: { valid: false, error: 'User does not exist' } };
       }
@@ -254,8 +252,11 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+      if (!isAdmin && !isSuperAdmin) return unauthorizedResponse;
 
       const [user, admin, superAdmin] = await Promise.all([
         User.getByEmail(body.email),
@@ -283,8 +284,11 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+      if (!isAdmin && !isSuperAdmin) return unauthorizedResponse;
 
       const [user, admin, superAdmin] = await Promise.all([
         User.getById(body.userId),
@@ -312,8 +316,11 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+      if (!isAdmin && !isSuperAdmin) return unauthorizedResponse;
 
       const [user, admin, superAdmin] = await Promise.all([
         User.getByEmail(body.email),
@@ -339,8 +346,11 @@ export const orgRoute = createNextRoute(rootWebRouter.organizations, {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;
 
-      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-      if (!isSuperAdmin) return unauthorizedResponse;
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+      if (!isAdmin && !isSuperAdmin) return unauthorizedResponse;
 
       const members = await User.getMembersOfOrgByPath(params.orgPath);
 

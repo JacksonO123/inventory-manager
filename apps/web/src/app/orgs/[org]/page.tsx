@@ -24,7 +24,6 @@ export default async function OrgPage({ params }: OrgPageProps) {
     tsr.user.getAdminStatus.query()
   ]);
 
-  console.log(org);
   if (org.status !== 200) {
     return (
       <ErrorCardPage title="Error fetching organization">

@@ -22,7 +22,8 @@ export const reservationRouter = c.router(
         200: z.object({
           id: z.string().min(1)
         }),
-        500: errorMsgSchema
+        500: errorMsgSchema,
+        401: errorMsgSchema
       }
     },
     getByItemIdAndOrgPath: {
@@ -34,7 +35,8 @@ export const reservationRouter = c.router(
       }),
       responses: {
         200: z.array(reservationSchema),
-        500: errorMsgSchema
+        500: errorMsgSchema,
+        401: errorMsgSchema
       }
     }
   },

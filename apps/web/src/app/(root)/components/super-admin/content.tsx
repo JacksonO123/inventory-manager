@@ -9,6 +9,7 @@ import { toast } from '../../../../components/ui/toast';
 import Link from 'next/link';
 import { CreateOrgButton } from '../../../../components/CreateOrgButton';
 import { Orgs } from '../../../../components/Orgs';
+import { tsrErrorMessage } from '../../../../utils/utils';
 
 type SuperAdminContentProps = {
   orgs: Org[];
@@ -35,7 +36,7 @@ export function SuperAdminContent({
       setOrgPositions((prev) => prev.filter((item) => item !== -1));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to add org'
+        title: tsrErrorMessage(res.body, 'Failed to add org')
       });
     } else {
       setOrgs((prev) => prev.map((item) => (item.id === -1 ? { ...item, id: res.body.id } : item)));
@@ -58,7 +59,7 @@ export function SuperAdminContent({
       setOrgPositions(prevOrder);
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to reorder orgs'
+        title: tsrErrorMessage(res.body, 'Failed to reorder orgs')
       });
     } else {
       toast.add({
@@ -79,7 +80,7 @@ export function SuperAdminContent({
       setOrgs((prev) => prev.map((org) => (org.id === prevOrg.id ? prevOrg : org)));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to update org'
+        title: tsrErrorMessage(res.body, 'Failed to update org')
       });
     } else {
       toast.add({
@@ -98,7 +99,7 @@ export function SuperAdminContent({
       setOrgs(prevOrgs);
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to delete org'
+        title: tsrErrorMessage(res.body, 'Failed to delete org')
       });
     } else {
       toast.add({

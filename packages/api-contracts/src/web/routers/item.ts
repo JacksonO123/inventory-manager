@@ -18,6 +18,7 @@ export const itemRouter = c.router(
       body: partialItemSchema.extend({ orgId: z.number().int().gte(0) }),
       responses: {
         200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -34,6 +35,7 @@ export const itemRouter = c.router(
             reservations: z.array(reservationSchema.extend({ borrowerName: z.string() }))
           })
         ),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -44,6 +46,7 @@ export const itemRouter = c.router(
       body: borrowerBodySchema,
       responses: {
         200: z.object({ id: z.number().gte(0) }),
+        401: errorMsgSchema,
         404: errorMsgSchema,
         409: errorMsgSchema,
         500: errorMsgSchema
@@ -56,8 +59,8 @@ export const itemRouter = c.router(
       body: c.noBody(),
       responses: {
         200: z.object({ id: z.number().gte(0) }),
+        401: errorMsgSchema,
         404: errorMsgSchema,
-        409: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -70,6 +73,8 @@ export const itemRouter = c.router(
       }),
       responses: {
         200: itemSchema,
+        401: errorMsgSchema,
+        404: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -90,6 +95,7 @@ export const itemRouter = c.router(
             reservations: z.array(reservationSchema.extend({ borrowerName: z.string() }))
           })
         ),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     }

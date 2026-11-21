@@ -22,7 +22,7 @@ import { Button } from '../ui/button';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
 import { PENDING_CLASS_NAME } from './constants';
 import { toDate } from './utils';
-import { hoursBetween } from '../../utils/utils';
+import { hoursBetween, tsrErrorMessage } from '../../utils/utils';
 import { tsr } from '../../server/tsr';
 import { toast } from '../ui/toast';
 import {
@@ -103,7 +103,7 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
 
     toast.add({
       type: 'error',
-      title: res.status === 500 ? res.body.message : 'Failed to add item reservation'
+      title: tsrErrorMessage(res.body, 'Failed to add item reservation')
     });
 
     return { status: 'error' };
@@ -223,8 +223,6 @@ export function OrgItemCalendarSummary({ items, ...props }: OrgItemCalendarSumma
         : withResourceId;
     })
   );
-
-  console.log('here', events);
 
   return (
     <div {...props}>

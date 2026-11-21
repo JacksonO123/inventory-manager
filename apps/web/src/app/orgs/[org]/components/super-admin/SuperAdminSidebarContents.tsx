@@ -5,6 +5,7 @@ import { OrgSidebar } from '../../../../../components/OrgSidebar';
 import { Org, PartialOrg } from '../../../../../types/types';
 import { tsr } from '../../../../../server/tsr';
 import { toast } from '../../../../../components/ui/toast';
+import { tsrErrorMessage } from '../../../../../utils/utils';
 
 type SuperAdminSidebarContentsProps = {
   orgs: Org[];
@@ -26,7 +27,7 @@ export function SuperAdminSidebarContents({
       setOrgs((prev) => prev.filter((item) => item.id !== -1));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to add org'
+        title: tsrErrorMessage(res.body, 'Failed to add org')
       });
     } else {
       setOrgs((prev) => prev.map((item) => (item.id === -1 ? { ...item, id: res.body.id } : item)));

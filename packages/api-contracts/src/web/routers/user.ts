@@ -12,7 +12,8 @@ export const userRouter = c.router(
           admin: z.boolean(),
           superAdmin: z.boolean()
         }),
-        500: errorMsgSchema
+        500: errorMsgSchema,
+        401: errorMsgSchema
       }
     }
   },

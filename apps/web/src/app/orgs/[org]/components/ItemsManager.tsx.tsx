@@ -9,6 +9,7 @@ import { toast } from '../../../../components/ui/toast';
 import { CreateItemForm } from '../components/CreateItemForm';
 import { Items } from '../components/Items';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/dialog';
+import { tsrErrorMessage } from '../../../../utils/utils';
 
 type ItemsManagerProps = {
   items: Item[];
@@ -45,7 +46,7 @@ export function ItemsManager({
       setItems((items) => items.filter((item) => item.id !== -1));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to create item'
+        title: tsrErrorMessage(res.body, 'Failed to create item')
       });
     }
   }
