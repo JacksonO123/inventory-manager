@@ -1,8 +1,6 @@
-import { ArrowLeft, SearchX } from 'lucide-react';
+import { SearchX } from 'lucide-react';
 import { PageHeader } from './PageHeader';
 import { Card, CardContent } from './ui/card';
-import Link from 'next/link';
-import { Button } from './ui/button';
 import { PageWrapper } from './PageWrapper';
 import { PageContentWrapper } from './PageContentWrapper';
 import { BackLink } from './BackLink';

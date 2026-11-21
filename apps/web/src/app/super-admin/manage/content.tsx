@@ -15,9 +15,6 @@ import {
   validateSuperAdminEmail
 } from './utils/adminActions';
 import { useElementSize, useLocalStorage } from '@mantine/hooks';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '../../../components/ui/button';
 import { BackLink } from '../../../components/BackLink';
 
 type ContentProps = {

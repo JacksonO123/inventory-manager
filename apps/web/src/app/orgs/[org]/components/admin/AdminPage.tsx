@@ -1,5 +1,5 @@
 import { tsrFactory } from '../../../../../server/tsr-factory';
-import { Item, Org } from '../../../../../types/types';
+import { Org } from '../../../../../types/types';
 import { CalendarAndItemsTabGroup } from '../CalendarAndItemsTabGroup';
 
 type AdminContentsProps = {
