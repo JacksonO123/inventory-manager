@@ -18,6 +18,7 @@ import { useElementSize, useLocalStorage } from '@mantine/hooks';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../../../components/ui/button';
+import { BackLink } from '../../../components/BackLink';
 
 type ContentProps = {
   initialAdmins: PartialAdminAndEmail[];
@@ -44,11 +45,7 @@ export default function Content({ initialAdmins, initialSuperAdmins }: ContentPr
   return (
     <div className="w-full flex flex-col gap-4">
       <div>
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft /> Back to dashboard
-          </Button>
-        </Link>
+        <BackLink href="/">Dashboard</BackLink>
       </div>
       <div className="w-full p-4 rounded-md border">
         <Tabs tab={tab} onTabChange={setTab}>

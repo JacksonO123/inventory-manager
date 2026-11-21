@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { PageWrapper } from './PageWrapper';
 import { PageContentWrapper } from './PageContentWrapper';
+import { BackLink } from './BackLink';
 
 type ErrorCardProps = {
   children: React.ReactNode;
@@ -33,11 +34,7 @@ export function ErrorCard({ children, title }: ErrorCardProps) {
           <h1 className="text-xl font-medium">{title}</h1>
           <p className="text-sm text-muted-foreground">{children}</p>
         </div>
-        <Link href="/">
-          <Button variant="outline">
-            <ArrowLeft /> Back to home
-          </Button>
-        </Link>
+        <BackLink href="/">Dashboard</BackLink>
       </CardContent>
     </Card>
   );

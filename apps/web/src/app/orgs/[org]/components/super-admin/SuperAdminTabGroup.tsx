@@ -40,7 +40,7 @@ export function SuperAdminTabGroup({ org, items }: SuperAdminTabGroupProps) {
             org={org}
             customActionBarRenderFn={(createItem) => (
               <div className="flex justify-between flex-wrap gap-4 w-full">
-                <div style={{ minWidth: `${tabWidth}px` }} />
+                <div style={{ minWidth: `${tabWidth}px` }} className="h-8" />
                 <Button onClick={createItem}>
                   Create Item <Plus />
                 </Button>

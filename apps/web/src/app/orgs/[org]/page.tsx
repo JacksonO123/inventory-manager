@@ -8,6 +8,7 @@ import { SuperAdminPage } from './components/super-admin/SuperAdminPage';
 import { PageWrapper } from '../../../components/PageWrapper';
 import { SuperAdminSidebar } from './components/super-admin/SuperAdminSidebar';
 import { AdminSidebar } from './components/admin/AdminSidebar';
+import { BackLink } from '../../../components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
   return (
     <PageWrapper>
       <PageHeader />
-      <div className="flex-1 min-h-0 flex">
+      <div className="flex-1 min-h-0 flex relative">
         {adminStatus.body.superAdmin ? (
           <SuperAdminSidebar current={orgPath} />
         ) : (
