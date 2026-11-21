@@ -1,11 +1,11 @@
 'use client';
 
 import { useElementSize, useLocalStorage } from '@mantine/hooks';
-import { OrgItemCalendarSummary } from '../../../../../components/Calendar';
-import { Tab, TabContent, TabGroup, Tabs } from '../../../../../components/Tabs';
-import { Item, Org, ReservationWithBorrowerName } from '../../../../../types/types';
-import { ItemsManager } from '../ItemsManager.tsx';
-import { Button } from '../../../../../components/ui/button';
+import { OrgItemCalendarSummary } from '../../../../components/Calendar';
+import { Tab, TabContent, TabGroup, Tabs } from '../../../../components/Tabs';
+import { Item, Org, ReservationWithBorrowerName } from '../../../../types/types';
+import { ItemsManager } from './ItemsManager.tsx';
+import { Button } from '../../../../components/ui/button';
 import { Plus } from 'lucide-react';
 
 type SuperAdminTabGroupProps = {
@@ -16,9 +16,9 @@ type SuperAdminTabGroupProps = {
   }[];
 };
 
-export function SuperAdminTabGroup({ org, items }: SuperAdminTabGroupProps) {
+export function CalendarAndItemsTabGroup({ org, items }: SuperAdminTabGroupProps) {
   const [tab, setTab] = useLocalStorage<string | null>({
-    key: 'super-admin-tab-group-state',
+    key: 'calendar-and-items-tab-group-state',
     defaultValue: null
   });
   const { ref: tabRef, width: tabWidth } = useElementSize();

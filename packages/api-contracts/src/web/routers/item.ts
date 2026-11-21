@@ -28,7 +28,12 @@ export const itemRouter = c.router(
         orgPath: z.string().min(1)
       }),
       responses: {
-        200: z.array(itemSchema),
+        200: z.array(
+          z.object({
+            item: itemSchema,
+            reservations: z.array(reservationSchema.extend({ borrowerName: z.string() }))
+          })
+        ),
         500: errorMsgSchema
       }
     },

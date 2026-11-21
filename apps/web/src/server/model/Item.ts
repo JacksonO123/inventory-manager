@@ -22,19 +22,23 @@ export class Item {
   static async getAllFromOrgPath(orgPath: string) {
     const res = await db
       .select({
-        id: itemTable.id,
-        name: itemTable.name,
-        description: itemTable.description,
-        status: itemTable.status
+        item: itemTable,
+        reservations: sql<
+          ReservationWithBorrowerName[]
+        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})) filter (where ${reservationTable.id} is not null), '[]'::json)`
       })
-      .from(itemTable)
-      .leftJoin(orgTable, eq(orgTable.path, orgPath))
-      .innerJoin(
-        orgItemTable,
-        and(eq(orgItemTable.orgId, orgTable.id), eq(orgItemTable.itemId, itemTable.id))
-      );
+      .from(orgTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+      .innerJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
+      .leftJoin(
+        reservationTable,
+        and(eq(reservationTable.itemId, itemTable.id), eq(reservationTable.orgId, orgTable.id))
+      )
+      .leftJoin(user, eq(reservationTable.borrower, user.id))
+      .where(eq(orgTable.path, orgPath))
+      .groupBy(itemTable.id);
 
-    return res.map((item) => new Item(item));
+    return res;
   }
 
   static async create(values: PartialItem, orgId: number) {

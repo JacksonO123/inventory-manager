@@ -25,7 +25,7 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
   getItemsFromOrgPath: async ({ params }) => {
     try {
       const items = await Item.getAllFromOrgPath(params.orgPath);
-      return { status: 200, body: items.map((item) => item.values) };
+      return { status: 200, body: items };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }

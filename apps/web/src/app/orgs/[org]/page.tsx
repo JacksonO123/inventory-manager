@@ -2,13 +2,12 @@ import { tsrFactory } from '../../../server/tsr-factory';
 import { ErrorCardPage } from '../../../components/ErrorCardPage';
 import { PageContentWrapper } from '../../../components/PageContentWrapper';
 import { PageHeader } from '../../../components/PageHeader';
-import { AdminContents } from './components/admin/AdminContents';
+import { AdminPage } from './components/admin/AdminPage';
 import { redirect } from 'next/navigation';
 import { SuperAdminPage } from './components/super-admin/SuperAdminPage';
 import { PageWrapper } from '../../../components/PageWrapper';
 import { SuperAdminSidebar } from './components/super-admin/SuperAdminSidebar';
 import { AdminSidebar } from './components/admin/AdminSidebar';
-import { BackLink } from '../../../components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,9 +19,8 @@ export default async function OrgPage({ params }: OrgPageProps) {
   const { org: orgPath } = await params;
   const tsr = await tsrFactory();
 
-  const [org, items, adminStatus] = await Promise.all([
+  const [org, adminStatus] = await Promise.all([
     tsr.organizations.getByPath.query({ params: { path: orgPath } }),
-    tsr.item.getItemsFromOrgPath.query({ params: { orgPath } }),
     tsr.user.getAdminStatus.query()
   ]);
 
@@ -37,14 +35,6 @@ export default async function OrgPage({ params }: OrgPageProps) {
     return (
       <ErrorCardPage title="Organization not found">
         Organization does not exists at <span className="font-mono">/org/{orgPath}</span>.
-      </ErrorCardPage>
-    );
-  }
-
-  if (items.status !== 200) {
-    return (
-      <ErrorCardPage title="Error fetching items">
-        There was an error looking up the items
       </ErrorCardPage>
     );
   }
@@ -74,7 +64,7 @@ export default async function OrgPage({ params }: OrgPageProps) {
           {adminStatus.body.superAdmin ? (
             <SuperAdminPage org={org.body.org} />
           ) : adminStatus.body.admin ? (
-            <AdminContents org={org.body.org} items={items.body} />
+            <AdminPage org={org.body.org} />
           ) : (
             <></>
           )}
