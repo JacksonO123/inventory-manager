@@ -1,8 +1,8 @@
-import { OrgItemCalendarSummary } from '../../../../../components/Calendar';
+import { Separator } from '../../../../../components/ui/separator';
 import { tsrFactory } from '../../../../../server/tsr-factory';
 import { Org } from '../../../../../types/types';
-import { AdminContents } from '../admin/AdminContents';
 import { SuperAdminContent } from '../OrgMemberHandler';
+import { SuperAdminTabGroup } from './SuperAdminTabGroup';
 
 type SuperAdminPageProps = {
   org: Org;
@@ -36,20 +36,14 @@ export async function SuperAdminPage({ org }: SuperAdminPageProps) {
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <h1 className="text-2xl font-medium">{org.name}</h1>
+      <h1 className="text-3xl font-medium">{org.name}</h1>
       <SuperAdminContent
         org={org}
         adminMembers={adminMembers.status === 200 ? adminMembers.body : []}
         userMembers={userMembers.status === 200 ? userMembers.body : []}
       />
-      <AdminContents
-        items={items.status === 200 ? items.body.map((info) => info.item) : []}
-        org={org}
-      />
-      <OrgItemCalendarSummary
-        className="h-full min-h-140"
-        items={items.status === 200 ? items.body : []}
-      />
+      <Separator className="h-px" />
+      <SuperAdminTabGroup org={org} items={items.status === 200 ? items.body : []} />
     </div>
   );
 }

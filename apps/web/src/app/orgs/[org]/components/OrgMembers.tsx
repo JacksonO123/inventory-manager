@@ -75,7 +75,7 @@ export function OrgMembers({
       {...props}
     >
       <CardContent className="flex flex-col gap-4">
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-between gap-4 items-center">
           <CardTitle>{title}</CardTitle>
           <div className="flex gap-4">
             <Input

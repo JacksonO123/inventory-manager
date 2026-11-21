@@ -54,3 +54,5 @@ export type PartialReservation = z.infer<typeof partialReservationSchema>;
 export type OrgMember = z.infer<typeof orgMemberSchema>;
 
 export type PartialOrgMember = Omit<OrgMember, 'id'>;
+
+export type ReservationWithBorrowerName = Reservation & { borrowerName: string };

@@ -25,7 +25,13 @@ import { toDate } from './utils';
 import { hoursBetween } from '../../utils/utils';
 import { tsr } from '../../server/tsr';
 import { toast } from '../ui/toast';
-import { Item, Org, Reservation, ServerErrorRes } from '../../types/types';
+import {
+  Item,
+  Org,
+  Reservation,
+  ReservationWithBorrowerName,
+  ServerErrorRes
+} from '../../types/types';
 import { authClient } from '../../client/auth-client';
 
 type CalendarProps = React.ComponentProps<'div'> & {
@@ -201,13 +207,17 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
 }
 
 type OrgItemCalendarSummaryProps = React.ComponentProps<'div'> & {
-  items: { item: Item; reservations: Reservation[] }[];
+  items: { item: Item; reservations: ReservationWithBorrowerName[] }[];
 };
 
 export function OrgItemCalendarSummary({ items, ...props }: OrgItemCalendarSummaryProps) {
   const events = items.flatMap((info) =>
     info.reservations.map(({ status, ...res }) => {
-      const withResourceId = { ...res, resourceId: info.item.id + '' };
+      const withResourceId = {
+        ...res,
+        resourceId: info.item.id + '',
+        title: `${res.borrowerName}'s reservation`
+      };
       return status === 'pending'
         ? { ...withResourceId, className: PENDING_CLASS_NAME }
         : withResourceId;
@@ -222,16 +232,8 @@ export function OrgItemCalendarSummary({ items, ...props }: OrgItemCalendarSumma
         plugins={[themePlugin, resourceTimelinePlugin]}
         schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
         headerToolbar={{
-          start: 'add today prev,next title',
+          start: 'today prev,next title',
           end: 'resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth'
-        }}
-        buttons={{
-          add: {
-            text: 'Add Resource',
-            click() {
-              alert('handle add resource...');
-            }
-          }
         }}
         height="100%"
         initialView="resourceTimelineDay"

@@ -82,7 +82,7 @@ export const itemRouter = c.router(
         200: z.array(
           z.object({
             item: itemSchema,
-            reservations: z.array(reservationSchema)
+            reservations: z.array(reservationSchema.extend({ borrowerName: z.string() }))
           })
         ),
         500: errorMsgSchema

@@ -15,21 +15,23 @@ export function PageHeader() {
 
   return (
     <header className="flex justify-between h-16 items-center border-b">
-      <Link href="/" className="h-full flex items-center px-4">
-        <h1 className="text-lg text-nowrap">Inventory Manager</h1>
-      </Link>
-      <div className="flex gap-6 items-center text-md p-4">
+      <div className="h-full flex gap-2 items-center">
+        <Link href="/" className="h-full flex items-center px-4">
+          <h1 className="text-lg text-nowrap">Inventory Manager</h1>
+        </Link>
         {superAdmin ? (
-          <Badge className="p-3" variant="outline">
+          <Badge className="p-2" variant="outline">
             Super Admin
           </Badge>
         ) : admin ? (
-          <Badge className="p-3" variant="outline">
+          <Badge className="p-2" variant="outline">
             Admin
           </Badge>
         ) : (
           <></>
         )}
+      </div>
+      <div className="flex gap-6 items-center text-md p-4">
         {session.isPending ? (
           <LoadingSpinner className="size-8" />
         ) : session.data ? (

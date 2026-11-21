@@ -10,7 +10,7 @@ import { partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { HttpError } from '../errors';
-import { PartialItem, Item as ItemType, Reservation } from '../../types/types';
+import { PartialItem, Item as ItemType, ReservationWithBorrowerName } from '../../types/types';
 
 export class Item {
   values: ItemType;
@@ -129,8 +129,8 @@ export class Item {
       .select({
         item: itemTable,
         reservations: sql<
-          Reservation[]
-        >`coalesce(json_agg(${reservationTable}.*) filter (where ${reservationTable.id} is not null), '[]'::json)`
+          ReservationWithBorrowerName[]
+        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})) filter (where ${reservationTable.id} is not null), '[]'::json)`
       })
       .from(orgTable)
       .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
@@ -144,6 +144,7 @@ export class Item {
           gt(reservationTable.end, start)
         )
       )
+      .leftJoin(user, eq(reservationTable.borrower, user.id))
       .where(eq(orgTable.path, orgPath))
       .groupBy(itemTable.id);
 
