@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { UIEvent, useMemo, useRef, useState } from 'react';
 import { NewAdminForm } from '../../../../components/NewAdminForm';
 import { Button } from '../../../../components/ui/button';
 import {
@@ -44,7 +44,16 @@ export function OrgMembers({
   ...props
 }: OrgMembersProps) {
   const [emailFilter, setEmailFilter] = useState('');
+  const [listScroll, setListScroll] = useState(0);
+
+  const emailListRef = useRef<HTMLDivElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
   const memberName = memberType === 'admin' ? 'Admin' : 'User';
+  const atScrollTop = listScroll === 0;
+  const atScrollBottom =
+    listScroll + (wrapperRef.current?.clientHeight ?? 0) >=
+    (emailListRef.current?.scrollHeight ?? 0);
 
   const filteredMembers = useMemo(() => {
     return members.filter((admin) =>
@@ -52,10 +61,21 @@ export function OrgMembers({
     );
   }, [members, emailFilter]);
 
+  function onScroll(e: UIEvent<HTMLDivElement>) {
+    setListScroll(e.currentTarget.scrollTop);
+  }
+
   return (
-    <Card className={cn(className, 'w-full')} {...props}>
+    <Card
+      className={cn(
+        className,
+        'w-full h-fit pb-0',
+        !atScrollBottom && 'shadow-[inset_0_-8px_6px_-6px_rgba(0,0,0,0.2)]'
+      )}
+      {...props}
+    >
       <CardContent className="flex flex-col gap-4">
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-between gap-4 items-center">
           <CardTitle>{title}</CardTitle>
           <div className="flex gap-4">
             <Input
@@ -88,8 +108,18 @@ export function OrgMembers({
             </Dialog>
           </div>
         </div>
+      </CardContent>
 
+      <div
+        className={cn(
+          'max-h-120 overflow-y-scroll inset-shadow-black p-4 pt-0 duration-150',
+          !atScrollTop && 'shadow-[inset_0_8px_6px_-6px_rgba(0,0,0,0.2)]'
+        )}
+        onScroll={onScroll}
+        ref={wrapperRef}
+      >
         <AdminEmailList
+          ref={emailListRef}
           userEmail=""
           admins={filteredMembers}
           actionRender={(member) => (
@@ -132,7 +162,7 @@ export function OrgMembers({
             </Dialog>
           )}
         />
-      </CardContent>
+      </div>
     </Card>
   );
 }

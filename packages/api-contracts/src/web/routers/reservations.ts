@@ -1,7 +1,8 @@
 import {
   errorMsgSchema,
   reservationSchema,
-  partialReservationSchema
+  partialReservationSchema,
+  unrefinedReservationSchema
 } from '@invm/api-contracts/schemas';
 import { c } from '../../contract';
 import { z } from 'zod';
@@ -14,13 +15,15 @@ export const reservationRouter = c.router(
       body: z.object({
         orgId: z.number().int().gte(0),
         itemId: z.number().int().gte(0),
-        event: partialReservationSchema
+        event: partialReservationSchema.extend({ status: unrefinedReservationSchema.shape.status }),
+        borrowerId: z.string().min(1)
       }),
       responses: {
         200: z.object({
           id: z.string().min(1)
         }),
-        500: errorMsgSchema
+        500: errorMsgSchema,
+        401: errorMsgSchema
       }
     },
     getByItemIdAndOrgPath: {
@@ -32,7 +35,8 @@ export const reservationRouter = c.router(
       }),
       responses: {
         200: z.array(reservationSchema),
-        500: errorMsgSchema
+        500: errorMsgSchema,
+        401: errorMsgSchema
       }
     }
   },

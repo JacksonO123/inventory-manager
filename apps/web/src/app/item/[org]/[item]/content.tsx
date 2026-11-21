@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar } from '../../../../components/Calendar';
+import { ItemCalendar } from '../../../../components/Calendar';
 import { Item, Org, Reservation } from '../../../../types/types';
 
 type ItemPageContentsProps = {
@@ -11,7 +11,7 @@ type ItemPageContentsProps = {
 
 export function ItemPageContents({ item, org, defaultReservations }: ItemPageContentsProps) {
   return (
-    <Calendar
+    <ItemCalendar
       className="h-full w-full"
       item={item}
       org={org}

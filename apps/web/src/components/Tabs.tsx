@@ -1,4 +1,6 @@
-import { ForwardedRef, forwardRef, useEffect, useRef } from 'react';
+'use client';
+
+import { useEffect, useRef } from 'react';
 import { useTabs } from '../hooks/use-tabs';
 import { TabsContextProvider } from '../providers/TabsProvider';
 import { cn } from 'cn';
@@ -6,6 +8,7 @@ import { cn } from 'cn';
 type TabsProps = {
   children: React.ReactNode;
   onTabChange?: (tab: string) => void;
+  tab?: string | null;
 };
 
 export function Tabs(props: TabsProps) {
@@ -26,11 +29,8 @@ type TabGroupProps = React.ComponentProps<'div'> & {
   children: React.ReactNode;
 };
 
-export const TabGroup = forwardRef(function TabGroup(
-  { children, className, ...others }: TabGroupProps,
-  ref: ForwardedRef<HTMLDivElement>
-) {
-  const { styles } = useTabs();
+export function TabGroup({ children, className, ref, ...others }: TabGroupProps) {
+  const { styles, shouldAnimate } = useTabs();
 
   function computeStyles() {
     if (!styles) return {};
@@ -45,13 +45,16 @@ export const TabGroup = forwardRef(function TabGroup(
       <div className="flex relative gap-2 w-fit">
         {children}
         <div
-          className="absolute z-10 duration-150 bg-white h-full rounded-md shadow-md"
+          className={cn(
+            'absolute z-10 bg-white h-full rounded-md shadow-md',
+            shouldAnimate && 'duration-150'
+          )}
           style={computeStyles()}
         />
       </div>
     </div>
   );
-});
+}
 
 type TabProps = {
   value: string;

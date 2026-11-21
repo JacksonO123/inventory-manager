@@ -1,9 +1,16 @@
-import { checkoutTable, itemTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
+import {
+  checkoutTable,
+  itemTable,
+  orgItemTable,
+  orgTable,
+  reservationTable,
+  user
+} from '@invm/inventory-db-utils';
 import { partialItemSchema } from '@invm/api-contracts/schemas';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, gt, isNull, lt, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { HttpError } from '../errors';
-import { PartialItem, Item as ItemType } from '../../types/types';
+import { PartialItem, Item as ItemType, ReservationWithBorrowerName } from '../../types/types';
 
 export class Item {
   values: ItemType;
@@ -15,19 +22,23 @@ export class Item {
   static async getAllFromOrgPath(orgPath: string) {
     const res = await db
       .select({
-        id: itemTable.id,
-        name: itemTable.name,
-        description: itemTable.description,
-        status: itemTable.status
+        item: itemTable,
+        reservations: sql<
+          ReservationWithBorrowerName[]
+        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})) filter (where ${reservationTable.id} is not null), '[]'::json)`
       })
-      .from(itemTable)
-      .leftJoin(orgTable, eq(orgTable.path, orgPath))
-      .innerJoin(
-        orgItemTable,
-        and(eq(orgItemTable.orgId, orgTable.id), eq(orgItemTable.itemId, itemTable.id))
-      );
+      .from(orgTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+      .innerJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
+      .leftJoin(
+        reservationTable,
+        and(eq(reservationTable.itemId, itemTable.id), eq(reservationTable.orgId, orgTable.id))
+      )
+      .leftJoin(user, eq(reservationTable.borrower, user.id))
+      .where(eq(orgTable.path, orgPath))
+      .groupBy(itemTable.id);
 
-    return res.map((item) => new Item(item));
+    return res;
   }
 
   static async create(values: PartialItem, orgId: number) {
@@ -111,5 +122,36 @@ export class Item {
     }
 
     return new Item(item);
+  }
+
+  static async getAllFromOrgPathWithReservationsBetweenDates(
+    orgPath: string,
+    start: Date,
+    end: Date
+  ) {
+    const res = await db
+      .select({
+        item: itemTable,
+        reservations: sql<
+          ReservationWithBorrowerName[]
+        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})) filter (where ${reservationTable.id} is not null), '[]'::json)`
+      })
+      .from(orgTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+      .innerJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
+      .leftJoin(
+        reservationTable,
+        and(
+          eq(reservationTable.itemId, itemTable.id),
+          eq(reservationTable.orgId, orgTable.id),
+          lt(reservationTable.start, end),
+          gt(reservationTable.end, start)
+        )
+      )
+      .leftJoin(user, eq(reservationTable.borrower, user.id))
+      .where(eq(orgTable.path, orgPath))
+      .groupBy(itemTable.id);
+
+    return res;
   }
 }

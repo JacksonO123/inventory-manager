@@ -3,6 +3,7 @@ import { RenderClientErrors } from '../../../../components/RenderClientErrors';
 import { tsrFactory } from '../../../../server/tsr-factory';
 import { Org } from '../../../../types/types';
 import { SuperAdminContent } from './content';
+import { tsrErrorMessage } from '../../../../utils/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,15 +20,11 @@ export async function SuperAdminPage() {
   ]);
 
   if (orgsRes.status !== 200) {
-    errors.push(orgsRes.status === 500 ? orgsRes.body.message : 'Failed to fetch orgs');
+    errors.push(tsrErrorMessage(orgsRes.body, 'Failed to fetch orgs'));
   }
 
   if (orgPositionsRes.status !== 200) {
-    errors.push(
-      orgPositionsRes.status === 500
-        ? orgPositionsRes.body.message
-        : 'Failed to fetch org positions'
-    );
+    errors.push(tsrErrorMessage(orgPositionsRes.body, 'Failed to fetch org positions'));
   }
 
   if (orgsRes.status === 200 && orgPositionsRes.status === 200) {

@@ -52,17 +52,24 @@ export const eventStatusEnum = z.enum(['accepted', 'pending', 'canceled']);
 
 export const unrefinedReservationSchema = z.object({
   id: z.string().min(1),
+  orgId: z.number().int().gte(0),
+  itemId: z.number().int().gte(0),
   status: eventStatusEnum,
   start: z.coerce.date(),
   end: z.coerce.date(),
-  allDay: z.boolean()
+  allDay: z.boolean(),
+  borrower: z.string().min(1)
 });
 
 export const reservationSchema = unrefinedReservationSchema.refine((obj) => obj.start < obj.end, {
   message: 'End date must be after start date'
 });
 
-export const partialReservationSchema = unrefinedReservationSchema.omit({ id: true });
+export const partialReservationSchema = unrefinedReservationSchema.omit({
+  id: true,
+  status: true,
+  borrower: true
+});
 
 export const orgMemberSchema = z.object({
   id: z.number().int().gte(0),

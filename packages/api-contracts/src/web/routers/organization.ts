@@ -45,6 +45,7 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: c.noBody(),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -54,6 +55,7 @@ export const organizationRouter = c.router(
       body: orgSchema,
       responses: {
         200: c.noBody(),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -63,6 +65,7 @@ export const organizationRouter = c.router(
       body: z.object({ id: z.number().int().gte(0) }),
       responses: {
         200: c.noBody(),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -74,14 +77,26 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: z.object({ org: orgSchema.nullable() }),
+        401: errorMsgSchema,
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getOrgsForAdmin: {
+      path: '/get-orgs-for-admin',
+      method: 'GET',
+      responses: {
+        200: z.array(orgSchema),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
     getInfoForAdmin: {
-      path: '/get',
+      path: '/get-info-for-admin',
       method: 'GET',
       responses: {
         200: z.array(z.object({ org: orgSchema, items: z.array(itemSchema) })),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -93,6 +108,7 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: z.array(partialAdminSchema.extend({ email: z.email() })),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -105,6 +121,7 @@ export const organizationRouter = c.router(
       body: z.object({ email: z.email() }),
       responses: {
         200: partialAdminSchema,
+        401: errorMsgSchema,
         404: errorMsgSchema,
         500: errorMsgSchema
       }
@@ -118,6 +135,7 @@ export const organizationRouter = c.router(
       body: partialAdminSchema,
       responses: {
         200: c.noBody(),
+        401: errorMsgSchema,
         404: errorMsgSchema,
         500: errorMsgSchema
       }
@@ -134,6 +152,7 @@ export const organizationRouter = c.router(
           valid: z.boolean(),
           error: z.string().min(1).optional()
         }),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -149,6 +168,7 @@ export const organizationRouter = c.router(
           valid: z.boolean(),
           error: z.string().min(1).optional()
         }),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -161,6 +181,7 @@ export const organizationRouter = c.router(
       body: z.object({ email: z.email() }),
       responses: {
         200: partialAdminSchema,
+        401: errorMsgSchema,
         404: errorMsgSchema,
         500: errorMsgSchema
       }
@@ -174,6 +195,7 @@ export const organizationRouter = c.router(
       body: partialAdminSchema,
       responses: {
         200: c.noBody(),
+        401: errorMsgSchema,
         404: errorMsgSchema,
         500: errorMsgSchema
       }
@@ -186,6 +208,7 @@ export const organizationRouter = c.router(
       }),
       responses: {
         200: z.array(partialAdminSchema.extend({ email: z.email() })),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     }

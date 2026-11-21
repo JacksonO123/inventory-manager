@@ -1,20 +1,15 @@
 'use client';
 
-import { Pencil, Plus, UserRoundShield, X } from 'lucide-react';
-import { CreateOrgForm, Orgs } from '../../../../components/Orgs';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '../../../../components/ui/dialog';
+import { Pencil, UserRoundShield, X } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { useState } from 'react';
 import { Org, PartialOrg } from '../../../../types/types';
 import { tsr } from '../../../../server/tsr';
 import { toast } from '../../../../components/ui/toast';
 import Link from 'next/link';
+import { CreateOrgButton } from '../../../../components/CreateOrgButton';
+import { Orgs } from '../../../../components/Orgs';
+import { tsrErrorMessage } from '../../../../utils/utils';
 
 type SuperAdminContentProps = {
   orgs: Org[];
@@ -30,20 +25,18 @@ export function SuperAdminContent({
     ...initialOrgPositions,
     ...orgs.filter((item) => !initialOrgPositions.includes(item.id)).map((item) => item.id)
   ]);
-  const [createOrgOpen, setCreateOrgOpen] = useState(false);
   const [editing, setEditing] = useState(false);
 
   async function handleCreateOrgSubmit(partialOrg: PartialOrg) {
     setOrgs((prev) => [{ ...partialOrg, id: -1 }, ...prev]);
     setOrgPositions((prev) => [-1, ...prev]);
-    setCreateOrgOpen(false);
     const res = await tsr.organizations.create.mutate({ body: partialOrg });
     if (res.status !== 200) {
       setOrgs((prev) => prev.filter((item) => item.id !== -1));
       setOrgPositions((prev) => prev.filter((item) => item !== -1));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to add org'
+        title: tsrErrorMessage(res.body, 'Failed to add org')
       });
     } else {
       setOrgs((prev) => prev.map((item) => (item.id === -1 ? { ...item, id: res.body.id } : item)));
@@ -66,7 +59,7 @@ export function SuperAdminContent({
       setOrgPositions(prevOrder);
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to reorder orgs'
+        title: tsrErrorMessage(res.body, 'Failed to reorder orgs')
       });
     } else {
       toast.add({
@@ -87,7 +80,7 @@ export function SuperAdminContent({
       setOrgs((prev) => prev.map((org) => (org.id === prevOrg.id ? prevOrg : org)));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to update org'
+        title: tsrErrorMessage(res.body, 'Failed to update org')
       });
     } else {
       toast.add({
@@ -106,7 +99,7 @@ export function SuperAdminContent({
       setOrgs(prevOrgs);
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to delete org'
+        title: tsrErrorMessage(res.body, 'Failed to delete org')
       });
     } else {
       toast.add({
@@ -119,25 +112,7 @@ export function SuperAdminContent({
   return (
     <div className="h-full flex flex-col gap-8">
       <div className="flex justify-between gap-4 p-3 rounded-md border">
-        <Dialog open={createOrgOpen} onOpenChange={setCreateOrgOpen}>
-          <DialogTrigger
-            suppressHydrationWarning
-            render={
-              <Button>
-                <Plus /> Create org
-              </Button>
-            }
-          />
-          <DialogContent className="max-w-md!">
-            <DialogHeader>
-              <DialogTitle>Create organization</DialogTitle>
-            </DialogHeader>
-            <CreateOrgForm
-              onSubmit={handleCreateOrgSubmit}
-              onCancel={() => setCreateOrgOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <CreateOrgButton onCreate={handleCreateOrgSubmit} />
         <div className="flex gap-4">
           {editing ? (
             <Button variant="outline" onClick={() => setEditing(false)}>

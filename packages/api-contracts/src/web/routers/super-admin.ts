@@ -66,7 +66,9 @@ export const superAdminRouter = c.router(
       responses: {
         200: z.object({
           admins: z.array(adminSchema.extend({ email: z.email() }))
-        })
+        }),
+        500: errorMsgSchema,
+        401: errorMsgSchema
       }
     },
     revokeSuperAdmin: {

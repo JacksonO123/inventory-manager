@@ -17,6 +17,9 @@ importers:
       '@fullcalendar/react':
         specifier: ^7.1.5
         version: 7.1.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8)
+      '@fullcalendar/react-scheduler':
+        specifier: ^7.1.5
+        version: 7.1.5(@fullcalendar/react@7.1.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8)
       '@mantine/hooks':
         specifier: ^9.7.4
         version: 9.8.0(react@19.3.1)
@@ -101,7 +104,7 @@ importers:
         version: 23.2.1(4f6f5a0be075e1dad8397154bc28f4e9)
       '@nx/web':
         specifier: 23.2.1
-        version: 23.2.1(8ff38b7e054f0edcbd133fa1e130c321)
+        version: 23.2.1(50e4d367a677318aff4d882c12b0fe04)
       '@nx/webpack':
         specifier: 23.2.1
         version: 23.2.1(@babel/traverse@7.29.14(supports-color@8.1.1))(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/cli@0.8.2(@swc/core@1.16.22(@swc/helpers@0.5.24))(chokidar@5.0.0)(supports-color@8.1.1))(@swc/core@1.16.22(@swc/helpers@0.5.24))(cssnano@7.1.9(postcss@8.5.33))(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(nx@23.2.1(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/core@1.16.22(@swc/helpers@0.5.24)))(supports-color@8.1.1)(typescript@6.0.3)(uglify-js@3.19.3)(webpack-cli@7.3.1)(webpack-dev-server@5.2.7)(webpack@5.112.2)
@@ -1560,6 +1563,9 @@ packages:
     peerDependencies:
       temporal-polyfill: ^1.0.7
 
+  '@full-ui/headless-grid@7.1.5':
+    resolution: {integrity: sha512-lK7GMCwjMvuzCgAU/hvA+7jM3Mc0lA3xd+urJQE/KURQ9DvWJtRYUgQW4xVbj2Lh7HtgAK/vPcwtPCJWtQgKHw==}
+
   '@fullcalendar/core@6.1.22':
     resolution: {integrity: sha512-ju5PJUE++zr8XXCGtlXlrodF6doUy9BDfzx+VmE0B+XDBM2A5cUi/aU3M1ANfw/StmKhwqew7Ps7bXMiv/JREg==}
 
@@ -1573,6 +1579,14 @@ packages:
     resolution: {integrity: sha512-r8Njw8aPNFGRwDjVAh9NTh3ZJib5tcUoLi/BM4uYJt5Cs9tDiirmImaqxhx56hclVFX7ktd5CdaMX0+ArSbm5A==}
     peerDependencies:
       '@fullcalendar/core': ~6.1.22
+
+  '@fullcalendar/react-scheduler@7.1.5':
+    resolution: {integrity: sha512-l+20/PW3Zhk/miwDcD5Vt+SBdPlwYxuFXanKcZ1L44FEhcQDutte8tj3ZVeE2or+9Tfh78WT8gHxoB7b5KHH9Q==}
+    peerDependencies:
+      '@fullcalendar/react': 7.1.5
+      react: ^17 || ^18 || ^19
+      react-dom: ^17 || ^18 || ^19
+      temporal-polyfill: ^1.0.7
 
   '@fullcalendar/react@7.1.5':
     resolution: {integrity: sha512-us8Hggc1g6vxK3jQvIAtJOcGltSh/Y7wiqB5hT3+S5XkELHS5vFMfecayxprlLcCtV/BzK+Ot2VgeFUmA62JXg==}
@@ -9719,6 +9733,8 @@ snapshots:
     dependencies:
       temporal-polyfill: 1.0.8
 
+  '@full-ui/headless-grid@7.1.5': {}
+
   '@fullcalendar/core@6.1.22':
     dependencies:
       preact: 10.12.1
@@ -9731,6 +9747,16 @@ snapshots:
   '@fullcalendar/interaction@6.1.22(@fullcalendar/core@6.1.22)':
     dependencies:
       '@fullcalendar/core': 6.1.22
+
+  '@fullcalendar/react-scheduler@7.1.5(@fullcalendar/react@7.1.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8)':
+    dependencies:
+      '@full-ui/headless-calendar': 7.1.5(temporal-polyfill@1.0.8)
+      '@full-ui/headless-grid': 7.1.5
+      '@fullcalendar/core': 7.1.5(@full-ui/headless-calendar@7.1.5(temporal-polyfill@1.0.8))(temporal-polyfill@1.0.8)
+      '@fullcalendar/react': 7.1.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+      temporal-polyfill: 1.0.8
 
   '@fullcalendar/react@7.1.5(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(temporal-polyfill@1.0.8)':
     dependencies:
@@ -10914,7 +10940,7 @@ snapshots:
       - verdaccio
     optional: true
 
-  '@nx/web@23.2.1(8ff38b7e054f0edcbd133fa1e130c321)':
+  '@nx/web@23.2.1(50e4d367a677318aff4d882c12b0fe04)':
     dependencies:
       '@nx/devkit': 23.2.1(nx@23.2.1(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/core@1.16.22(@swc/helpers@0.5.24)))
       '@nx/js': 23.2.1(@babel/traverse@7.29.14(supports-color@8.1.1))(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/cli@0.8.2(@swc/core@1.16.22(@swc/helpers@0.5.24))(chokidar@5.0.0)(supports-color@8.1.1))(@swc/core@1.16.22(@swc/helpers@0.5.24))(nx@23.2.1(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/core@1.16.22(@swc/helpers@0.5.24)))(supports-color@8.1.1)
@@ -10923,9 +10949,7 @@ snapshots:
       picocolors: 1.1.1
       tslib: 2.9.1
     optionalDependencies:
-      '@nx/eslint': 23.3.2(@babel/traverse@7.29.14(supports-color@8.1.1))(@nx/jest@23.2.1(ce74c889f2b884f1d456563be29c95ac))(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/cli@0.8.2(@swc/core@1.16.22(@swc/helpers@0.5.24))(chokidar@5.0.0)(supports-color@8.1.1))(@swc/core@1.16.22(@swc/helpers@0.5.24))(@zkochan/js-yaml@0.0.7)(eslint@10.15.0(jiti@2.7.0)(supports-color@8.1.1))(nx@23.2.1(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/core@1.16.22(@swc/helpers@0.5.24)))(supports-color@8.1.1)
       '@nx/jest': 23.2.1(ce74c889f2b884f1d456563be29c95ac)
-      '@nx/vite': 23.3.2(32838884245cc9b59aa7bf9d570cc96d)
       '@nx/webpack': 23.2.1(@babel/traverse@7.29.14(supports-color@8.1.1))(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/cli@0.8.2(@swc/core@1.16.22(@swc/helpers@0.5.24))(chokidar@5.0.0)(supports-color@8.1.1))(@swc/core@1.16.22(@swc/helpers@0.5.24))(cssnano@7.1.9(postcss@8.5.33))(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(nx@23.2.1(@swc-node/register@1.11.1(@swc/core@1.16.22(@swc/helpers@0.5.24))(@swc/types@0.1.28)(supports-color@8.1.1)(typescript@6.0.3))(@swc/core@1.16.22(@swc/helpers@0.5.24)))(supports-color@8.1.1)(typescript@6.0.3)(uglify-js@3.19.3)(webpack-cli@7.3.1)(webpack-dev-server@5.2.7)(webpack@5.112.2)
     transitivePeerDependencies:
       - '@babel/traverse'

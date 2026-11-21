@@ -3,10 +3,11 @@ import { HTTPStatusCode } from '@ts-rest/core';
 import { tsr } from '../../../../server/tsr';
 import { z } from 'better-auth';
 import { IdServerErrorRes, ServerErrorRes } from '../../../../types/types';
+import { tsrErrorMessage } from '../../../../utils/utils';
 
 export async function validateSuperAdminEmail(email: string): Promise<true | string> {
   const res = await tsr.superAdmin.isValidSuperAdminEmail.mutate({ body: { email } });
-  if (res.status !== 200) return 'Validation error';
+  if (res.status !== 200) return tsrErrorMessage(res.body, 'Validation error');
   if (res.body.status === 'no_user_exists') return 'Given email is not an existing user';
   if (res.body.status === 'super_admin_exists') return 'Already a super admin';
 
@@ -15,7 +16,7 @@ export async function validateSuperAdminEmail(email: string): Promise<true | str
 
 export async function validateAdminEmail(email: string): Promise<true | string> {
   const res = await tsr.superAdmin.isValidAdminEmail.mutate({ body: { email } });
-  if (res.status !== 200) return 'Validation error';
+  if (res.status !== 200) return tsrErrorMessage(res.body, 'Validation error');
   if (res.body.status === 'no_user_exists') return 'Given email is not an existing user';
   if (res.body.status === 'admin_exists') return 'Already an admin';
 
@@ -23,9 +24,9 @@ export async function validateAdminEmail(email: string): Promise<true | string> 
 }
 
 type TsrResult =
-  | { status: 500 | 401; body: z.infer<typeof errorMsgSchema> }
+  | { status: 401 | 500; body: z.infer<typeof errorMsgSchema> }
   | { status: 200; body: unknown }
-  | { status: Exclude<HTTPStatusCode, 200 | 401 | 500>; body?: unknown };
+  | { status: Exclude<HTTPStatusCode, 200 | 401 | 500>; body: unknown };
 
 type SuccessBody<Res> = Extract<Res, { status: 200 }> extends { body: infer B } ? B : never;
 
@@ -38,7 +39,7 @@ function tsrResultToErrorRes(
   res: TsrResult,
   bodyTransform?: (body: any) => unknown
 ): ServerErrorRes<unknown> {
-  if (res.status === 500 || res.status === 401) {
+  if (res.status === 401 || res.status === 500) {
     return { status: 'error', error: res.body.message };
   }
   if (res.status !== 200) {

@@ -1,7 +1,10 @@
+'use client';
+
 import type { DateSelectInfo, EventInput } from '@fullcalendar/react';
 import themePlugin from '@fullcalendar/react/themes/breezy';
 import timeGridPlugin from '@fullcalendar/react/timegrid';
 import interactionPlugin from '@fullcalendar/react/interaction';
+import resourceTimelinePlugin from '@fullcalendar/react-scheduler/resource-timeline';
 
 import '@fullcalendar/react/skeleton.css';
 import '@fullcalendar/react/themes/breezy/theme.css';
@@ -19,10 +22,17 @@ import { Button } from '../ui/button';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
 import { PENDING_CLASS_NAME } from './constants';
 import { toDate } from './utils';
-import { hoursBetween } from '../../utils/utils';
+import { hoursBetween, tsrErrorMessage } from '../../utils/utils';
 import { tsr } from '../../server/tsr';
 import { toast } from '../ui/toast';
-import { Item, Org, Reservation, ServerErrorRes } from '../../types/types';
+import {
+  Item,
+  Org,
+  Reservation,
+  ReservationWithBorrowerName,
+  ServerErrorRes
+} from '../../types/types';
+import { authClient } from '../../client/auth-client';
 
 type CalendarProps = React.ComponentProps<'div'> & {
   defaultReservation: Reservation[];
@@ -30,7 +40,8 @@ type CalendarProps = React.ComponentProps<'div'> & {
   item: Item;
 };
 
-export function Calendar({ org, item, defaultReservation, ...props }: CalendarProps) {
+export function ItemCalendar({ org, item, defaultReservation, ...props }: CalendarProps) {
+  const session = authClient.useSession();
   const [events, setReservations] = useState<EventInput[]>(
     defaultReservation.map(({ status, ...res }) =>
       status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
@@ -39,6 +50,8 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
   const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
 
   const handleSelectEvent = (info: DateSelectInfo) => {
+    if (session.data === null) return;
+
     info.view.calendar.unselect();
 
     const eventId = crypto.randomUUID();
@@ -48,7 +61,7 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
       ...prev,
       {
         id: eventId,
-        title: item.name,
+        title: `${session.data!.user.name}'s reservation`,
         start: info.start,
         end: info.end,
         allDay: info.allDay
@@ -60,7 +73,7 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
     event: EventInput,
     status: Reservation['status']
   ): Promise<ServerErrorRes<string>> {
-    if (event.start === undefined || event.end === undefined) {
+    if (session.data === null || event.start === undefined || event.end === undefined) {
       return { status: 'error' };
     }
 
@@ -68,11 +81,14 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
       body: {
         orgId: org.id,
         itemId: item.id,
+        borrowerId: session.data.user.id,
         event: {
-          status,
+          orgId: org.id,
+          itemId: item.id,
           start: toDate(event.start),
           end: toDate(event.end),
-          allDay: !!event.allDay
+          allDay: !!event.allDay,
+          status
         }
       }
     });
@@ -87,7 +103,7 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
 
     toast.add({
       type: 'error',
-      title: res.status === 500 ? res.body.message : 'Failed to add item reservation'
+      title: tsrErrorMessage(res.body, 'Failed to add item reservation')
     });
 
     return { status: 'error' };
@@ -187,5 +203,41 @@ export function Calendar({ org, item, defaultReservation, ...props }: CalendarPr
         />
       </div>
     </>
+  );
+}
+
+type OrgItemCalendarSummaryProps = React.ComponentProps<'div'> & {
+  items: { item: Item; reservations: ReservationWithBorrowerName[] }[];
+};
+
+export function OrgItemCalendarSummary({ items, ...props }: OrgItemCalendarSummaryProps) {
+  const events = items.flatMap((info) =>
+    info.reservations.map(({ status, ...res }) => {
+      const withResourceId = {
+        ...res,
+        resourceId: info.item.id + '',
+        title: `${res.borrowerName}'s reservation`
+      };
+      return status === 'pending'
+        ? { ...withResourceId, className: PENDING_CLASS_NAME }
+        : withResourceId;
+    })
+  );
+
+  return (
+    <div {...props}>
+      <FullCalendar
+        plugins={[themePlugin, resourceTimelinePlugin]}
+        schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
+        headerToolbar={{
+          start: 'today prev,next title',
+          end: 'resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth'
+        }}
+        height="100%"
+        initialView="resourceTimelineDay"
+        resources={items.map((info) => ({ id: info.item.id + '', title: info.item.name }))}
+        events={events}
+      />
+    </div>
   );
 }
