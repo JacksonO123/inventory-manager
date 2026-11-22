@@ -1,0 +1,40 @@
+import {
+  errorMsgSchema,
+  reservationSchema,
+  partialReservationSchema
+} from '@invm/api-contracts/schemas';
+import { c } from '../../contract';
+import { z } from 'zod';
+
+export const reservationRouter = c.router(
+  {
+    addReservation: {
+      path: '/add',
+      method: 'PUT',
+      body: z.object({
+        orgId: z.number().int().gte(0),
+        itemId: z.number().int().gte(0),
+        event: partialReservationSchema
+      }),
+      responses: {
+        200: z.object({
+          id: z.string().min(1)
+        }),
+        500: errorMsgSchema
+      }
+    },
+    getByItemIdAndOrgPath: {
+      path: '/get/:orgPath/:itemId',
+      method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1),
+        itemId: z.coerce.number().int().gte(0)
+      }),
+      responses: {
+        200: z.array(reservationSchema),
+        500: errorMsgSchema
+      }
+    }
+  },
+  { pathPrefix: '/reservation' }
+);

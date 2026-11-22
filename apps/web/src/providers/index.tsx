@@ -1,14 +1,16 @@
-import { BasicAuthProvider } from './BasicAuthProvider';
+import { AdminContextType } from '../contexts/admin-context';
+import { AdminProvider } from './AdminProvider';
 import { ReactQueryProvider } from './ReactQueryProvider';
 
 type ProvidersProps = {
-  children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode;
+  adminStatus: AdminContextType;
 };
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children, adminStatus }: ProvidersProps) {
   return (
     <ReactQueryProvider>
-      <BasicAuthProvider>{children}</BasicAuthProvider>
+      <AdminProvider adminStatus={adminStatus}>{children}</AdminProvider>
     </ReactQueryProvider>
   );
 }

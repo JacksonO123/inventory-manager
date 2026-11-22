@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '../../server/auth';
 import { headers } from 'next/headers';
-import { tsrFactory } from '../../server/tsrFactory';
+import { tsrFactory } from '../../server/tsr-factory';
 
 export const dynamic = 'force-dynamic';
 

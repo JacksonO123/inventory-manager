@@ -1,9 +1,11 @@
 import { rootWebRouter } from '@invm/api-contracts/web';
 import { createNextRoute, createNextRouter } from '@ts-rest/next';
 import { nextItemRoute } from '../../server/routes/item';
-import { basicAuthRoute } from '../../server/routes/auth';
 import { adminRoute } from '../../server/routes/admin';
-import { superAdminRoute } from '../../server/routes/superAdmin';
+import { superAdminRoute } from '../../server/routes/super-admin';
+import { orgRoute } from '../../server/routes/org';
+import { reservationRoute } from '../../server/routes/reservation';
+import { userRoute } from '../../server/routes/user';
 
 const router = createNextRoute(rootWebRouter, {
   debug: async () => {
@@ -11,9 +13,11 @@ const router = createNextRoute(rootWebRouter, {
   },
 
   item: nextItemRoute,
-  auth: basicAuthRoute,
   admin: adminRoute,
-  superAdmin: superAdminRoute
+  superAdmin: superAdminRoute,
+  organizations: orgRoute,
+  reservation: reservationRoute,
+  user: userRoute
 });
 
 export default createNextRouter(rootWebRouter, router);

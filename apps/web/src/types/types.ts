@@ -3,14 +3,19 @@ import {
   basicUserSchema,
   basicUserSchemaOmitId,
   itemSchema,
+  orgPositionsSchema,
+  orgSchema,
   partialItemSchema,
-  userSchema
+  userSchema,
+  partialReservationSchema,
+  unrefinedReservationSchema,
+  orgMemberSchema
 } from '@invm/api-contracts/schemas';
 import { z } from 'zod';
 
 export type Item = z.infer<typeof itemSchema>;
 
-export type ItemAndBasicUserBorrower = Item & { borrower: BasicUser['id'] | null };
+export type ItemAndBasicUserBorrower = Item & { borrower: string | null };
 
 export type PartialItem = z.infer<typeof partialItemSchema>;
 
@@ -35,3 +40,17 @@ export type ServerErrorRes<T = unknown> =
   | { status: 'success'; body: T };
 
 export type IdServerErrorRes = ServerErrorRes<{ userId: string }>;
+
+export type Org = z.infer<typeof orgSchema>;
+
+export type PartialOrg = Omit<Org, 'id'>;
+
+export type OrgPositions = z.infer<typeof orgPositionsSchema>;
+
+export type Reservation = z.infer<typeof unrefinedReservationSchema>;
+
+export type PartialReservation = z.infer<typeof partialReservationSchema>;
+
+export type OrgMember = z.infer<typeof orgMemberSchema>;
+
+export type PartialOrgMember = Omit<OrgMember, 'id'>;

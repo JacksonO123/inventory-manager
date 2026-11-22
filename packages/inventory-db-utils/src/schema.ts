@@ -83,12 +83,6 @@ export const itemTable = pgTable('item', {
   is_damaged: t.boolean().notNull().default(false)
 });
 
-export const basicUserTable = pgTable('basic_user', {
-  id: t.serial().primaryKey(),
-  name: t.text().notNull(),
-  email: t.text().notNull().unique()
-});
-
 export const checkoutTable = pgTable(
   'checkout',
   {
@@ -98,9 +92,9 @@ export const checkoutTable = pgTable(
       .notNull()
       .references(() => itemTable.id, { onDelete: 'cascade' }),
     borrowerId: t
-      .integer('borrower_id')
+      .text('borrower_id')
       .notNull()
-      .references(() => basicUserTable.id, { onDelete: 'cascade' }),
+      .references(() => user.id, { onDelete: 'cascade' }),
     checkedOutAt: t
       .timestamp('checked_out_at', { precision: 6, withTimezone: true })
       .notNull()
@@ -113,28 +107,90 @@ export const checkoutTable = pgTable(
   ]
 );
 
-export const superAdminTable = pgTable(
-  'super_admin',
+export const superAdminTable = pgTable('super_admin', {
+  id: t.serial().primaryKey(),
+  userId: t
+    .text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' })
+});
+
+export const adminTable = pgTable('admin', {
+  id: t.serial().primaryKey(),
+  userId: t
+    .text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' })
+});
+
+export const orgTable = pgTable(
+  'organization',
   {
     id: t.serial().primaryKey(),
-    user_id: t
-      .text('user_id')
-      .notNull()
-      .unique()
-      .references(() => user.id, { onDelete: 'cascade' })
+    name: t.text('name').notNull(),
+    description: t.text('description').notNull(),
+    svgDataUrl: t.text('svg_data_url'),
+    path: t.text('path').notNull()
   },
-  (table) => [t.index('super_admin_user_id_index').on(table.user_id)]
+  (table) => [t.index('organization_path_index').on(table.path)]
 );
 
-export const adminTable = pgTable(
-  'admin',
+export const orgPositionsTable = pgTable('org_positions', {
+  id: t.serial().primaryKey(),
+  userId: t
+    .text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  positions: t.jsonb('positions').$type<number[]>().notNull()
+});
+
+export const eventStatusPgEnum = t.pgEnum('status', ['accepted', 'pending', 'canceled']);
+
+export const reservationTable = pgTable('reservation', {
+  id: t.serial().primaryKey(),
+  status: eventStatusPgEnum().notNull(),
+  start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
+  end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
+  allDay: t.boolean('all_day').notNull()
+});
+
+export const orgItemTable = pgTable(
+  'org_item',
   {
     id: t.serial().primaryKey(),
-    user_id: t
+    orgId: t
+      .integer('org_id')
+      .notNull()
+      .references(() => orgTable.id, { onDelete: 'cascade' }),
+    itemId: t
+      .integer('item_id')
+      .notNull()
+      .references(() => itemTable.id, { onDelete: 'cascade' })
+  },
+  (table) => [
+    t.unique('org_item_org_item_unique').on(table.orgId, table.itemId),
+    t.index('org_item_item_id_idx').on(table.itemId)
+  ]
+);
+
+export const orgMemberTable = pgTable(
+  'org_member',
+  {
+    id: t.serial().primaryKey(),
+    userId: t
       .text('user_id')
       .notNull()
-      .unique()
-      .references(() => user.id, { onDelete: 'cascade' })
+      .references(() => user.id, { onDelete: 'cascade' }),
+    orgId: t
+      .integer('org_id')
+      .notNull()
+      .references(() => orgTable.id, { onDelete: 'cascade' })
   },
-  (table) => [t.index('admin_user_id_index').on(table.user_id)]
+  (table) => [
+    t.unique('org_member_user_org_unique').on(table.userId, table.orgId),
+    t.index('org_member_org_id_index').on(table.orgId)
+  ]
 );
