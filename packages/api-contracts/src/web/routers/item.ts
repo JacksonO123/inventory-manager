@@ -98,6 +98,19 @@ export const itemRouter = c.router(
         401: errorMsgSchema,
         500: errorMsgSchema
       }
+    },
+    getAll: {
+      path: '/get-all',
+      method: 'GET',
+      responses: {
+        200: z.array(
+          z.object({
+            orgId: z.number().int().gte(0),
+            items: z.array(itemSchema)
+          })
+        ),
+        500: errorMsgSchema
+      }
     }
   },
   { pathPrefix: '/item' }

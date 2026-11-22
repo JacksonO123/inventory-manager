@@ -154,4 +154,15 @@ export class Item {
 
     return res;
   }
+
+  static async getAllGroupByOrgs() {
+    return await db
+      .select({
+        orgId: orgItemTable.orgId,
+        items: sql<ItemType[]>`coalesce(json_agg(${itemTable}.*), '[]'::json)`
+      })
+      .from(itemTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.itemId, itemTable.id))
+      .groupBy(orgItemTable.orgId);
+  }
 }

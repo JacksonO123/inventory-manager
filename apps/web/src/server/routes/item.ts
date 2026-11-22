@@ -98,5 +98,21 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
     } catch (err) {
       return errorResponse(err);
     }
+  },
+
+  getAll: async ({ req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const isSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
+      if (!isSuperAdmin) return unauthorizedResponse;
+
+      const items = await Item.getAllGroupByOrgs();
+
+      return { status: 200, body: items };
+    } catch (err) {
+      return errorResponse(err);
+    }
   }
 });

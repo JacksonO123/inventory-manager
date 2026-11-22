@@ -10,37 +10,27 @@ import Link from 'next/link';
 import { CreateOrgButton } from '../../../../components/CreateOrgButton';
 import { Orgs } from '../../../../components/Orgs';
 import { tsrErrorMessage } from '../../../../utils/utils';
+import { useOrgPositions, useOrgs } from '../../../../stores/orgs';
 
-type SuperAdminContentProps = {
-  orgs: Org[];
-  positions: number[];
-};
-
-export function SuperAdminContent({
-  orgs: initialOrgs,
-  positions: initialOrgPositions
-}: SuperAdminContentProps) {
-  const [orgs, setOrgs] = useState(initialOrgs);
-  const [orgPositions, setOrgPositions] = useState([
-    ...initialOrgPositions,
-    ...orgs.filter((item) => !initialOrgPositions.includes(item.id)).map((item) => item.id)
-  ]);
+export function SuperAdminContent() {
+  const { orgs, setOrgs } = useOrgs();
+  const { positions, setPositions } = useOrgPositions();
   const [editing, setEditing] = useState(false);
 
   async function handleCreateOrgSubmit(partialOrg: PartialOrg) {
     setOrgs((prev) => [{ ...partialOrg, id: -1 }, ...prev]);
-    setOrgPositions((prev) => [-1, ...prev]);
+    setPositions((prev) => [-1, ...prev]);
     const res = await tsr.organizations.create.mutate({ body: partialOrg });
     if (res.status !== 200) {
       setOrgs((prev) => prev.filter((item) => item.id !== -1));
-      setOrgPositions((prev) => prev.filter((item) => item !== -1));
+      setPositions((prev) => prev.filter((item) => item !== -1));
       toast.add({
         type: 'error',
         title: tsrErrorMessage(res.body, 'Failed to add org')
       });
     } else {
       setOrgs((prev) => prev.map((item) => (item.id === -1 ? { ...item, id: res.body.id } : item)));
-      setOrgPositions((prev) => prev.map((item) => (item === -1 ? res.body.id : item)));
+      setPositions((prev) => prev.map((item) => (item === -1 ? res.body.id : item)));
       toast.add({
         type: 'success',
         title: 'Successfully added org'
@@ -49,14 +39,14 @@ export function SuperAdminContent({
   }
 
   async function handleSetOrgPositions(newOrder: number[]) {
-    const prevOrder = [...orgPositions];
-    setOrgPositions(newOrder);
+    const prevOrder = [...positions];
+    setPositions(newOrder);
 
     const res = await tsr.organizations.setPositions.mutate({
       body: { positions: newOrder }
     });
     if (res.status !== 200) {
-      setOrgPositions(prevOrder);
+      setPositions(prevOrder);
       toast.add({
         type: 'error',
         title: tsrErrorMessage(res.body, 'Failed to reorder orgs')
@@ -131,9 +121,7 @@ export function SuperAdminContent({
         </div>
       </div>
       <Orgs
-        orgs={orgs}
         managing={editing}
-        positions={orgPositions}
         onUpdate={handleUpdateOrg}
         onDelete={handleDeleteOrg}
         onReorder={handleSetOrgPositions}
