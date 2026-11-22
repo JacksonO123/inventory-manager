@@ -38,5 +38,14 @@ export function SuperAdminSidebarContents({
     }
   }
 
-  return <OrgSidebar orgs={orgs} current={current} onCreateOrg={handleCreateOrgSubmit} />;
+  function handleEditSubmit() {}
+
+  return (
+    <OrgSidebar
+      orgs={orgs}
+      current={current}
+      onCreateOrg={handleCreateOrgSubmit}
+      onEditSubmit={handleEditSubmit}
+    />
+  );
 }

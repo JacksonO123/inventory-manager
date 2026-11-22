@@ -96,7 +96,7 @@ export function OrgMembers({
                 <DialogHeader>
                   <DialogTitle>
                     Enter email of new{' '}
-                    <span className="text-primary font-bold">org {memberName}</span>
+                    <span className="text-primary font-bold">Org {memberName}</span>
                   </DialogTitle>
                 </DialogHeader>
                 <NewAdminForm

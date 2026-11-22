@@ -97,7 +97,6 @@ export function OrgContent({
                     onSubmit={(updatedOrg) => onUpdate({ ...updatedOrg, id: org.id })}
                     onCancel={() => setEditDialogOpen(false)}
                   />
-                  ;
                 </DialogContent>
               </Dialog>
               <Dialog>
