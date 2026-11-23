@@ -3,20 +3,21 @@
 import { useElementSize, useLocalStorage } from '@mantine/hooks';
 import { OrgItemCalendarSummary } from '../../../../components/Calendar';
 import { Tab, TabContent, TabGroup, Tabs } from '../../../../components/Tabs';
-import { Item, Org, ReservationWithBorrowerName } from '../../../../types/types';
+import { Org } from '../../../../types/types';
 import { ItemsManager } from './ItemsManager.tsx';
 import { Button } from '../../../../components/ui/button';
 import { Plus } from 'lucide-react';
+import { useItemsFor } from '../../../../stores/items';
+import { useReservations } from '../../../../stores/reservations';
 
 type SuperAdminTabGroupProps = {
   org: Org;
-  items: {
-    item: Item;
-    reservations: ReservationWithBorrowerName[];
-  }[];
 };
 
-export function CalendarAndItemsTabGroup({ org, items }: SuperAdminTabGroupProps) {
+export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
+  const { items } = useItemsFor(org.id);
+  const { reservations } = useReservations();
+
   const [tab, setTab] = useLocalStorage<string | null>({
     key: 'calendar-and-items-tab-group-state',
     defaultValue: null
@@ -32,11 +33,15 @@ export function CalendarAndItemsTabGroup({ org, items }: SuperAdminTabGroupProps
         </TabGroup>
         <TabContent tab="calendar">
           <div className="h-8"></div>
-          <OrgItemCalendarSummary className="h-full min-h-140" items={items} />
+          <OrgItemCalendarSummary
+            className="h-full min-h-140"
+            items={items}
+            reservations={reservations}
+          />
         </TabContent>
         <TabContent tab="items">
           <ItemsManager
-            items={items.map((info) => info.item)}
+            items={items}
             org={org}
             customActionBarRenderFn={(createItem) => (
               <div className="flex justify-between flex-wrap gap-4 w-full">

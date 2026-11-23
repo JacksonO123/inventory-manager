@@ -22,23 +22,13 @@ export class Item {
   static async getAllFromOrgPath(orgPath: string) {
     const res = await db
       .select({
-        item: itemTable,
-        reservations: sql<
-          ReservationWithBorrowerName[]
-        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})) filter (where ${reservationTable.id} is not null), '[]'::json)`
+        item: itemTable
       })
-      .from(orgTable)
-      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
-      .innerJoin(itemTable, eq(itemTable.id, orgItemTable.itemId))
-      .leftJoin(
-        reservationTable,
-        and(eq(reservationTable.itemId, itemTable.id), eq(reservationTable.orgId, orgTable.id))
-      )
-      .leftJoin(user, eq(reservationTable.borrower, user.id))
-      .where(eq(orgTable.path, orgPath))
-      .groupBy(itemTable.id);
+      .from(itemTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.itemId, itemTable.id))
+      .innerJoin(orgTable, and(eq(orgTable.id, orgItemTable.orgId), eq(orgTable.path, orgPath)));
 
-    return res;
+    return res.map((entry) => new Item(entry.item));
   }
 
   static async create(values: PartialItem, orgId: number) {

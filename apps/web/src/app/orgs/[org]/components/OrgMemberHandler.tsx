@@ -7,17 +7,17 @@ import { tsr } from '../../../../server/tsr';
 import { toast } from '../../../../components/ui/toast';
 import { tsrErrorMessage } from '../../../../utils/utils';
 
-type SuperAdminContentProps = {
+type OrgMemberHandlerProps = {
   org: Org;
   adminMembers: PartialAdminAndEmail[];
   userMembers: PartialAdminAndEmail[];
 };
 
-export function SuperAdminContent({
+export function OrgMemberHandler({
   org,
   adminMembers: defaultAdminMembers,
   userMembers: defaultUserMembers
-}: SuperAdminContentProps) {
+}: OrgMemberHandlerProps) {
   const [adminMembers, setAdminMembers] = useState(defaultAdminMembers);
   const [userMembers, setUserMembers] = useState(defaultUserMembers);
   const [addAdminMemberOpen, setAddAdminMemberOpen] = useState(false);

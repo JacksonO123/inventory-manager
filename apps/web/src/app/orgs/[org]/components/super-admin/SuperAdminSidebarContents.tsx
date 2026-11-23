@@ -1,22 +1,18 @@
 'use client';
 
-import { useState } from 'react';
 import { OrgSidebar } from '../../../../../components/OrgSidebar';
-import { Org, PartialOrg } from '../../../../../types/types';
+import { PartialOrg } from '../../../../../types/types';
 import { tsr } from '../../../../../server/tsr';
 import { toast } from '../../../../../components/ui/toast';
 import { tsrErrorMessage } from '../../../../../utils/utils';
+import { useOrgs } from '../../../../../stores/orgs';
 
 type SuperAdminSidebarContentsProps = {
-  orgs: Org[];
   current: string;
 };
 
-export function SuperAdminSidebarContents({
-  orgs: defaultOrgs,
-  current
-}: SuperAdminSidebarContentsProps) {
-  const [orgs, setOrgs] = useState(defaultOrgs);
+export function SuperAdminSidebarContents({ current }: SuperAdminSidebarContentsProps) {
+  const { orgs, setOrgs } = useOrgs();
 
   async function handleCreateOrgSubmit(partialOrg: PartialOrg) {
     setOrgs((prev) => [{ ...partialOrg, id: -1 }, ...prev]);

@@ -1,5 +1,8 @@
 import { tsrFactory } from '../../../../../server/tsr-factory';
-import { Org } from '../../../../../types/types';
+import { InitItems } from '../../../../../stores/client-helpers/InitItems';
+import { InitOrgs } from '../../../../../stores/client-helpers/InitOrgs';
+import { Item, Org } from '../../../../../types/types';
+import { extractBodyOrDefault } from '../../../../../utils/utils';
 import { CalendarAndItemsTabGroup } from '../CalendarAndItemsTabGroup';
 
 type AdminContentsProps = {
@@ -8,7 +11,21 @@ type AdminContentsProps = {
 
 export async function AdminPage({ org }: AdminContentsProps) {
   const tsr = await tsrFactory();
-  const items = await tsr.item.getItemsFromOrgPath.query({ params: { orgPath: org.path } });
+  const itemsRes = await tsr.organizations.getInfoForAdmin.query();
+  const info = extractBodyOrDefault(itemsRes, []);
+  const groupedItems = info.reduce(
+    (acc, curr) => {
+      acc[curr.org.id] = curr.items;
+      return acc;
+    },
+    {} as Record<number, Item[]>
+  );
 
-  return <CalendarAndItemsTabGroup org={org} items={items.status === 200 ? items.body : []} />;
+  return (
+    <>
+      <InitItems items={groupedItems} />
+      <InitOrgs orgs={info.map((entry) => entry.org)} />
+      <CalendarAndItemsTabGroup org={org} />
+    </>
+  );
 }

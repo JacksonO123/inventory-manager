@@ -29,7 +29,7 @@ import {
   Item,
   Org,
   Reservation,
-  ReservationWithBorrowerName,
+  ReservationWithOptionalBorrowerName,
   ServerErrorRes
 } from '../../types/types';
 import { authClient } from '../../client/auth-client';
@@ -207,22 +207,33 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
 }
 
 type OrgItemCalendarSummaryProps = React.ComponentProps<'div'> & {
-  items: { item: Item; reservations: ReservationWithBorrowerName[] }[];
+  items: Item[];
+  reservations: ReservationWithOptionalBorrowerName[];
 };
 
-export function OrgItemCalendarSummary({ items, ...props }: OrgItemCalendarSummaryProps) {
-  const events = items.flatMap((info) =>
-    info.reservations.map(({ status, ...res }) => {
-      const withResourceId = {
-        ...res,
-        resourceId: info.item.id + '',
-        title: `${res.borrowerName}'s reservation`
-      };
-      return status === 'pending'
-        ? { ...withResourceId, className: PENDING_CLASS_NAME }
-        : withResourceId;
-    })
+export function OrgItemCalendarSummary({
+  items,
+  reservations,
+  ...props
+}: OrgItemCalendarSummaryProps) {
+  const itemIdToName = items.reduce(
+    (acc, curr) => {
+      acc[curr.id] = curr.name;
+      return acc;
+    },
+    {} as Record<number, string>
   );
+
+  const events = reservations.flatMap((reservation) => {
+    const withResourceId = {
+      ...reservation,
+      resourceId: reservation.itemId + '',
+      title: `${reservation.borrowerName ?? 'Anonymous'}'s reservation`
+    };
+    return reservation.status === 'pending'
+      ? { ...withResourceId, className: PENDING_CLASS_NAME }
+      : withResourceId;
+  });
 
   return (
     <div {...props}>
@@ -235,7 +246,10 @@ export function OrgItemCalendarSummary({ items, ...props }: OrgItemCalendarSumma
         }}
         height="100%"
         initialView="resourceTimelineDay"
-        resources={items.map((info) => ({ id: info.item.id + '', title: info.item.name }))}
+        resources={reservations.map((reservation) => ({
+          id: reservation.itemId + '',
+          title: itemIdToName[reservation.itemId]
+        }))}
         events={events}
       />
     </div>

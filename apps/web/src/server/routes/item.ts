@@ -31,7 +31,7 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       if (session === null) return unauthorizedResponse;
 
       const items = await Item.getAllFromOrgPath(params.orgPath);
-      return { status: 200, body: items };
+      return { status: 200, body: items.map((item) => item.values) };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }

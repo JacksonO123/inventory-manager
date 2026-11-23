@@ -2,10 +2,9 @@ import { PageContentWrapper } from '../../../../components/PageContentWrapper';
 import { RenderClientErrors } from '../../../../components/RenderClientErrors';
 import { tsrFactory } from '../../../../server/tsr-factory';
 import { SuperAdminContent } from './content';
-import { tsrErrorMessage } from '../../../../utils/utils';
+import { groupItems, tsrErrorMessage } from '../../../../utils/utils';
 import { InitOrgs } from '../../../../stores/client-helpers/InitOrgs';
 import { InitOrgPositions } from '../../../../stores/client-helpers/InitOrgPositions';
-import { Item } from '../../../../types/types';
 import { InitItems } from '../../../../stores/client-helpers/InitItems';
 
 export const dynamic = 'force-dynamic';
@@ -32,13 +31,7 @@ export async function SuperAdminPage() {
   const orgs = orgsRes.status === 200 ? orgsRes.body : [];
   const positions = orgPositionsRes.status === 200 ? orgPositionsRes.body : [];
   const items = itemsRes.status === 200 ? itemsRes.body : [];
-  const groupedItems = items.reduce(
-    (acc, curr) => {
-      acc[curr.orgId] = curr.items;
-      return acc;
-    },
-    {} as Record<number, Item[]>
-  );
+  const groupedItems = groupItems(items);
 
   return (
     <PageContentWrapper>

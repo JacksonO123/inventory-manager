@@ -1,5 +1,3 @@
-import { tsrFactory } from '../../../../../server/tsr-factory';
-import { Org } from '../../../../../types/types';
 import { SuperAdminSidebarContents } from './SuperAdminSidebarContents';
 
 type SidebarProps = {
@@ -7,9 +5,5 @@ type SidebarProps = {
 };
 
 export async function SuperAdminSidebar({ current }: SidebarProps) {
-  const tsr = await tsrFactory();
-  const orgsRes = await tsr.organizations.getAll.query();
-  const orgs: Org[] = orgsRes.status === 200 ? orgsRes.body : [];
-
-  return <SuperAdminSidebarContents orgs={orgs} current={current} />;
+  return <SuperAdminSidebarContents current={current} />;
 }

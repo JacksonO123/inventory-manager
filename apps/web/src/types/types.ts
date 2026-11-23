@@ -57,6 +57,4 @@ export type PartialOrgMember = Omit<OrgMember, 'id'>;
 
 export type ReservationWithBorrowerName = Reservation & { borrowerName: string };
 
-export type OrgWithAllInfo = Org & {
-  items: (Item & { reservations: (Reservation & { borrowerName?: string })[] })[];
-};
+export type ReservationWithOptionalBorrowerName = Reservation & { borrowerName?: string };
