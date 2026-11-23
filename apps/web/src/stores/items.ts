@@ -18,7 +18,8 @@ export const useItems = create<ItemsState & ItemsActions>((set) => ({
 }));
 
 export function useItemsFor(orgId: number) {
-  const items = useItems((state) => state.items[orgId] ?? []);
+  const storedItems = useItems((state) => state.items[orgId]);
+  const items = storedItems ?? [];
   const setItemsForFromState = useItems((state) => state.setItemsFor);
 
   function handleSetItems(newItems: Item[]) {
