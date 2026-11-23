@@ -23,7 +23,8 @@ export const reservationRouter = c.router(
           id: z.string().min(1)
         }),
         500: errorMsgSchema,
-        401: errorMsgSchema
+        401: errorMsgSchema,
+        409: errorMsgSchema
       }
     },
     getByItemIdAndOrgPath: {
@@ -37,6 +38,23 @@ export const reservationRouter = c.router(
         200: z.array(reservationSchema),
         500: errorMsgSchema,
         401: errorMsgSchema
+      }
+    },
+    getByItemIdAndOrgPathBetweenDates: {
+      path: '/get-between-dates/:orgPath/:itemId',
+      method: 'POST',
+      pathParams: z.object({
+        orgPath: z.string().min(1),
+        itemId: z.coerce.number().int().gte(0)
+      }),
+      body: z.object({
+        start: z.coerce.date(),
+        end: z.coerce.date()
+      }),
+      responses: {
+        200: z.array(reservationSchema),
+        401: errorMsgSchema,
+        500: errorMsgSchema
       }
     }
   },

@@ -7,6 +7,8 @@ import { errorResponse } from './utils/errors';
 import { hoursBetween } from '../../utils/utils';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
 import { Reservation } from '../model/Reservation';
+import { SuperAdmin } from '../model/SuperAdmin';
+import { User } from '../model/User';
 
 export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
   addReservation: async ({ body, req }) => {
@@ -25,6 +27,10 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
 
       const event = await Reservation.create(body.event, body.borrowerId, body.event.status);
 
+      if (event === null) {
+        return { status: 409, body: { message: 'Reservation overlaps' } };
+      }
+
       return { status: 200, body: { id: event.values.id } };
     } catch (err) {
       return errorResponse(err);
@@ -38,6 +44,35 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
       const items = await Reservation.getByItemIdAndOrgPath(params.itemId, params.orgPath);
 
       return { status: 200, body: items.map((res) => res.values) };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  getByItemIdAndOrgPathBetweenDates: async ({ req, body, params }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const [isSuperAdmin, memberOfOrg] = await Promise.all([
+        SuperAdmin.isSuperAdmin(session.user.id),
+        User.isMemberOfOrgByPath(session.user.id, params.orgPath)
+      ]);
+
+      if (!isSuperAdmin && !memberOfOrg) {
+        return unauthorizedResponse;
+      }
+
+      const reservations = await Reservation.getByItemIdAndOrgPathBetweenDates(
+        params.orgPath,
+        params.itemId,
+        body.start,
+        body.end
+      );
+
+      return {
+        status: 200,
+        body: reservations.map((reservation) => ({ ...reservation, id: reservation.id + '' }))
+      };
     } catch (err) {
       return errorResponse(err);
     }

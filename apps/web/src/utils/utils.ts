@@ -1,4 +1,4 @@
-import { Item } from '../types/types';
+import { Item, Org } from '../types/types';
 import { HTTPStatusCode } from '@ts-rest/core';
 
 export function hoursBetween(dateStart: Date, dateEnd: Date) {
@@ -15,10 +15,15 @@ export function tsrErrorMessage(body: unknown, fallback: string): string {
   return fallback;
 }
 
-export function groupItems(items: { orgId: number; items: Item[] }[]) {
-  return items.reduce(
+export function groupItems(info: { org: Org; items: Item[] }[]): Record<number, Item[]>;
+export function groupItems(info: { orgId: number; items: Item[] }[]): Record<number, Item[]>;
+export function groupItems(
+  info: ({ org: Org; items: Item[] } | { orgId: number; items: Item[] })[]
+): Record<number, Item[]> {
+  return info.reduce(
     (acc, curr) => {
-      acc[curr.orgId] = curr.items;
+      const orgId = 'orgId' in curr ? curr.orgId : curr.org.id;
+      acc[orgId] = curr.items;
       return acc;
     },
     {} as Record<number, Item[]>

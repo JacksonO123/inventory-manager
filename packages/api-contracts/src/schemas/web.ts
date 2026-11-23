@@ -48,13 +48,13 @@ export const orgPositionsSchema = z.object({
   positions: z.array(z.number().int().gte(0))
 });
 
-export const eventStatusEnum = z.enum(['accepted', 'pending', 'canceled']);
+export const reservationStatusEnum = z.enum(['accepted', 'pending', 'canceled']);
 
 export const unrefinedReservationSchema = z.object({
   id: z.string().min(1),
   orgId: z.number().int().gte(0),
   itemId: z.number().int().gte(0),
-  status: eventStatusEnum,
+  status: reservationStatusEnum,
   start: z.coerce.date(),
   end: z.coerce.date(),
   allDay: z.boolean(),

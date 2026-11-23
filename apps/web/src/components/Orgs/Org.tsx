@@ -94,7 +94,10 @@ export function OrgContent({
                 <DialogContent>
                   <CreateOrgForm
                     defaultValues={org}
-                    onSubmit={(updatedOrg) => onUpdate({ ...updatedOrg, id: org.id })}
+                    onSubmit={(updatedOrg) => {
+                      onUpdate({ ...updatedOrg, id: org.id });
+                      setEditDialogOpen(false);
+                    }}
                     onCancel={() => setEditDialogOpen(false)}
                   />
                 </DialogContent>

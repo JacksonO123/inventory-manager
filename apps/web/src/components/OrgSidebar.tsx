@@ -16,15 +16,16 @@ import {
 } from './ui/dropdown-menu';
 import { Dialog, DialogContent } from './ui/dialog';
 import { CreateOrgForm } from './Orgs';
+import { useOrgs } from '../stores/orgs';
 
 type OrgSidebar = {
-  orgs: Org[];
   current: string;
   onCreateOrg?: (org: PartialOrg) => void;
-  onEditSubmit?: () => void;
+  onEditSubmit?: (org: Org) => void;
 };
 
-export function OrgSidebar({ orgs, current, onCreateOrg, onEditSubmit }: OrgSidebar) {
+export function OrgSidebar({ current, onCreateOrg, onEditSubmit }: OrgSidebar) {
+  const { orgs } = useOrgs();
   const sidebarId = useId();
 
   return (

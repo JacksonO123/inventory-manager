@@ -41,7 +41,6 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
         </TabContent>
         <TabContent tab="items">
           <ItemsManager
-            items={items}
             org={org}
             customActionBarRenderFn={(createItem) => (
               <div className="flex justify-between flex-wrap gap-4 w-full">

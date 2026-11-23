@@ -12,11 +12,12 @@ import '@fullcalendar/react/themes/breezy/palettes/indigo.css';
 import './style.css';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const FullCalendar = dynamic(() => import('@fullcalendar/react').then((mod) => mod.default), {
   ssr: false
 });
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
@@ -33,6 +34,7 @@ import {
   ServerErrorRes
 } from '../../types/types';
 import { authClient } from '../../client/auth-client';
+import { useReservations } from '../../stores/reservations';
 
 type CalendarProps = React.ComponentProps<'div'> & {
   defaultReservation: Reservation[];
@@ -42,12 +44,20 @@ type CalendarProps = React.ComponentProps<'div'> & {
 
 export function ItemCalendar({ org, item, defaultReservation, ...props }: CalendarProps) {
   const session = authClient.useSession();
-  const [events, setReservations] = useState<EventInput[]>(
+  const { setReservations: setStoreReservations } = useReservations();
+  const [events, setEvents] = useState<EventInput[]>(
     defaultReservation.map(({ status, ...res }) =>
       status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
     )
   );
   const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
+
+  const visibleRangeRef = useRef<{ start: Date; end: Date } | null>(null);
+  const lastAddedEventIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    lastAddedEventIdRef.current = lastAddedEventId;
+  }, [lastAddedEventId]);
 
   const handleSelectEvent = (info: DateSelectInfo) => {
     if (session.data === null) return;
@@ -57,7 +67,7 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
     const eventId = crypto.randomUUID();
     setLastAddedEventId(eventId);
 
-    setReservations((prev) => [
+    setEvents((prev) => [
       ...prev,
       {
         id: eventId,
@@ -122,7 +132,7 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
     const difference = hoursBetween(toDate(event.start), toDate(event.end));
     if (difference > MAX_FREE_RESERVE_HOURS) {
       const newEvent = events.find((res) => res.id === lastAddedEventId);
-      setReservations((events) =>
+      setEvents((events) =>
         events.map((item) => {
           if (item.id === lastAddedEventId) {
             return {
@@ -144,19 +154,57 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
     }
 
     if (successStatus.status === 'success') {
-      setReservations((prev) =>
+      setEvents((prev) =>
         prev.map((res) => (res.id === lastAddedEventId ? { ...res, id: successStatus.body } : res))
       );
     } else {
-      setReservations((prev) => prev.filter((res) => res.id !== lastAddedEventId));
+      setEvents((prev) => prev.filter((res) => res.id !== lastAddedEventId));
     }
   }
 
   function filterAddedEvent() {
     if (lastAddedEventId === null) return;
-    setReservations((events) => events.filter((event) => event.id !== lastAddedEventId));
+    setEvents((events) => events.filter((event) => event.id !== lastAddedEventId));
     setLastAddedEventId(null);
   }
+
+  async function fetchRelevantReservations(start: Date, end: Date) {
+    const fetched = await tsr.reservation.getByItemIdAndOrgPathBetweenDates.mutate({
+      params: { orgPath: org.path, itemId: item.id },
+      body: { start, end }
+    });
+    if (fetched.status !== 200) {
+      toast.add({
+        type: 'error',
+        title: 'Failed to fetch reservations for calendar'
+      });
+      return;
+    }
+
+    const fetchedReservations = fetched.body;
+
+    setStoreReservations(fetchedReservations);
+
+    setEvents((prev) => {
+      const pendingId = lastAddedEventIdRef.current;
+      const pendingEvent =
+        pendingId !== null ? prev.find((event) => event.id === pendingId) : undefined;
+      const fetchedEvents = fetchedReservations.map(({ status, ...res }) =>
+        status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
+      );
+      return pendingEvent !== undefined ? [...fetchedEvents, pendingEvent] : fetchedEvents;
+    });
+  }
+
+  useEffect(() => {
+    if (session.data === null) return;
+    if (visibleRangeRef.current === null) return;
+    const { start, end } = visibleRangeRef.current;
+    tsr.reservation.getByItemIdAndOrgPathBetweenDates.mutate({
+      params: { orgPath: org.path, itemId: item.id },
+      body: { start, end }
+    });
+  }, [session.data]);
 
   return (
     <>
@@ -183,6 +231,12 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
           selectable={true}
           selectMirror={true}
           select={handleSelectEvent}
+          datesSet={(arg) => {
+            visibleRangeRef.current = { start: arg.start, end: arg.end };
+            if (session.data !== null) {
+              void fetchRelevantReservations(arg.start, arg.end);
+            }
+          }}
           events={events}
           editable={true}
           slotDuration="00:15:00"

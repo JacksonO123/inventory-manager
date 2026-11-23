@@ -30,11 +30,9 @@ export class Org {
   }
 
   static async update(org: OrgType) {
-    const [res] = await db.update(orgTable).set(org).returning();
-    if (res === undefined) {
-      throw new Error('Failed to update org');
-    }
-    return new Org(res);
+    const { id, ...rest } = org;
+    const [res] = await db.update(orgTable).set(rest).where(eq(orgTable.id, id)).returning();
+    return new Org(res!);
   }
 
   static async deleteById(id: number) {
