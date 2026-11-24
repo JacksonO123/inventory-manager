@@ -30,7 +30,7 @@ export function OrgSidebar({ current, onCreateOrg, onEditSubmit }: OrgSidebar) {
 
   return (
     <div className="h-full w-72 border-r p-4 flex flex-col gap-2">
-      {onCreateOrg && <CreateOrgButton onCreate={onCreateOrg} />}
+      {onCreateOrg && <CreateOrgButton onCreate={onCreateOrg} className="h-9" />}
       {orgs.map((org, index) => (
         <SidebarLink
           key={`org-${index}-${sidebarId}`}

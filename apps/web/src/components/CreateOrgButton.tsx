@@ -5,11 +5,11 @@ import { useState } from 'react';
 import { PartialOrg } from '../types/types';
 import { Button } from './ui/button';
 
-type CreateOrgButtonProps = {
+type CreateOrgButtonProps = Omit<React.ComponentProps<typeof Button>, 'children'> & {
   onCreate: (org: PartialOrg) => void;
 };
 
-export function CreateOrgButton({ onCreate }: CreateOrgButtonProps) {
+export function CreateOrgButton({ onCreate, ...props }: CreateOrgButtonProps) {
   const [createOrgOpen, setCreateOrgOpen] = useState(false);
 
   return (
@@ -17,7 +17,7 @@ export function CreateOrgButton({ onCreate }: CreateOrgButtonProps) {
       <DialogTrigger
         suppressHydrationWarning
         render={
-          <Button>
+          <Button {...props}>
             <Plus /> Create Org
           </Button>
         }
