@@ -18,7 +18,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
 
       const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
 
-      if (userIsSuperAdmin || queriedUser.email === session.user.email) {
+      if (userIsSuperAdmin || queriedUser.values.email === session.user.email) {
         let isAdmin = await Admin.isAdmin(body.id);
         if (!isAdmin) {
           isAdmin = await SuperAdmin.isSuperAdmin(body.id);
@@ -45,12 +45,12 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
         return { status: 500, body: { message: 'User does not exist' } };
       }
 
-      const admin = await Admin.create(queriedUser.id);
+      const admin = await Admin.create(queriedUser.values.id);
       if (admin === undefined) {
         return { status: 500, body: { message: 'Failed to create admin' } };
       }
 
-      return { status: 200, body: { userId: admin.values.user_id, id: admin.values.id } };
+      return { status: 200, body: { userId: admin.values.userId, id: admin.values.id } };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
     }
@@ -69,7 +69,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
         body: {
           admins: allAdmins.map((item) => ({
             id: item.values.id,
-            user_id: item.values.user_id,
+            userId: item.values.userId,
             email: item.email
           }))
         }
@@ -106,7 +106,7 @@ export const adminRoute = createNextRoute(rootWebRouter.admin, {
       }
 
       await Admin.revoke(body.userId);
-      await SuperAdmin.create(admin.user_id);
+      await SuperAdmin.create(admin.userId);
 
       return { status: 200 };
     } catch (err) {

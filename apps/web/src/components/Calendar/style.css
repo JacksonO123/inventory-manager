@@ -1,0 +1,9 @@
+.event-pending {
+  border: 2px dashed var(--fc-event-color) !important;
+  background: color-mix(in srgb, var(--fc-event-color) 15%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.event-pending * {
+  color: var(--fc-event-color) !important;
+}

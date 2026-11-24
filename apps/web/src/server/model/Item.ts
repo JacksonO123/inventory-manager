@@ -1,4 +1,4 @@
-import { basicUserTable, checkoutTable, itemTable } from '@invm/inventory-db-utils';
+import { checkoutTable, itemTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
 import { itemSchema, partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
@@ -12,8 +12,8 @@ export class Item {
     this.values = values;
   }
 
-  static async getAll() {
-    return await db
+  static async getAllFromOrgPath(orgPath: string) {
+    const res = await db
       .select({
         id: itemTable.id,
         name: itemTable.name,
@@ -24,27 +24,32 @@ export class Item {
         borrower: checkoutTable.borrowerId
       })
       .from(itemTable)
-      .leftJoin(
-        checkoutTable,
-        and(eq(checkoutTable.itemId, itemTable.id), isNull(checkoutTable.returnedAt))
+      .leftJoin(orgTable, eq(orgTable.path, orgPath))
+      .innerJoin(
+        orgItemTable,
+        and(eq(orgItemTable.orgId, orgTable.id), eq(orgItemTable.itemId, itemTable.id))
       );
+
+    return res.map((item) => new Item(item));
   }
 
-  static async create(values: PartialItem) {
+  static async create(values: PartialItem, orgId: number) {
     const parsed = partialItemSchema.parse(values);
-    const [createdItem] = await db.insert(itemTable).values(parsed).returning();
-    if (createdItem === undefined) {
-      throw new Error('Failed to create item');
-    }
+    const createdItem = await db.transaction(async (tx) => {
+      const [createdItem] = await tx.insert(itemTable).values(parsed).returning();
+      await tx.insert(orgItemTable).values({ itemId: createdItem!.id, orgId: orgId });
+      return createdItem!;
+    });
+
     return new Item(createdItem);
   }
 
-  static async checkOut(itemId: number, borrowerId: number) {
+  static async checkOut(itemId: number, borrowerId: string) {
     await db.transaction(async (tx) => {
       const [borrower] = await tx
-        .select({ id: basicUserTable.id })
-        .from(basicUserTable)
-        .where(eq(basicUserTable.id, borrowerId))
+        .select({ id: user.id })
+        .from(user)
+        .where(eq(user.id, borrowerId))
         .limit(1);
       if (borrower === undefined) {
         throw new HttpError(404, 'Borrower not found');
@@ -99,6 +104,27 @@ export class Item {
       .where(eq(itemTable.id, itemId))
       .limit(1);
     return row !== undefined;
+  }
+
+  static async getByIdAndOrgPath(itemId: number, orgPath: string) {
+    const [item] = await db
+      .select({
+        id: itemTable.id,
+        name: itemTable.name,
+        description: itemTable.description,
+        is_available: itemTable.is_available,
+        is_lent_out: itemTable.is_lent_out,
+        is_damaged: itemTable.is_damaged
+      })
+      .from(itemTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.itemId, itemTable.id))
+      .innerJoin(orgTable, and(eq(orgTable.id, orgItemTable.orgId), eq(orgTable.path, orgPath)))
+      .where(eq(itemTable.id, itemId));
+    if (item === undefined) {
+      throw new HttpError(404, 'Item not found');
+    }
+
+    return new Item(item);
   }
 
   static async edit(itemId: number, values: Partial<Omit<ItemType, 'id'>>) {
