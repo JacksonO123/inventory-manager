@@ -10,7 +10,27 @@ describe('CreateItemForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() =>
-      expect(onSave).toHaveBeenCalledWith({ name: 'HDMI cable', description: null })
+      expect(onSave).toHaveBeenCalledWith({
+        name: 'HDMI cable',
+        description: null,
+        is_damaged: false
+      })
+    );
+  });
+  it('sends is_damaged as true when the Damaged button is toggled', async () => {
+    const onSave = jest.fn();
+    render(<CreateItemForm onSave={onSave} onCancel={jest.fn()} />);
+
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'HDMI cable' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Damaged' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith({
+        name: 'HDMI cable',
+        description: null,
+        is_damaged: true
+      })
     );
   });
   it('does not save a name that is only whitespace', async () => {

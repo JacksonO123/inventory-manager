@@ -19,15 +19,21 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
     validators: {
       onChange: z.object({
         name: z.string().trim().min(1),
-        description: z.string()
+        description: z.string(),
+        is_damaged: z.boolean()
       })
     },
     defaultValues: {
       name: '',
-      description: ''
+      description: '',
+      is_damaged: false
     },
     onSubmit: ({ value }) => {
-      onSave({ name: value.name.trim(), description: value.description.trim() || null });
+      onSave({
+        name: value.name.trim(),
+        description: value.description.trim() || null,
+        is_damaged: value.is_damaged
+      });
     }
   });
 
@@ -72,6 +78,19 @@ export function CreateItemForm({ onSave, onCancel }: CreateItemFormProps) {
               {field.state.meta.isTouched && <FieldError errors={field.state.meta.errors} />}
             </Field>
           </div>
+        )}
+      </form.Field>
+      <form.Field name="is_damaged">
+        {(field) => (
+          <Button
+            type="button"
+            size="sm"
+            variant={field.state.value ? 'default' : 'outline'}
+            aria-pressed={field.state.value}
+            onClick={() => field.handleChange(!field.state.value)}
+          >
+            Damaged
+          </Button>
         )}
       </form.Field>
       <div className="flex gap-4 justify-end">
