@@ -8,6 +8,7 @@ import { ItemsManager } from './ItemsManager.tsx';
 import { Button } from '../../../../components/ui/button';
 import { Plus } from 'lucide-react';
 import { useReservations } from '../../../../stores/reservations';
+import { cn } from 'cn';
 
 type SuperAdminTabGroupProps = {
   org: Org;
@@ -32,7 +33,17 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
         <TabGroup className="absolute" ref={tabRef}>
           <Tab value="calendar">Calendar</Tab>
           <Tab value="items">Items</Tab>
-          <Tab value="reservation-requests">Reservation Requests ({totalRequests})</Tab>
+          <Tab value="reservation-requests" className="flex gap-2 items-center">
+            Reservation Requests{' '}
+            <div
+              className={cn(
+                'text-[0.7rem] w-4 h-4 flex items-center justify-center rounded-full',
+                totalRequests > 0 ? 'bg-primary text-white' : 'bg-secondary'
+              )}
+            >
+              {totalRequests}
+            </div>
+          </Tab>
         </TabGroup>
         <TabContent tab="calendar">
           <div className="h-8"></div>

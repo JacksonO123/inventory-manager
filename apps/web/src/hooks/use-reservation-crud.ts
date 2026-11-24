@@ -78,6 +78,18 @@ export function useReservationCrudForItem(orgId: number, itemId: number) {
 export function useReservationCrudForOrg(orgId: number) {
   const { setReservations } = useReservations();
 
+  function dedupeReservations(reservations: Reservation[]) {
+    return Object.values(
+      reservations.reduce(
+        (acc, curr) => {
+          acc[curr.itemId] = curr;
+          return acc;
+        },
+        {} as Record<number, Reservation>
+      )
+    );
+  }
+
   async function fetchReservationsBetweenDates(start: Date, end: Date) {
     const fetched = await tsr.reservation.getOrgIdBetweenDates.mutate({
       params: { orgId: orgId },
@@ -97,7 +109,7 @@ export function useReservationCrudForOrg(orgId: number) {
       for (const reservation of fetchedReservations) {
         const arr = prev[reservation.itemId] ?? [];
         arr.push(reservation);
-        prev[reservation.itemId] = arr;
+        prev[reservation.itemId] = dedupeReservations(arr);
       }
       return { ...prev };
     });

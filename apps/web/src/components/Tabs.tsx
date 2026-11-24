@@ -56,12 +56,11 @@ export function TabGroup({ children, className, ref, ...others }: TabGroupProps)
   );
 }
 
-type TabProps = {
+type TabProps = React.ComponentProps<'button'> & {
   value: string;
-  children: React.ReactNode;
 };
 
-export function Tab({ value, children }: TabProps) {
+export function Tab({ value, className, ...props }: TabProps) {
   const { addTab, active, setStyles, setActive } = useTabs();
   const ref = useRef<HTMLButtonElement | null>(null);
 
@@ -91,11 +90,11 @@ export function Tab({ value, children }: TabProps) {
       ref={ref}
       className={cn(
         'z-20 px-2 py-0.5 cursor-pointer text-foreground hover:text-foreground duration-150',
-        active !== value && 'text-muted-foreground'
+        active !== value && 'text-muted-foreground',
+        className
       )}
       onClick={(e) => handleClick(e.currentTarget)}
-    >
-      {children}
-    </button>
+      {...props}
+    />
   );
 }
