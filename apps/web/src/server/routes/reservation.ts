@@ -102,7 +102,7 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
       return errorResponse(err);
     }
   },
-  getOrgIdBetweenDates: async ({ req, params, body }) => {
+  getWithOrgIdBetweenDates: async ({ req, params, body }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
       if (session === null) return unauthorizedResponse;

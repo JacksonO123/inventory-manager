@@ -188,10 +188,7 @@ export function OrgItemCalendarSummary({ org, ...props }: OrgItemCalendarSummary
     fetchReservationsBetweenDates(start, end);
   }, [session.data]);
 
-  const flatReservations = useMemo(
-    () => Object.values(reservations).flatMap((group) => group),
-    [reservations]
-  );
+  const flatReservations = useMemo(() => Object.values(reservations).flat(), [reservations]);
 
   const events = flatReservations.map((reservation) => {
     const withResourceId = {

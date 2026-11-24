@@ -57,7 +57,7 @@ export const reservationRouter = c.router(
         500: errorMsgSchema
       }
     },
-    getOrgIdBetweenDates: {
+    getWithOrgIdBetweenDates: {
       path: '/get-between-dates/:orgId',
       method: 'POST',
       pathParams: z.object({

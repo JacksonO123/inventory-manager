@@ -9,6 +9,8 @@ import { Button } from '../../../../components/ui/button';
 import { Plus } from 'lucide-react';
 import { useReservations } from '../../../../stores/reservations';
 import { cn } from 'cn';
+import { useId } from 'react';
+import { ReservationRequestCard } from './ReservationRequestPreview';
 
 type SuperAdminTabGroupProps = {
   org: Org;
@@ -16,6 +18,7 @@ type SuperAdminTabGroupProps = {
 
 export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
   const { requests } = useReservations();
+  const calendarId = useId();
 
   const [tab, setTab] = useLocalStorage<string | null>({
     key: `calendar-and-items-tab-group-${org.path}-state`,
@@ -46,7 +49,7 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
           </Tab>
         </TabGroup>
         <TabContent tab="calendar">
-          <div className="h-8"></div>
+          <div className="h-8" />
           <OrgItemCalendarSummary className="h-full min-h-140" org={org} />
         </TabContent>
         <TabContent tab="items">
@@ -61,6 +64,17 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
               </div>
             )}
           />
+        </TabContent>
+        <TabContent tab="reservation-requests">
+          <div className="h-8" />
+          {Object.values(requests)
+            .flat()
+            .map((req, index) => (
+              <ReservationRequestCard
+                req={req}
+                key={`reservation-request-${index}-${calendarId}`}
+              />
+            ))}
         </TabContent>
       </Tabs>
     </div>

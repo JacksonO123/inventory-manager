@@ -91,7 +91,7 @@ export function useReservationCrudForOrg(orgId: number) {
   }
 
   async function fetchReservationsBetweenDates(start: Date, end: Date) {
-    const fetched = await tsr.reservation.getOrgIdBetweenDates.mutate({
+    const fetched = await tsr.reservation.getWithOrgIdBetweenDates.mutate({
       params: { orgId: orgId },
       body: { start, end }
     });

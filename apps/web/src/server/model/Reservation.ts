@@ -1,19 +1,9 @@
-import {
-  reservationTable,
-  orgItemTable,
-  orgTable,
-  user,
-  itemTable
-} from '@invm/inventory-db-utils';
-import {
-  Reservation as EventType,
-  PartialReservation,
-  ReservationWithBorrowerName
-} from '../../types/types';
+import { reservationTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
+import { Reservation as EventType, PartialReservation } from '../../types/types';
 import { db } from '../db';
 import { z } from 'zod';
 import { reservationStatusEnum } from '@invm/api-contracts/schemas';
-import { and, eq, gte, lte, or, sql } from 'drizzle-orm';
+import { and, eq, getTableColumns, gte, lte, or } from 'drizzle-orm';
 
 export class Reservation {
   values: EventType;
@@ -131,12 +121,10 @@ export class Reservation {
   }
 
   static async getRequestsByOrgPath(orgPath: string) {
-    const res = await db
+    const rows = await db
       .select({
-        itemId: reservationTable.itemId,
-        reservations: sql<
-          ReservationWithBorrowerName[]
-        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})), '[]'::json)`
+        ...getTableColumns(reservationTable),
+        borrowerName: user.name
       })
       .from(orgTable)
       .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
@@ -148,9 +136,15 @@ export class Reservation {
         )
       )
       .innerJoin(user, eq(user.id, reservationTable.borrower))
-      .where(eq(orgTable.path, orgPath))
-      .groupBy(reservationTable.itemId);
+      .where(eq(orgTable.path, orgPath));
 
-    return res;
+    return [
+      ...Map.groupBy(rows, (r) => r.itemId)
+        .entries()
+        .map(([key, value]) => ({
+          itemId: key,
+          reservations: value.map((entry) => ({ ...entry, id: entry.id + '' }))
+        }))
+    ];
   }
 }
