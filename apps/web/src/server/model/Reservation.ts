@@ -1,4 +1,10 @@
-import { reservationTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
+import {
+  reservationTable,
+  orgItemTable,
+  orgTable,
+  user,
+  itemTable
+} from '@invm/inventory-db-utils';
 import {
   Reservation as EventType,
   PartialReservation,
@@ -142,7 +148,8 @@ export class Reservation {
         )
       )
       .innerJoin(user, eq(user.id, reservationTable.borrower))
-      .where(eq(orgTable.path, orgPath));
+      .where(eq(orgTable.path, orgPath))
+      .groupBy(reservationTable.itemId);
 
     return res;
   }
