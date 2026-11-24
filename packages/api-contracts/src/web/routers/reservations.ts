@@ -41,10 +41,10 @@ export const reservationRouter = c.router(
       }
     },
     getByItemIdAndOrgPathBetweenDates: {
-      path: '/get-between-dates/:orgPath/:itemId',
+      path: '/get-by-item-between-dates/:orgId/:itemId',
       method: 'POST',
       pathParams: z.object({
-        orgPath: z.string().min(1),
+        orgId: z.coerce.number().int().gte(0),
         itemId: z.coerce.number().int().gte(0)
       }),
       body: z.object({
@@ -53,6 +53,39 @@ export const reservationRouter = c.router(
       }),
       responses: {
         200: z.array(reservationSchema),
+        401: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getOrgIdBetweenDates: {
+      path: '/get-between-dates/:orgId',
+      method: 'POST',
+      pathParams: z.object({
+        orgId: z.coerce.number().int().gte(0)
+      }),
+      body: z.object({
+        start: z.coerce.date(),
+        end: z.coerce.date()
+      }),
+      responses: {
+        200: z.array(reservationSchema),
+        401: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getReservationRequestsForOrg: {
+      path: '/get-requests/:orgPath',
+      method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
+      }),
+      responses: {
+        200: z.array(
+          z.object({
+            itemId: z.number().int().gte(0),
+            reservations: z.array(reservationSchema.extend({ borrowerName: z.string() }))
+          })
+        ),
         401: errorMsgSchema,
         500: errorMsgSchema
       }

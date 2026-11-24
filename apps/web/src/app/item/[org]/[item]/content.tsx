@@ -10,12 +10,5 @@ type ItemPageContentsProps = {
 };
 
 export function ItemPageContents({ item, org, defaultReservations }: ItemPageContentsProps) {
-  return (
-    <ItemCalendar
-      className="h-full w-full"
-      item={item}
-      org={org}
-      defaultReservation={defaultReservations}
-    />
-  );
+  return <ItemCalendar className="h-full w-full" item={item} org={org} />;
 }

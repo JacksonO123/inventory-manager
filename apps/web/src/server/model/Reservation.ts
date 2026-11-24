@@ -1,9 +1,13 @@
-import { reservationTable, orgItemTable, orgTable } from '@invm/inventory-db-utils';
-import { Reservation as EventType, PartialReservation } from '../../types/types';
+import { reservationTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
+import {
+  Reservation as EventType,
+  PartialReservation,
+  ReservationWithBorrowerName
+} from '../../types/types';
 import { db } from '../db';
 import { z } from 'zod';
 import { reservationStatusEnum } from '@invm/api-contracts/schemas';
-import { and, eq, gte, lte, or } from 'drizzle-orm';
+import { and, eq, gte, lte, or, sql } from 'drizzle-orm';
 
 export class Reservation {
   values: EventType;
@@ -74,21 +78,15 @@ export class Reservation {
     );
   }
 
-  static async getByItemIdAndOrgPathBetweenDates(
-    orgPath: string,
-    itemId: number,
-    start: Date,
-    end: Date
-  ) {
+  static async getByOrgIdBetweenDates(orgId: number, start: Date, end: Date) {
     const res = await db
       .select({
         reservations: reservationTable
       })
       .from(reservationTable)
-      .innerJoin(orgTable, and(eq(orgTable.path, orgPath), eq(orgTable.id, reservationTable.orgId)))
       .where(
         and(
-          eq(reservationTable.itemId, itemId),
+          eq(reservationTable.orgId, orgId),
           or(
             and(gte(reservationTable.start, start), lte(reservationTable.start, end)),
             and(gte(reservationTable.end, start), lte(reservationTable.end, end)),
@@ -98,5 +96,54 @@ export class Reservation {
       );
 
     return res.map((entry) => entry.reservations);
+  }
+
+  static async getByItemIdAndOrgIdBetweenDates(
+    orgId: number,
+    itemId: number,
+    start: Date,
+    end: Date
+  ) {
+    const res = await db
+      .select({
+        reservations: reservationTable
+      })
+      .from(reservationTable)
+      .where(
+        and(
+          eq(reservationTable.itemId, itemId),
+          eq(reservationTable.orgId, orgId),
+          or(
+            and(gte(reservationTable.start, start), lte(reservationTable.start, end)),
+            and(gte(reservationTable.end, start), lte(reservationTable.end, end)),
+            and(lte(reservationTable.start, start), gte(reservationTable.end, end))
+          )
+        )
+      );
+
+    return res.map((entry) => entry.reservations);
+  }
+
+  static async getRequestsByOrgPath(orgPath: string) {
+    const res = await db
+      .select({
+        itemId: reservationTable.itemId,
+        reservations: sql<
+          ReservationWithBorrowerName[]
+        >`coalesce(json_agg(to_jsonb(${reservationTable}) || jsonb_build_object('borrowerName', ${user.name})), '[]'::json)`
+      })
+      .from(orgTable)
+      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+      .innerJoin(
+        reservationTable,
+        and(
+          eq(reservationTable.itemId, orgItemTable.itemId),
+          eq(reservationTable.status, 'pending')
+        )
+      )
+      .innerJoin(user, eq(user.id, reservationTable.borrower))
+      .where(eq(orgTable.path, orgPath));
+
+    return res;
   }
 }

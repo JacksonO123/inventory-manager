@@ -67,7 +67,7 @@ function SidebarLink({ org, current, onEditSubmit }: SidebarLinkProps) {
       <Link
         href={`/orgs/${org.path}`}
         className={cn(
-          "inline-flex flex-1 items-center rounded-lg text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer"
+          "inline-flex flex-1 items-center rounded-lg text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer h-full"
         )}
       >
         <span>{org.name}</span>

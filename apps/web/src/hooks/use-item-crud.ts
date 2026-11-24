@@ -1,8 +1,8 @@
 import { toast } from '../components/ui/toast';
 import { tsr } from '../server/tsr';
-import { useItemsFor } from '../stores/items';
 import { ItemAndBasicUserBorrower, PartialItem } from '../types/types';
 import { tsrErrorMessage } from '../utils/utils';
+import { useItemsFor } from './use-items-for';
 
 export function useItemCrudFor(orgId: number) {
   const { setItems } = useItemsFor(orgId);

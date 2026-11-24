@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { CreateItemForm } from '../components/CreateItemForm';
 import { Items } from '../components/Items';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/dialog';
-import { useItemsFor } from '../../../../stores/items';
 import { useItemCrudFor } from '../../../../hooks/use-item-crud';
+import { useItemsFor } from '../../../../hooks/use-items-for';
 
 type ItemsManagerProps = {
   org: Org;

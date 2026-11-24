@@ -1,6 +1,6 @@
 'use client';
 
-import type { DateSelectInfo, EventInput } from '@fullcalendar/react';
+import type { DateSelectInfo } from '@fullcalendar/react';
 import themePlugin from '@fullcalendar/react/themes/breezy';
 import timeGridPlugin from '@fullcalendar/react/timegrid';
 import interactionPlugin from '@fullcalendar/react/interaction';
@@ -12,7 +12,7 @@ import '@fullcalendar/react/themes/breezy/palettes/indigo.css';
 import './style.css';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 const FullCalendar = dynamic(() => import('@fullcalendar/react').then((mod) => mod.default), {
   ssr: false
@@ -22,42 +22,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { MAX_FREE_RESERVE_HOURS } from '../../utils/constants';
 import { PENDING_CLASS_NAME } from './constants';
-import { toDate } from './utils';
-import { hoursBetween, tsrErrorMessage } from '../../utils/utils';
-import { tsr } from '../../server/tsr';
+import { hoursBetween } from '../../utils/utils';
 import { toast } from '../ui/toast';
-import {
-  Item,
-  Org,
-  Reservation,
-  ReservationWithOptionalBorrowerName,
-  ServerErrorRes
-} from '../../types/types';
+import { Item, Org, Reservation } from '../../types/types';
 import { authClient } from '../../client/auth-client';
+import {
+  useReservationCrudForItem,
+  useReservationCrudForOrg
+} from '../../hooks/use-reservation-crud';
+import { useReservationsFor } from '../../hooks/use-reservations-for';
 import { useReservations } from '../../stores/reservations';
+import { useItemsFor } from '../../hooks/use-items-for';
 
 type CalendarProps = React.ComponentProps<'div'> & {
-  defaultReservation: Reservation[];
   org: Org;
   item: Item;
 };
 
-export function ItemCalendar({ org, item, defaultReservation, ...props }: CalendarProps) {
+export function ItemCalendar({ org, item, ...props }: CalendarProps) {
   const session = authClient.useSession();
-  const { setReservations: setStoreReservations } = useReservations();
-  const [events, setEvents] = useState<EventInput[]>(
-    defaultReservation.map(({ status, ...res }) =>
-      status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
-    )
+  const { reservations, setTempReservation, tempReservation } = useReservationsFor(item.id);
+  const { addReservation, fetchReservationsBetweenDates } = useReservationCrudForItem(
+    org.id,
+    item.id
   );
-  const [lastAddedEventId, setLastAddedEventId] = useState<string | null>(null);
+  const events = useMemo(
+    () =>
+      (tempReservation ? [...reservations, tempReservation] : reservations).map(
+        ({ status, ...res }) =>
+          status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
+      ),
+    [reservations, tempReservation]
+  );
 
   const visibleRangeRef = useRef<{ start: Date; end: Date } | null>(null);
-  const lastAddedEventIdRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    lastAddedEventIdRef.current = lastAddedEventId;
-  }, [lastAddedEventId]);
 
   const handleSelectEvent = (info: DateSelectInfo) => {
     if (session.data === null) return;
@@ -65,150 +63,50 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
     info.view.calendar.unselect();
 
     const eventId = crypto.randomUUID();
-    setLastAddedEventId(eventId);
+    const numHours = hoursBetween(info.start, info.end);
 
-    setEvents((prev) => [
-      ...prev,
-      {
-        id: eventId,
-        title: `${session.data!.user.name}'s reservation`,
-        start: info.start,
-        end: info.end,
-        allDay: info.allDay
-      }
-    ]);
+    const reservation: Reservation = {
+      id: eventId,
+      orgId: org.id,
+      itemId: item.id,
+      start: info.start,
+      end: info.end,
+      status: numHours > MAX_FREE_RESERVE_HOURS ? 'pending' : 'accepted',
+      allDay: info.allDay ?? false,
+      borrower: session.data.user.id
+    };
+
+    setTempReservation(reservation);
   };
 
-  async function handleAddReservation(
-    event: EventInput,
-    status: Reservation['status']
-  ): Promise<ServerErrorRes<string>> {
-    if (session.data === null || event.start === undefined || event.end === undefined) {
-      return { status: 'error' };
-    }
-
-    const res = await tsr.reservation.addReservation.mutate({
-      body: {
-        orgId: org.id,
-        itemId: item.id,
-        borrowerId: session.data.user.id,
-        event: {
-          orgId: org.id,
-          itemId: item.id,
-          start: toDate(event.start),
-          end: toDate(event.end),
-          allDay: !!event.allDay,
-          status
-        }
-      }
-    });
-
-    if (res.status === 200) {
-      toast.add({
-        type: 'success',
-        title: 'Successfully added item reservation'
-      });
-      return { status: 'success', body: res.body.id };
-    }
-
-    toast.add({
-      type: 'error',
-      title: tsrErrorMessage(res.body, 'Failed to add item reservation')
-    });
-
-    return { status: 'error' };
-  }
-
   async function commitEvent() {
-    if (lastAddedEventId === null) return;
-    const event = events.find((event) => event.id === lastAddedEventId);
-    if (event === undefined) return;
-    if (event.start === undefined || event.end === undefined) return;
+    if (session.data === null || tempReservation === null) return;
 
-    setLastAddedEventId(null);
+    const res = await addReservation(tempReservation, session.data.user.id);
 
-    let successStatus: ServerErrorRes<string>;
+    setTempReservation(null);
 
-    const difference = hoursBetween(toDate(event.start), toDate(event.end));
-    if (difference > MAX_FREE_RESERVE_HOURS) {
-      const newEvent = events.find((res) => res.id === lastAddedEventId);
-      setEvents((events) =>
-        events.map((item) => {
-          if (item.id === lastAddedEventId) {
-            return {
-              ...item,
-              className: PENDING_CLASS_NAME
-            };
-          }
-          return item;
-        })
-      );
-
-      if (newEvent === undefined) return;
-
-      successStatus = await handleAddReservation(newEvent, 'pending');
-    } else {
-      const newEvent = events.find((event) => event.id === lastAddedEventId) ?? null;
-      if (newEvent === null) return;
-      successStatus = await handleAddReservation(newEvent, 'accepted');
-    }
-
-    if (successStatus.status === 'success') {
-      setEvents((prev) =>
-        prev.map((res) => (res.id === lastAddedEventId ? { ...res, id: successStatus.body } : res))
-      );
-    } else {
-      setEvents((prev) => prev.filter((res) => res.id !== lastAddedEventId));
-    }
-  }
-
-  function filterAddedEvent() {
-    if (lastAddedEventId === null) return;
-    setEvents((events) => events.filter((event) => event.id !== lastAddedEventId));
-    setLastAddedEventId(null);
-  }
-
-  async function fetchRelevantReservations(start: Date, end: Date) {
-    const fetched = await tsr.reservation.getByItemIdAndOrgPathBetweenDates.mutate({
-      params: { orgPath: org.path, itemId: item.id },
-      body: { start, end }
-    });
-    if (fetched.status !== 200) {
+    if (res.status === 'error') {
       toast.add({
         type: 'error',
-        title: 'Failed to fetch reservations for calendar'
+        title: res.error ?? 'Failed to add reservation'
       });
-      return;
     }
-
-    const fetchedReservations = fetched.body;
-
-    setStoreReservations(fetchedReservations);
-
-    setEvents((prev) => {
-      const pendingId = lastAddedEventIdRef.current;
-      const pendingEvent =
-        pendingId !== null ? prev.find((event) => event.id === pendingId) : undefined;
-      const fetchedEvents = fetchedReservations.map(({ status, ...res }) =>
-        status === 'pending' ? { ...res, className: PENDING_CLASS_NAME } : res
-      );
-      return pendingEvent !== undefined ? [...fetchedEvents, pendingEvent] : fetchedEvents;
-    });
   }
 
   useEffect(() => {
     if (session.data === null) return;
     if (visibleRangeRef.current === null) return;
     const { start, end } = visibleRangeRef.current;
-    tsr.reservation.getByItemIdAndOrgPathBetweenDates.mutate({
-      params: { orgPath: org.path, itemId: item.id },
-      body: { start, end }
-    });
+    fetchReservationsBetweenDates(start, end);
   }, [session.data]);
 
   return (
     <>
-      <Dialog open={lastAddedEventId !== null} onOpenChange={(open) => !open && filterAddedEvent()}>
+      <Dialog
+        open={tempReservation !== null}
+        onOpenChange={(open) => !open && setTempReservation(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm reservation?</DialogTitle>
@@ -216,7 +114,7 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
               <Button onClick={commitEvent} className="flex-1">
                 Yes
               </Button>
-              <Button onClick={filterAddedEvent} variant="outline" className="flex-1">
+              <Button onClick={() => setTempReservation(null)} variant="outline" className="flex-1">
                 Cancel
               </Button>
             </div>
@@ -234,7 +132,7 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
           datesSet={(arg) => {
             visibleRangeRef.current = { start: arg.start, end: arg.end };
             if (session.data !== null) {
-              void fetchRelevantReservations(arg.start, arg.end);
+              fetchReservationsBetweenDates(arg.start, arg.end);
             }
           }}
           events={events}
@@ -261,24 +159,41 @@ export function ItemCalendar({ org, item, defaultReservation, ...props }: Calend
 }
 
 type OrgItemCalendarSummaryProps = React.ComponentProps<'div'> & {
-  items: Item[];
-  reservations: ReservationWithOptionalBorrowerName[];
+  org: Org;
 };
 
-export function OrgItemCalendarSummary({
-  items,
-  reservations,
-  ...props
-}: OrgItemCalendarSummaryProps) {
-  const itemIdToName = items.reduce(
-    (acc, curr) => {
-      acc[curr.id] = curr.name;
-      return acc;
-    },
-    {} as Record<number, string>
+export function OrgItemCalendarSummary({ org, ...props }: OrgItemCalendarSummaryProps) {
+  const session = authClient.useSession();
+  const { items } = useItemsFor(org.id);
+  const { reservations } = useReservations();
+  const { fetchReservationsBetweenDates } = useReservationCrudForOrg(org.id);
+  const itemIdToName = useMemo(
+    () =>
+      items.reduce(
+        (acc, curr) => {
+          acc[curr.id] = curr.name;
+          return acc;
+        },
+        {} as Record<number, string>
+      ),
+    [items]
   );
 
-  const events = reservations.flatMap((reservation) => {
+  const visibleRangeRef = useRef<{ start: Date; end: Date } | null>(null);
+
+  useEffect(() => {
+    if (session.data === null) return;
+    if (visibleRangeRef.current === null) return;
+    const { start, end } = visibleRangeRef.current;
+    fetchReservationsBetweenDates(start, end);
+  }, [session.data]);
+
+  const flatReservations = useMemo(
+    () => Object.values(reservations).flatMap((group) => group),
+    [reservations]
+  );
+
+  const events = flatReservations.map((reservation) => {
     const withResourceId = {
       ...reservation,
       resourceId: reservation.itemId + '',
@@ -298,9 +213,15 @@ export function OrgItemCalendarSummary({
           start: 'today prev,next title',
           end: 'resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth'
         }}
+        datesSet={(arg) => {
+          visibleRangeRef.current = { start: arg.start, end: arg.end };
+          if (session.data !== null) {
+            fetchReservationsBetweenDates(arg.start, arg.end);
+          }
+        }}
         height="100%"
         initialView="resourceTimelineDay"
-        resources={reservations.map((reservation) => ({
+        resources={flatReservations.map((reservation) => ({
           id: reservation.itemId + '',
           title: itemIdToName[reservation.itemId]
         }))}
