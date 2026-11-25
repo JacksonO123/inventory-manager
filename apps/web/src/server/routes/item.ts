@@ -5,9 +5,13 @@ import { errorResponse } from './utils/errors';
 import { auth } from '../auth';
 import { incomingHeadersToHeaders } from './utils/headers';
 import { unauthorizedResponse } from './utils/constants';
+import { isAdminOrSuperAdmin } from './utils/validateAdmin';
 
 export const nextItemRoute = createNextRoute(rootWebRouter.item, {
-  createItem: async ({ body }) => {
+  createItem: async ({ body, req }) => {
+    const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+    if (session === null) return unauthorizedResponse;
+    if (!(await isAdminOrSuperAdmin(session.user.id))) return unauthorizedResponse;
     try {
       const { orgId, ...partialItem } = body;
       const createdItem = await Item.create(partialItem, orgId);
@@ -63,7 +67,10 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       return errorResponse(err);
     }
   },
-  editItem: async ({ params, body }) => {
+  editItem: async ({ params, body, req }) => {
+    const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+    if (session === null) return unauthorizedResponse;
+    if (!(await isAdminOrSuperAdmin(session.user.id))) return unauthorizedResponse;
     try {
       await Item.edit(params.id, body);
       return { status: 200, body: { id: params.id } };
@@ -72,7 +79,10 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
     }
   },
 
-  deleteItem: async ({ params }) => {
+  deleteItem: async ({ params, req }) => {
+    const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+    if (session === null) return unauthorizedResponse;
+    if (!(await isAdminOrSuperAdmin(session.user.id))) return unauthorizedResponse;
     try {
       await Item.delete(params.id);
       return { status: 200, body: { id: params.id } };

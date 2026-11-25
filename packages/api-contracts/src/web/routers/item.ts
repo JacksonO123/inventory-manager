@@ -16,6 +16,7 @@ export const itemRouter = c.router(
           id: z.number().gte(0),
           is_damaged: itemSchema.shape.is_damaged
         }),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -74,6 +75,7 @@ export const itemRouter = c.router(
       responses: {
         200: z.object({ id: z.number().gte(0) }),
         400: errorMsgSchema,
+        401: errorMsgSchema,
         404: errorMsgSchema,
         500: errorMsgSchema
       }
@@ -86,6 +88,7 @@ export const itemRouter = c.router(
       responses: {
         200: z.object({ id: z.number().gte(0) }),
         404: errorMsgSchema,
+        401: errorMsgSchema,
         409: errorMsgSchema,
         500: errorMsgSchema
       }
