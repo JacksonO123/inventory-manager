@@ -12,7 +12,11 @@ export const itemRouter = c.router(
       method: 'PUT',
       body: partialItemSchema.extend({ orgId: z.number().int().gte(0) }),
       responses: {
-        200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
+        200: z.object({
+          id: z.number().gte(0),
+          is_damaged: itemSchema.shape.is_damaged
+        }),
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -62,7 +66,34 @@ export const itemRouter = c.router(
         200: itemSchema,
         500: errorMsgSchema
       }
+    },
+    editItem: {
+      path: '/:id',
+      method: 'PUT',
+      pathParams: itemIdParamsSchema,
+      body: itemSchema.omit({ id: true }).partial(), // only what changed
+      responses: {
+        200: z.object({ id: z.number().gte(0) }),
+        400: errorMsgSchema,
+        401: errorMsgSchema,
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    deleteItem: {
+      path: '/:id',
+      method: 'DELETE',
+      pathParams: itemIdParamsSchema,
+      body: c.noBody(),
+      responses: {
+        200: z.object({ id: z.number().gte(0) }),
+        404: errorMsgSchema,
+        401: errorMsgSchema,
+        409: errorMsgSchema,
+        500: errorMsgSchema
+      }
     }
   },
+
   { pathPrefix: '/item' }
 );

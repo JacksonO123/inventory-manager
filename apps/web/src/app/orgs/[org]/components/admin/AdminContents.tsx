@@ -29,7 +29,8 @@ export function AdminContents({ items: itemsFromServer, org }: AdminContentsProp
     const fullItem: ItemAndBasicUserBorrower = {
       ...item,
       id: -1,
-      status: 'available',
+      is_available: true,
+      is_lent_out: false,
       borrower: null
     };
     setItems((prev) => [...prev, fullItem]);
@@ -38,7 +39,7 @@ export function AdminContents({ items: itemsFromServer, org }: AdminContentsProp
     if (res.status === 200) {
       setItems((items) =>
         items.map((item) =>
-          item.id === -1 ? { ...item, id: res.body.id, status: res.body.status } : item
+          item.id === -1 ? { ...item, id: res.body.id, is_damaged: res.body.is_damaged } : item
         )
       );
     } else {

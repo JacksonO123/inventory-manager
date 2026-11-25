@@ -78,7 +78,9 @@ export const itemTable = pgTable('item', {
   id: t.serial().primaryKey(),
   name: t.text().notNull(),
   description: t.text(),
-  status: itemStatus().notNull().default('available')
+  is_available: t.boolean().notNull().default(true),
+  is_lent_out: t.boolean().notNull().default(false),
+  is_damaged: t.boolean().notNull().default(false)
 });
 
 export const checkoutTable = pgTable(

@@ -4,10 +4,16 @@ export const itemSchema = z.object({
   id: z.number().int().gte(0),
   name: z.string().trim().min(1),
   description: z.string().trim().min(1).nullable(),
-  status: z.enum(['available', 'booked', 'out_of_service'])
+  is_available: z.boolean(),
+  is_lent_out: z.boolean(),
+  is_damaged: z.boolean()
 });
 
-export const partialItemSchema = itemSchema.omit({ id: true, status: true });
+export const partialItemSchema = itemSchema.omit({
+  id: true,
+  is_available: true,
+  is_lent_out: true
+});
 
 export const basicUserSchema = z.object({
   id: z.number().int().gte(0),

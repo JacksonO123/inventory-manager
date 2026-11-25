@@ -5,15 +5,24 @@ import { errorResponse } from './utils/errors';
 import { auth } from '../auth';
 import { incomingHeadersToHeaders } from './utils/headers';
 import { unauthorizedResponse } from './utils/constants';
+import { isAdminOrSuperAdmin } from './utils/validateAdmin';
 
 export const nextItemRoute = createNextRoute(rootWebRouter.item, {
-  createItem: async ({ body }) => {
+  createItem: async ({ body, req }) => {
+    const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+    if (session === null) return unauthorizedResponse;
+    if (!(await isAdminOrSuperAdmin(session.user.id))) return unauthorizedResponse;
     try {
       const { orgId, ...partialItem } = body;
       const createdItem = await Item.create(partialItem, orgId);
       return {
         status: 200,
-        body: { id: createdItem.values.id, status: createdItem.values.status }
+        body: {
+          id: createdItem.values.id,
+          is_available: createdItem.values.is_available,
+          is_lent_out: createdItem.values.is_lent_out,
+          is_damaged: createdItem.values.is_damaged
+        }
       };
     } catch (err) {
       return { status: 500, body: { message: err + '' } };
@@ -46,7 +55,6 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       return errorResponse(err);
     }
   },
-
   getByIdAndOrgPath: async ({ params, req }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
@@ -55,6 +63,29 @@ export const nextItemRoute = createNextRoute(rootWebRouter.item, {
       const item = await Item.getByIdAndOrgPath(params.id, params.orgPath);
 
       return { status: 200, body: item.values };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  editItem: async ({ params, body, req }) => {
+    const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+    if (session === null) return unauthorizedResponse;
+    if (!(await isAdminOrSuperAdmin(session.user.id))) return unauthorizedResponse;
+    try {
+      await Item.edit(params.id, body);
+      return { status: 200, body: { id: params.id } };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+
+  deleteItem: async ({ params, req }) => {
+    const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+    if (session === null) return unauthorizedResponse;
+    if (!(await isAdminOrSuperAdmin(session.user.id))) return unauthorizedResponse;
+    try {
+      await Item.delete(params.id);
+      return { status: 200, body: { id: params.id } };
     } catch (err) {
       return errorResponse(err);
     }

@@ -1,5 +1,5 @@
 import { checkoutTable, itemTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
-import { partialItemSchema } from '@invm/api-contracts/schemas';
+import { itemSchema, partialItemSchema } from '@invm/api-contracts/schemas';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
 import { HttpError } from '../errors';
@@ -18,7 +18,10 @@ export class Item {
         id: itemTable.id,
         name: itemTable.name,
         description: itemTable.description,
-        status: itemTable.status
+        is_available: itemTable.is_available,
+        is_lent_out: itemTable.is_lent_out,
+        is_damaged: itemTable.is_damaged,
+        borrower: checkoutTable.borrowerId
       })
       .from(itemTable)
       .leftJoin(orgTable, eq(orgTable.path, orgPath))
@@ -56,8 +59,14 @@ export class Item {
       // checking out the same item at once can't both succeed
       const [item] = await tx
         .update(itemTable)
-        .set({ status: 'booked' })
-        .where(and(eq(itemTable.id, itemId), eq(itemTable.status, 'available')))
+        .set({ is_available: false, is_lent_out: true })
+        .where(
+          and(
+            eq(itemTable.id, itemId),
+            eq(itemTable.is_available, true),
+            eq(itemTable.is_lent_out, false)
+          )
+        )
         .returning({ id: itemTable.id });
       if (item === undefined) {
         if (await Item.exists(itemId, tx)) {
@@ -81,7 +90,10 @@ export class Item {
         throw new HttpError(404, 'Item not found');
       }
 
-      await tx.update(itemTable).set({ status: 'available' }).where(eq(itemTable.id, itemId));
+      await tx
+        .update(itemTable)
+        .set({ is_available: true, is_lent_out: false })
+        .where(eq(itemTable.id, itemId));
     });
   }
 
@@ -100,7 +112,9 @@ export class Item {
         id: itemTable.id,
         name: itemTable.name,
         description: itemTable.description,
-        status: itemTable.status
+        is_available: itemTable.is_available,
+        is_lent_out: itemTable.is_lent_out,
+        is_damaged: itemTable.is_damaged
       })
       .from(itemTable)
       .innerJoin(orgItemTable, eq(orgItemTable.itemId, itemTable.id))
@@ -111,5 +125,31 @@ export class Item {
     }
 
     return new Item(item);
+  }
+
+  static async edit(itemId: number, values: Partial<Omit<ItemType, 'id'>>) {
+    const parsed = itemSchema.omit({ id: true }).partial().parse(values);
+    if (Object.keys(parsed).length === 0) throw new HttpError(400, 'No valid edits provided');
+    const [updated] = await db
+      .update(itemTable)
+      .set(parsed)
+      .where(eq(itemTable.id, itemId))
+      .returning({ id: itemTable.id });
+    if (!updated) throw new HttpError(404, 'Item not found');
+  }
+
+  static async delete(itemId: number) {
+    if (!(await Item.exists(itemId))) {
+      throw new HttpError(404, 'Item not found');
+    }
+
+    const [deleted] = await db
+      .delete(itemTable)
+      .where(and(eq(itemTable.id, itemId), eq(itemTable.is_lent_out, false)))
+      .returning({ id: itemTable.id });
+
+    if (!deleted) {
+      throw new HttpError(409, 'Item is currently lent out');
+    }
   }
 }
