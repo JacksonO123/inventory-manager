@@ -6,7 +6,7 @@ import { useId, useState } from 'react';
 import { Button } from './ui/button';
 import { cn } from 'cn';
 import { CreateOrgButton } from './CreateOrgButton';
-import { EllipsisVertical, Pencil } from 'lucide-react';
+import { EllipsisVertical, Pencil, Trash } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from './ui/dropdown-menu';
-import { Dialog, DialogContent } from './ui/dialog';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from './ui/dialog';
 import { CreateOrgForm } from './Orgs';
 import { useOrgs } from '../stores/orgs';
 
@@ -22,9 +30,10 @@ type OrgSidebar = {
   current: string;
   onCreateOrg?: (org: PartialOrg) => void;
   onEditSubmit?: (org: Org) => void;
+  onDelete?: (id: number) => void;
 };
 
-export function OrgSidebar({ current, onCreateOrg, onEditSubmit }: OrgSidebar) {
+export function OrgSidebar({ current, onCreateOrg, onEditSubmit, onDelete }: OrgSidebar) {
   const { orgs } = useOrgs();
   const sidebarId = useId();
 
@@ -37,6 +46,7 @@ export function OrgSidebar({ current, onCreateOrg, onEditSubmit }: OrgSidebar) {
           org={org}
           current={org.path === current}
           onEditSubmit={onEditSubmit}
+          onDelete={onDelete}
         />
       ))}
     </div>
@@ -47,11 +57,13 @@ type SidebarLinkProps = {
   org: Org;
   current: boolean;
   onEditSubmit?: (org: Org) => void;
+  onDelete?: (id: number) => void;
 };
 
-function SidebarLink({ org, current, onEditSubmit }: SidebarLinkProps) {
+function SidebarLink({ org, current, onEditSubmit, onDelete }: SidebarLinkProps) {
   const [hovering, setHovering] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   return (
     <div
@@ -101,10 +113,40 @@ function SidebarLink({ org, current, onEditSubmit }: SidebarLinkProps) {
                 Edit
                 <Pencil />
               </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                className="flex justify-between"
+                onClick={() => {
+                  setRemoving(true);
+                  setHovering(false);
+                }}
+              >
+                Remove
+                <Trash />
+              </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
+
+      <Dialog open={removing} onOpenChange={setRemoving}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogDescription>Are you sure you want to delete this org?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline">Cancel</Button>} />
+            <DialogClose
+              render={
+                <Button onClick={() => onDelete?.(org.id)} variant="destructive">
+                  Delete
+                </Button>
+              }
+            />
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={editing} onOpenChange={setEditing}>
         <DialogContent>

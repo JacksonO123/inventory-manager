@@ -117,7 +117,13 @@ export function OrgContent({
                   </DialogHeader>
                   <DialogFooter>
                     <DialogClose render={<Button variant="outline">Cancel</Button>} />
-                    <DialogClose render={<Button onClick={onDelete}>Delete</Button>} />
+                    <DialogClose
+                      render={
+                        <Button onClick={onDelete} variant="destructive">
+                          Delete
+                        </Button>
+                      }
+                    />
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
