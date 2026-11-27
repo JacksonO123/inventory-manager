@@ -76,7 +76,7 @@ export function useReservationCrudForItem(orgId: number, itemId: number) {
 }
 
 export function useReservationCrudForOrg(orgId: number) {
-  const { setReservations, setStatus } = useReservations();
+  const { setReservations, setStatus, remove } = useReservations();
 
   async function fetchReservationsBetweenDates(start: Date, end: Date) {
     const fetched = await tsr.reservation.getWithOrgIdBetweenDates.mutate({
@@ -149,6 +149,7 @@ export function useReservationCrudForOrg(orgId: number) {
         title: tsrErrorMessage(res.body, 'Failed to reject reservation')
       });
     } else {
+      remove(itemId, reservationId);
       toast.add({
         type: 'success',
         title: 'Successfully reject reservation'

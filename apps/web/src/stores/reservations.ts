@@ -24,6 +24,7 @@ type ReservationsActions = {
   ) => void;
   setTempReservationFor: (itemId: number, reservation: Reservation | null) => void;
   setStatus: (itemId: number, reservationId: string, status: Reservation['status']) => void;
+  remove: (itemId: number, reservationId: string) => void;
 };
 
 export const useReservations = create<ReservationsState & ReservationsActions>((set) => ({
@@ -54,6 +55,15 @@ export const useReservations = create<ReservationsState & ReservationsActions>((
           state.reservations[itemId]?.map((reservation) =>
             reservation.id === reservationId ? { ...reservation, status } : reservation
           ) ?? []
+      }
+    })),
+  remove: (itemId, reservationId) =>
+    set((state) => ({
+      reservations: {
+        ...state.reservations,
+        [itemId]:
+          state.reservations[itemId]?.filter((reservation) => reservation.id !== reservationId) ??
+          []
       }
     }))
 }));
