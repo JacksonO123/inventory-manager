@@ -37,18 +37,6 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
       return errorResponse(err);
     }
   },
-  getByItemIdAndOrgPath: async ({ params, req }) => {
-    try {
-      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
-      if (session === null) return unauthorizedResponse;
-
-      const items = await Reservation.getByItemIdAndOrgPath(params.itemId, params.orgPath);
-
-      return { status: 200, body: items.map((res) => res.values) };
-    } catch (err) {
-      return errorResponse(err);
-    }
-  },
   getByItemIdAndOrgPathBetweenDates: async ({ req, body, params }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
@@ -78,30 +66,6 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
       return errorResponse(err);
     }
   },
-  getReservationRequestsForOrg: async ({ req, params }) => {
-    try {
-      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
-      if (session === null) return unauthorizedResponse;
-
-      const [isAdmin, isSuperAdmin] = await Promise.all([
-        Admin.isAdmin(session.user.id),
-        SuperAdmin.isSuperAdmin(session.user.id)
-      ]);
-
-      if (!isAdmin && !isSuperAdmin) {
-        return unauthorizedResponse;
-      }
-
-      const requests = await Reservation.getRequestsByOrgPath(params.orgPath);
-
-      return {
-        status: 200,
-        body: requests
-      };
-    } catch (err) {
-      return errorResponse(err);
-    }
-  },
   getWithOrgIdBetweenDates: async ({ req, params, body }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
@@ -126,6 +90,68 @@ export const reservationRoute = createNextRoute(rootWebRouter.reservation, {
         status: 200,
         body: reservations.map((reservation) => ({ ...reservation, id: reservation.id + '' }))
       };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  accept: async ({ body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+
+      if (!isAdmin && !isSuperAdmin) {
+        return unauthorizedResponse;
+      }
+
+      await Reservation.accept(body.itemId, body.reservationId);
+
+      return { status: 200, body: {} };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  reject: async ({ body, req }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+
+      if (!isAdmin && !isSuperAdmin) {
+        return unauthorizedResponse;
+      }
+
+      await Reservation.reject(body.itemId, body.reservationId);
+
+      return { status: 200, body: {} };
+    } catch (err) {
+      return errorResponse(err);
+    }
+  },
+  getWithOrgPath: async ({ req, params }) => {
+    try {
+      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
+      if (session === null) return unauthorizedResponse;
+
+      const [isAdmin, isSuperAdmin] = await Promise.all([
+        Admin.isAdmin(session.user.id),
+        SuperAdmin.isSuperAdmin(session.user.id)
+      ]);
+
+      if (!isAdmin && !isSuperAdmin) {
+        return unauthorizedResponse;
+      }
+
+      const reservations = await Reservation.getAllByOrgPath(params.orgPath);
+      return { status: 200, body: reservations.map((reservation) => reservation.values) };
     } catch (err) {
       return errorResponse(err);
     }

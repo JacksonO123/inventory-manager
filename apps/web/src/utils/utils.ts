@@ -1,4 +1,4 @@
-import { Item, Org } from '../types/types';
+import { Item, Org, Reservation } from '../types/types';
 import { HTTPStatusCode } from '@ts-rest/core';
 
 export function hoursBetween(dateStart: Date, dateEnd: Date) {
@@ -39,4 +39,16 @@ export function extractBodyOrDefault<T>(
   }
 
   return defaultValue;
+}
+
+export function dedupeReservations(reservations: Reservation[]) {
+  return Object.values(
+    reservations.reduce(
+      (acc, curr) => {
+        acc[curr.id] = curr;
+        return acc;
+      },
+      {} as Record<string, Reservation>
+    )
+  );
 }

@@ -32,13 +32,10 @@ export default async function OrgPage({ params }: OrgPageProps) {
   }
 
   const tsr = await tsrFactory();
-  const [org, item, itemReservations] = await Promise.all([
+  const [org, item] = await Promise.all([
     tsr.organizations.getByPath.query({ params: { path: orgPath } }),
     tsr.item.getByIdAndOrgPath.query({
       params: { id: itemIdParseRes.data, orgPath }
-    }),
-    tsr.reservation.getByItemIdAndOrgPath.query({
-      params: { orgPath, itemId: itemIdParseRes.data }
     })
   ]);
 
@@ -46,23 +43,11 @@ export default async function OrgPage({ params }: OrgPageProps) {
     return <ErrorCardPage title="Item not found">That item could not be found</ErrorCardPage>;
   }
 
-  if (itemReservations.status !== 200) {
-    return (
-      <ErrorCardPage title="Failed fetching item reservations">
-        There was an error getting reservation for this item
-      </ErrorCardPage>
-    );
-  }
-
   return (
     <PageWrapper>
       <PageHeader />
       <PageContentWrapper>
-        <ItemPageContents
-          item={item.body}
-          org={org.body.org}
-          defaultReservations={itemReservations.body}
-        />
+        <ItemPageContents item={item.body} org={org.body.org} />
       </PageContentWrapper>
     </PageWrapper>
   );

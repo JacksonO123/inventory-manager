@@ -7,17 +7,19 @@ import { Org } from '../../../../types/types';
 import { ItemsManager } from './ItemsManager.tsx';
 import { Button } from '../../../../components/ui/button';
 import { Plus } from 'lucide-react';
-import { useReservations } from '../../../../stores/reservations';
 import { cn } from 'cn';
 import { useId } from 'react';
 import { ReservationRequestCard } from './ReservationRequestPreview';
+import { useReservationCrudForOrg } from '../../../../hooks/use-reservation-crud';
+import { useRequests } from '../../../../hooks/use-requests';
 
 type SuperAdminTabGroupProps = {
   org: Org;
 };
 
 export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
-  const { requests } = useReservations();
+  const requests = useRequests();
+  const { accept, reject } = useReservationCrudForOrg(org.id);
   const calendarId = useId();
 
   const [tab, setTab] = useLocalStorage<string | null>({
@@ -25,10 +27,6 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
     defaultValue: null
   });
   const { ref: tabRef, width: tabWidth } = useElementSize();
-
-  const totalRequests = Object.values(requests)
-    .map((itemRequests) => itemRequests.length)
-    .reduce((acc, curr) => acc + curr, 0);
 
   return (
     <div className="relative flex flex-col gap-4 h-full">
@@ -41,10 +39,10 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
             <div
               className={cn(
                 'text-[0.7rem] w-4 h-4 flex items-center justify-center rounded-full',
-                totalRequests > 0 ? 'bg-primary text-white' : 'bg-secondary'
+                requests.length > 0 ? 'bg-primary text-white' : 'bg-secondary'
               )}
             >
-              {totalRequests}
+              {requests.length}
             </div>
           </Tab>
         </TabGroup>
@@ -67,14 +65,14 @@ export function CalendarAndItemsTabGroup({ org }: SuperAdminTabGroupProps) {
         </TabContent>
         <TabContent tab="reservation-requests">
           <div className="h-8" />
-          {Object.values(requests)
-            .flat()
-            .map((req, index) => (
-              <ReservationRequestCard
-                req={req}
-                key={`reservation-request-${index}-${calendarId}`}
-              />
-            ))}
+          {requests.map((req, index) => (
+            <ReservationRequestCard
+              req={req}
+              key={`reservation-request-${index}-${calendarId}`}
+              onAccept={() => accept(req.itemId, req.id)}
+              onReject={() => reject(req.itemId, req.id)}
+            />
+          ))}
         </TabContent>
       </Tabs>
     </div>

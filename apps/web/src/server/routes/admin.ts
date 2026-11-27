@@ -8,30 +8,6 @@ import { User } from '../model/User';
 import { incomingHeadersToHeaders } from './utils/headers';
 
 export const adminRoute = createNextRoute(rootWebRouter.admin, {
-  isAdmin: async ({ body, req }) => {
-    try {
-      const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });
-      if (session === null) return unauthorizedResponse;
-
-      const queriedUser = await User.getById(body.id);
-      if (queriedUser === undefined) return unauthorizedResponse;
-
-      const userIsSuperAdmin = await SuperAdmin.isSuperAdmin(session.user.id);
-
-      if (userIsSuperAdmin || queriedUser.values.email === session.user.email) {
-        let isAdmin = await Admin.isAdmin(body.id);
-        if (!isAdmin) {
-          isAdmin = await SuperAdmin.isSuperAdmin(body.id);
-        }
-
-        return { status: 200, body: { isAdmin } };
-      } else {
-        return unauthorizedResponse;
-      }
-    } catch (err) {
-      return { status: 500, body: { message: err + '' } };
-    }
-  },
   addAdmin: async ({ body, req }) => {
     try {
       const session = await auth.api.getSession({ headers: incomingHeadersToHeaders(req.headers) });

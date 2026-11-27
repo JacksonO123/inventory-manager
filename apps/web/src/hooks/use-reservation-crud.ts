@@ -1,5 +1,5 @@
 import { toast } from '../components/ui/toast';
-import { tsrErrorMessage } from '../utils/utils';
+import { dedupeReservations, tsrErrorMessage } from '../utils/utils';
 import { Reservation, ReservationWithOptionalBorrowerName, ServerErrorRes } from '../types/types';
 import { tsr } from '../server/tsr';
 import { useReservationsFor } from './use-reservations-for';
@@ -76,19 +76,7 @@ export function useReservationCrudForItem(orgId: number, itemId: number) {
 }
 
 export function useReservationCrudForOrg(orgId: number) {
-  const { setReservations } = useReservations();
-
-  function dedupeReservations(reservations: Reservation[]) {
-    return Object.values(
-      reservations.reduce(
-        (acc, curr) => {
-          acc[curr.itemId] = curr;
-          return acc;
-        },
-        {} as Record<number, Reservation>
-      )
-    );
-  }
+  const { setReservations, setStatus } = useReservations();
 
   async function fetchReservationsBetweenDates(start: Date, end: Date) {
     const fetched = await tsr.reservation.getWithOrgIdBetweenDates.mutate({
@@ -106,14 +94,67 @@ export function useReservationCrudForOrg(orgId: number) {
     const fetchedReservations = fetched.body;
 
     setReservations((prev) => {
+      const fetchedByItem: Record<number, ReservationWithOptionalBorrowerName[]> = {};
       for (const reservation of fetchedReservations) {
-        const arr = prev[reservation.itemId] ?? [];
-        arr.push(reservation);
-        prev[reservation.itemId] = dedupeReservations(arr);
+        (fetchedByItem[reservation.itemId] ??= []).push(reservation);
       }
-      return { ...prev };
+
+      const next: Record<number, ReservationWithOptionalBorrowerName[]> = { ...prev };
+      for (const [itemId, itemReservations] of Object.entries(fetchedByItem)) {
+        const id = Number(itemId);
+        next[id] = dedupeReservations([...(next[id] ?? []), ...itemReservations]);
+      }
+      return next;
     });
   }
 
-  return { fetchReservationsBetweenDates };
+  async function accept(itemId: number, reservationId: string) {
+    setStatus(itemId, reservationId, 'accepted');
+
+    const res = await tsr.reservation.accept.mutate({
+      body: {
+        itemId,
+        reservationId: Number(reservationId)
+      }
+    });
+
+    if (res.status !== 200) {
+      setStatus(itemId, reservationId, 'pending');
+      toast.add({
+        type: 'error',
+        title: tsrErrorMessage(res.body, 'Failed to accept reservation')
+      });
+    } else {
+      toast.add({
+        type: 'success',
+        title: 'Successfully accepted reservation'
+      });
+    }
+  }
+
+  async function reject(itemId: number, reservationId: string) {
+    setStatus(itemId, reservationId, 'canceled');
+
+    const res = await tsr.reservation.reject.mutate({
+      body: {
+        itemId,
+        reservationId: Number(reservationId)
+      }
+    });
+
+    if (res.status !== 200) {
+      setStatus(itemId, reservationId, 'pending');
+      toast.add({
+        type: 'error',
+        title: tsrErrorMessage(res.body, 'Failed to reject reservation')
+      });
+    } else {
+      toast.add({
+        type: 'success',
+        title: 'Successfully reject reservation'
+      });
+    }
+  }
+
+  return { fetchReservationsBetweenDates, accept, reject };
 }

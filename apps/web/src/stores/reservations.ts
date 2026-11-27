@@ -1,14 +1,9 @@
 import { create } from 'zustand';
-import {
-  Reservation,
-  ReservationWithBorrowerName,
-  ReservationWithOptionalBorrowerName
-} from '../types/types';
+import { Reservation, ReservationWithOptionalBorrowerName } from '../types/types';
 
 type ReservationsState = {
   reservations: Record<number, ReservationWithOptionalBorrowerName[]>;
   tempReservations: { itemId: number; reservation: Reservation } | null;
-  requests: Record<number, ReservationWithBorrowerName[]>;
 };
 
 type ReservationsActions = {
@@ -27,13 +22,12 @@ type ReservationsActions = {
           reservations: ReservationWithOptionalBorrowerName[]
         ) => ReservationWithOptionalBorrowerName[])
   ) => void;
-  setRequests: (requests: Record<number, ReservationWithBorrowerName[]>) => void;
   setTempReservationFor: (itemId: number, reservation: Reservation | null) => void;
+  setStatus: (itemId: number, reservationId: string, status: Reservation['status']) => void;
 };
 
 export const useReservations = create<ReservationsState & ReservationsActions>((set) => ({
   reservations: [],
-  requests: [],
   tempReservations: null,
   setReservations: (reservations) =>
     set((state) => ({
@@ -50,7 +44,16 @@ export const useReservations = create<ReservationsState & ReservationsActions>((
             : reservations
       }
     })),
-  setRequests: (requests) => set({ requests }),
   setTempReservationFor: (itemId, reservation) =>
-    set({ tempReservations: reservation === null ? null : { itemId, reservation } })
+    set({ tempReservations: reservation === null ? null : { itemId, reservation } }),
+  setStatus: (itemId, reservationId, status) =>
+    set((state) => ({
+      reservations: {
+        ...state.reservations,
+        [itemId]:
+          state.reservations[itemId]?.map((reservation) =>
+            reservation.id === reservationId ? { ...reservation, status } : reservation
+          ) ?? []
+      }
+    }))
 }));

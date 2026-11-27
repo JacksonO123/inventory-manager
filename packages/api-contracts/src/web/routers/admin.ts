@@ -4,20 +4,6 @@ import { z } from 'zod';
 
 export const adminRouter = c.router(
   {
-    isAdmin: {
-      path: '/is-admin',
-      method: 'POST',
-      body: z.object({
-        id: z.string().min(1)
-      }),
-      responses: {
-        200: z.object({
-          isAdmin: z.boolean()
-        }),
-        500: errorMsgSchema,
-        401: errorMsgSchema
-      }
-    },
     addAdmin: {
       path: '/add',
       method: 'PUT',

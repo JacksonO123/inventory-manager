@@ -1,14 +1,15 @@
-import { reservationTable, orgItemTable, orgTable, user } from '@invm/inventory-db-utils';
-import { Reservation as EventType, PartialReservation } from '../../types/types';
+import { reservationTable, orgTable, user } from '@invm/inventory-db-utils';
+import { ReservationWithOptionalBorrowerName, PartialReservation } from '../../types/types';
 import { db } from '../db';
+import { HttpError } from '../errors';
 import { z } from 'zod';
 import { reservationStatusEnum } from '@invm/api-contracts/schemas';
-import { and, eq, getTableColumns, gte, lte, or } from 'drizzle-orm';
+import { and, eq, gt, gte, lt, lte, ne, or } from 'drizzle-orm';
 
 export class Reservation {
-  values: EventType;
+  values: ReservationWithOptionalBorrowerName;
 
-  constructor(values: EventType) {
+  constructor(values: ReservationWithOptionalBorrowerName) {
     this.values = values;
   }
 
@@ -22,18 +23,22 @@ export class Reservation {
       .select({ id: reservationTable.id })
       .from(reservationTable)
       .where(
-        or(
-          and(
-            lte(reservationTable.start, partialReservation.start),
-            gte(reservationTable.end, partialReservation.start)
-          ),
-          and(
-            lte(reservationTable.start, partialReservation.end),
-            gte(reservationTable.end, partialReservation.end)
-          ),
-          and(
-            gte(reservationTable.start, partialReservation.start),
-            lte(reservationTable.end, partialReservation.end)
+        and(
+          eq(reservationTable.itemId, partialReservation.itemId),
+          ne(reservationTable.status, 'canceled'),
+          or(
+            and(
+              lt(reservationTable.start, partialReservation.start),
+              gt(reservationTable.end, partialReservation.start)
+            ),
+            and(
+              lt(reservationTable.start, partialReservation.end),
+              gt(reservationTable.end, partialReservation.end)
+            ),
+            and(
+              gt(reservationTable.start, partialReservation.start),
+              lt(reservationTable.end, partialReservation.end)
+            )
           )
         )
       );
@@ -57,32 +62,52 @@ export class Reservation {
     return new Reservation(newEvent);
   }
 
-  static async getByItemIdAndOrgPath(itemId: number, orgPath: string) {
-    const res = await db
-      .select({
-        reservation: reservationTable
-      })
-      .from(reservationTable)
-      .leftJoin(orgTable, eq(orgTable.path, orgPath))
-      .innerJoin(
-        orgItemTable,
-        and(eq(orgItemTable.orgId, orgTable.id), eq(orgItemTable.itemId, itemId))
-      );
+  static async accept(itemId: number, reservationId: number) {
+    const [res] = await db
+      .update(reservationTable)
+      .set({ status: 'accepted' })
+      .where(
+        and(
+          eq(reservationTable.id, reservationId),
+          eq(reservationTable.itemId, itemId),
+          eq(reservationTable.status, 'pending')
+        )
+      )
+      .returning({ id: reservationTable.id });
+    if (res === undefined) {
+      throw new HttpError(404, 'Reservation not found');
+    }
+  }
 
-    return res.map(
-      ({ reservation: { id, ...event } }) => new Reservation({ id: id + '', ...event })
-    );
+  static async reject(itemId: number, reservationId: number) {
+    const [res] = await db
+      .update(reservationTable)
+      .set({ status: 'canceled' })
+      .where(
+        and(
+          eq(reservationTable.id, reservationId),
+          eq(reservationTable.itemId, itemId),
+          eq(reservationTable.status, 'pending')
+        )
+      )
+      .returning({ id: reservationTable.id });
+    if (res === undefined) {
+      throw new HttpError(404, 'Reservation not found');
+    }
   }
 
   static async getByOrgIdBetweenDates(orgId: number, start: Date, end: Date) {
     const res = await db
       .select({
-        reservations: reservationTable
+        reservations: reservationTable,
+        borrowerName: user.name
       })
       .from(reservationTable)
+      .leftJoin(user, eq(reservationTable.borrower, user.id))
       .where(
         and(
           eq(reservationTable.orgId, orgId),
+          ne(reservationTable.status, 'canceled'),
           or(
             and(gte(reservationTable.start, start), lte(reservationTable.start, end)),
             and(gte(reservationTable.end, start), lte(reservationTable.end, end)),
@@ -91,7 +116,10 @@ export class Reservation {
         )
       );
 
-    return res.map((entry) => entry.reservations);
+    return res.map(({ reservations, borrowerName }) => ({
+      ...reservations,
+      borrowerName: borrowerName ?? undefined
+    }));
   }
 
   static async getByItemIdAndOrgIdBetweenDates(
@@ -109,6 +137,7 @@ export class Reservation {
         and(
           eq(reservationTable.itemId, itemId),
           eq(reservationTable.orgId, orgId),
+          ne(reservationTable.status, 'canceled'),
           or(
             and(gte(reservationTable.start, start), lte(reservationTable.start, end)),
             and(gte(reservationTable.end, start), lte(reservationTable.end, end)),
@@ -120,31 +149,23 @@ export class Reservation {
     return res.map((entry) => entry.reservations);
   }
 
-  static async getRequestsByOrgPath(orgPath: string) {
-    const rows = await db
-      .select({
-        ...getTableColumns(reservationTable),
-        borrowerName: user.name
-      })
-      .from(orgTable)
-      .innerJoin(orgItemTable, eq(orgItemTable.orgId, orgTable.id))
+  static async getAllByOrgPath(orgPath: string) {
+    const res = await db
+      .select({ reservation: reservationTable, borrowerName: user.name })
+      .from(reservationTable)
       .innerJoin(
-        reservationTable,
-        and(
-          eq(reservationTable.itemId, orgItemTable.itemId),
-          eq(reservationTable.status, 'pending')
-        )
+        orgTable,
+        and(eq(reservationTable.orgId, orgTable.id), eq(orgTable.path, orgPath))
       )
-      .innerJoin(user, eq(user.id, reservationTable.borrower))
-      .where(eq(orgTable.path, orgPath));
-
-    return [
-      ...Map.groupBy(rows, (r) => r.itemId)
-        .entries()
-        .map(([key, value]) => ({
-          itemId: key,
-          reservations: value.map((entry) => ({ ...entry, id: entry.id + '' }))
-        }))
-    ];
+      .leftJoin(user, eq(reservationTable.borrower, user.id))
+      .where(ne(reservationTable.status, 'canceled'));
+    return res.map(
+      ({ reservation, borrowerName }) =>
+        new Reservation({
+          ...reservation,
+          id: reservation.id + '',
+          borrowerName: borrowerName ?? undefined
+        })
+    );
   }
 }

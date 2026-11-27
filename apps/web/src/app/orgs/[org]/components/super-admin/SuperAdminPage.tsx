@@ -1,12 +1,12 @@
 import { Separator } from '../../../../../components/ui/separator';
 import { tsrFactory } from '../../../../../server/tsr-factory';
-import { Org, ReservationWithBorrowerName } from '../../../../../types/types';
+import { Org, ReservationWithOptionalBorrowerName } from '../../../../../types/types';
 import { OrgMemberHandler } from '../OrgMemberHandler';
 import { CalendarAndItemsTabGroup } from '../CalendarAndItemsTabGroup';
 import { InitOrgs } from '../../../../../stores/client-helpers/InitOrgs';
 import { InitItems } from '../../../../../stores/client-helpers/InitItems';
 import { extractBodyOrDefault, groupItems } from '../../../../../utils/utils';
-import { InitReservationRequests } from '../../../../../stores/client-helpers/InitReservationRequests';
+import { InitReservations } from '../../../../../stores/client-helpers/InitReservations';
 
 type SuperAdminPageProps = {
   org: Org;
@@ -22,39 +22,40 @@ export async function SuperAdminPage({ org }: SuperAdminPageProps) {
   dayEnd.setDate(dayStart.getDate() + 1);
 
   const tsr = await tsrFactory();
-  const [userMembersRes, adminMembersRes, itemsRes, orgsRes, reservationRequestsRes] =
-    await Promise.all([
-      tsr.organizations.getUserMembers.query({
-        params: { orgPath: org.path }
-      }),
-      tsr.organizations.getAdminMembers.query({
-        params: { orgPath: org.path }
-      }),
-      tsr.item.getAll.query(),
-      tsr.organizations.getAll.query(),
-      tsr.reservation.getReservationRequestsForOrg.query({ params: { orgPath: org.path } })
-    ]);
+  const [userMembersRes, adminMembersRes, itemsRes, orgsRes, reservationsReq] = await Promise.all([
+    tsr.organizations.getUserMembers.query({
+      params: { orgPath: org.path }
+    }),
+    tsr.organizations.getAdminMembers.query({
+      params: { orgPath: org.path }
+    }),
+    tsr.item.getAll.query(),
+    tsr.organizations.getAll.query(),
+    tsr.reservation.getWithOrgPath.query({ params: { orgPath: org.path } })
+  ]);
 
   const adminMembers = extractBodyOrDefault(adminMembersRes, []);
   const userMembers = extractBodyOrDefault(userMembersRes, []);
   const items = extractBodyOrDefault(itemsRes, []);
   const orgs = extractBodyOrDefault(orgsRes, []);
-  const requests = extractBodyOrDefault(reservationRequestsRes, []);
+  const requests = extractBodyOrDefault(reservationsReq, []);
 
   const groupedItems = groupItems(items);
   const groupedRequests = requests.reduce(
     (acc, curr) => {
-      acc[curr.itemId] = curr.reservations;
+      const arr = acc[curr.itemId] ?? [];
+      arr.push(curr);
+      acc[curr.itemId] = arr;
       return acc;
     },
-    {} as Record<number, ReservationWithBorrowerName[]>
+    {} as Record<number, ReservationWithOptionalBorrowerName[]>
   );
 
   return (
     <div className="flex flex-col gap-4 h-full">
       <InitOrgs orgs={orgs} />
       <InitItems items={groupedItems} />
-      <InitReservationRequests requests={groupedRequests} />
+      <InitReservations reservations={groupedRequests} />
 
       <h1 className="text-3xl font-medium">{org.name}</h1>
       <OrgMemberHandler org={org} adminMembers={adminMembers} userMembers={userMembers} />

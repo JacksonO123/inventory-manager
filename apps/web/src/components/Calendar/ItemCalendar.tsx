@@ -190,6 +190,15 @@ export function OrgItemCalendarSummary({ org, ...props }: OrgItemCalendarSummary
 
   const flatReservations = useMemo(() => Object.values(reservations).flat(), [reservations]);
 
+  const resources = useMemo(
+    () =>
+      Object.keys(reservations).map((itemId) => ({
+        id: itemId,
+        title: itemIdToName[Number(itemId)]
+      })),
+    [reservations, itemIdToName]
+  );
+
   const events = flatReservations.map((reservation) => {
     const withResourceId = {
       ...reservation,
@@ -218,10 +227,7 @@ export function OrgItemCalendarSummary({ org, ...props }: OrgItemCalendarSummary
         }}
         height="100%"
         initialView="resourceTimelineDay"
-        resources={flatReservations.map((reservation) => ({
-          id: reservation.itemId + '',
-          title: itemIdToName[reservation.itemId]
-        }))}
+        resources={resources}
         events={events}
       />
     </div>

@@ -1,13 +1,6 @@
 import { ArrowRight, CalendarDays, Clock } from 'lucide-react';
-import { ReservationWithBorrowerName } from '../../../../types/types';
-
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-50 text-amber-800 ring-amber-600/20',
-  approved: 'bg-emerald-50 text-emerald-800 ring-emerald-600/20',
-  rejected: 'bg-red-50 text-red-800 ring-red-600/20',
-  cancelled: 'bg-slate-100 text-slate-600 ring-slate-500/20'
-};
-const FALLBACK_STATUS = 'bg-slate-100 text-slate-700 ring-slate-500/20';
+import { ReservationWithOptionalBorrowerName } from '../../../../types/types';
+import { Button } from '../../../../components/ui/button';
 
 const dayFmt = new Intl.DateTimeFormat(undefined, {
   weekday: 'short',
@@ -46,7 +39,13 @@ function formatDuration(start: Date, end: Date, allDay: boolean) {
   return `${days} day${days === 1 ? '' : 's'}`;
 }
 
-export function ReservationRequestCard({ req }: { req: ReservationWithBorrowerName }) {
+type ReservationRequestCardProps = {
+  req: ReservationWithOptionalBorrowerName;
+  onAccept: () => void;
+  onReject: () => void;
+};
+
+export function ReservationRequestCard({ req, onAccept, onReject }: ReservationRequestCardProps) {
   const single = sameDay(req.start, req.end);
 
   return (
@@ -60,14 +59,13 @@ export function ReservationRequestCard({ req }: { req: ReservationWithBorrowerNa
 
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="truncate font-medium">{req.borrowerName}</h3>
-          <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${
-              STATUS_STYLES[req.status] ?? FALLBACK_STATUS
-            }`}
-          >
-            {req.status}
-          </span>
+          <h3 className="truncate font-medium">{req.borrowerName ?? 'Unknown'}</h3>
+          <div className="flex gap-2">
+            <Button variant="destructive" onClick={onReject}>
+              Reject
+            </Button>
+            <Button onClick={onAccept}>Accept</Button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">

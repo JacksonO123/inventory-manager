@@ -27,19 +27,6 @@ export const reservationRouter = c.router(
         409: errorMsgSchema
       }
     },
-    getByItemIdAndOrgPath: {
-      path: '/get/:orgPath/:itemId',
-      method: 'GET',
-      pathParams: z.object({
-        orgPath: z.string().min(1),
-        itemId: z.coerce.number().int().gte(0)
-      }),
-      responses: {
-        200: z.array(reservationSchema),
-        500: errorMsgSchema,
-        401: errorMsgSchema
-      }
-    },
     getByItemIdAndOrgPathBetweenDates: {
       path: '/get-by-item-between-dates/:orgId/:itemId',
       method: 'POST',
@@ -50,6 +37,18 @@ export const reservationRouter = c.router(
       body: z.object({
         start: z.coerce.date(),
         end: z.coerce.date()
+      }),
+      responses: {
+        200: z.array(reservationSchema),
+        401: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getWithOrgPath: {
+      path: '/get-by-org/:orgPath',
+      method: 'GET',
+      pathParams: z.object({
+        orgPath: z.string().min(1)
       }),
       responses: {
         200: z.array(reservationSchema),
@@ -73,20 +72,31 @@ export const reservationRouter = c.router(
         500: errorMsgSchema
       }
     },
-    getReservationRequestsForOrg: {
-      path: '/get-requests/:orgPath',
-      method: 'GET',
-      pathParams: z.object({
-        orgPath: z.string().min(1)
+    accept: {
+      path: '/accept',
+      method: 'POST',
+      body: z.object({
+        itemId: z.number().int().gte(0),
+        reservationId: z.number().int().gte(0)
       }),
       responses: {
-        200: z.array(
-          z.object({
-            itemId: z.number().int().gte(0),
-            reservations: z.array(reservationSchema.extend({ borrowerName: z.string() }))
-          })
-        ),
+        200: z.object({}),
         401: errorMsgSchema,
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    reject: {
+      path: '/reject',
+      method: 'POST',
+      body: z.object({
+        itemId: z.number().int().gte(0),
+        reservationId: z.number().int().gte(0)
+      }),
+      responses: {
+        200: z.object({}),
+        401: errorMsgSchema,
+        404: errorMsgSchema,
         500: errorMsgSchema
       }
     }
