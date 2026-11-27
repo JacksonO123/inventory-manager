@@ -3,7 +3,6 @@ import { c } from '../../contract';
 import { z } from 'zod';
 
 const itemIdParamsSchema = z.object({ id: z.coerce.number().int().gte(0) });
-const borrowerBodySchema = z.object({ borrowerId: z.string().min(1) });
 
 export const itemRouter = c.router(
   {
@@ -13,41 +12,7 @@ export const itemRouter = c.router(
       body: partialItemSchema.extend({ orgId: z.number().int().gte(0) }),
       responses: {
         200: z.object({ id: z.number().gte(0), status: itemSchema.shape.status }),
-        500: errorMsgSchema
-      }
-    },
-    getItemsFromOrgPath: {
-      path: '/list/:orgPath',
-      method: 'GET',
-      pathParams: z.object({
-        orgPath: z.string().min(1)
-      }),
-      responses: {
-        200: z.array(itemSchema),
-        500: errorMsgSchema
-      }
-    },
-    checkOut: {
-      path: '/checkout/:id',
-      method: 'POST',
-      pathParams: itemIdParamsSchema,
-      body: borrowerBodySchema,
-      responses: {
-        200: z.object({ id: z.number().gte(0) }),
-        404: errorMsgSchema,
-        409: errorMsgSchema,
-        500: errorMsgSchema
-      }
-    },
-    returnItem: {
-      path: '/return/:id',
-      method: 'POST',
-      pathParams: itemIdParamsSchema,
-      body: c.noBody(),
-      responses: {
-        200: z.object({ id: z.number().gte(0) }),
-        404: errorMsgSchema,
-        409: errorMsgSchema,
+        401: errorMsgSchema,
         500: errorMsgSchema
       }
     },
@@ -60,6 +25,21 @@ export const itemRouter = c.router(
       }),
       responses: {
         200: itemSchema,
+        401: errorMsgSchema,
+        404: errorMsgSchema,
+        500: errorMsgSchema
+      }
+    },
+    getAll: {
+      path: '/get-all',
+      method: 'GET',
+      responses: {
+        200: z.array(
+          z.object({
+            orgId: z.number().int().gte(0),
+            items: z.array(itemSchema)
+          })
+        ),
         500: errorMsgSchema
       }
     }

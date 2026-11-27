@@ -9,6 +9,7 @@ export async function tsrFactory() {
     baseUrl: env.API_BASE_URL,
     baseHeaders: {
       cookie: nextHeaders.get('cookie') ?? ''
-    }
+    },
+    validateResponse: true
   });
 }

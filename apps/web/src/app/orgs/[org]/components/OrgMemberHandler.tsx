@@ -5,18 +5,19 @@ import { Org, PartialAdminAndEmail } from '../../../../types/types';
 import { OrgMembers } from './OrgMembers';
 import { tsr } from '../../../../server/tsr';
 import { toast } from '../../../../components/ui/toast';
+import { tsrErrorMessage } from '../../../../utils/utils';
 
-type SuperAdminContentProps = {
+type OrgMemberHandlerProps = {
   org: Org;
   adminMembers: PartialAdminAndEmail[];
   userMembers: PartialAdminAndEmail[];
 };
 
-export function SuperAdminContent({
+export function OrgMemberHandler({
   org,
   adminMembers: defaultAdminMembers,
   userMembers: defaultUserMembers
-}: SuperAdminContentProps) {
+}: OrgMemberHandlerProps) {
   const [adminMembers, setAdminMembers] = useState(defaultAdminMembers);
   const [userMembers, setUserMembers] = useState(defaultUserMembers);
   const [addAdminMemberOpen, setAddAdminMemberOpen] = useState(false);
@@ -35,7 +36,7 @@ export function SuperAdminContent({
       setAdminMembers((prev) => prev.filter((item) => item.email !== email));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to add member'
+        title: tsrErrorMessage(res.body, 'Failed to add member')
       });
     } else {
       setAdminMembers((prev) =>
@@ -61,7 +62,7 @@ export function SuperAdminContent({
       setAdminMembers(before);
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to remove member'
+        title: tsrErrorMessage(res.body, 'Failed to remove member')
       });
     } else {
       toast.add({
@@ -81,9 +82,7 @@ export function SuperAdminContent({
         : isValidMemberRes.body.error !== undefined
           ? isValidMemberRes.body.error
           : 'Not a valid new member'
-      : isValidMemberRes.status === 500
-        ? isValidMemberRes.body.message
-        : 'Failed to validate new member email';
+      : tsrErrorMessage(isValidMemberRes.body, 'Failed to validate new member email');
   }
 
   async function handleAddUserMember(email: string) {
@@ -99,7 +98,7 @@ export function SuperAdminContent({
       setUserMembers((prev) => prev.filter((item) => item.email !== email));
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to add member'
+        title: tsrErrorMessage(res.body, 'Failed to add member')
       });
     } else {
       setUserMembers((prev) =>
@@ -125,7 +124,7 @@ export function SuperAdminContent({
       setUserMembers(before);
       toast.add({
         type: 'error',
-        title: res.status === 500 ? res.body.message : 'Failed to remove member'
+        title: tsrErrorMessage(res.body, 'Failed to remove member')
       });
     } else {
       toast.add({
@@ -145,9 +144,7 @@ export function SuperAdminContent({
         : isValidMemberRes.body.error !== undefined
           ? isValidMemberRes.body.error
           : 'Not a valid new member'
-      : isValidMemberRes.status === 500
-        ? isValidMemberRes.body.message
-        : 'Failed to validate new member email';
+      : tsrErrorMessage(isValidMemberRes.body, 'Failed to validate new member email');
   }
 
   return (

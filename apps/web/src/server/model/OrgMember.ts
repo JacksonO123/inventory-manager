@@ -2,6 +2,7 @@ import { orgMemberTable, orgTable, user } from '@invm/inventory-db-utils';
 import { and, eq } from 'drizzle-orm';
 import { OrgMember as OrgMemberType } from '../../types/types';
 import { db } from '../db';
+import { HttpError } from '../errors';
 
 export class OrgMember {
   values: OrgMemberType;
@@ -27,9 +28,13 @@ export class OrgMember {
       .from(orgTable)
       .where(eq(orgTable.path, orgPath));
 
+    if (orgIdRes === undefined) {
+      throw new HttpError(404, 'Org not found');
+    }
+
     await db
       .delete(orgMemberTable)
-      .where(and(eq(orgMemberTable.userId, userId), eq(orgMemberTable.orgId, orgIdRes!.orgId)));
+      .where(and(eq(orgMemberTable.userId, userId), eq(orgMemberTable.orgId, orgIdRes.orgId)));
   }
 
   static async getBelongsToPaths(userId: string) {

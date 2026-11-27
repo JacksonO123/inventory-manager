@@ -163,6 +163,9 @@ export function AdminManage({
           </Dialog>
         </div>
       </div>
+      {filteredAdmins.length === 0 && (
+        <div className="w-full text-center text-muted-foreground pt-4">No items</div>
+      )}
       {filteredAdmins.length > 0 && (
         <AdminEmailList
           userEmail={session.data?.user.email ?? null}

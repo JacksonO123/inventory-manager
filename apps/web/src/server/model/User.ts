@@ -42,4 +42,16 @@ export class User {
 
     return res.map((user) => new User(user.user));
   }
+
+  static async isMemberOfOrgById(userId: string, orgId: number) {
+    const res = await db
+      .select({ id: user.id })
+      .from(user)
+      .innerJoin(
+        orgMemberTable,
+        and(eq(orgMemberTable.orgId, orgId), eq(orgMemberTable.userId, userId))
+      );
+
+    return res.length > 0;
+  }
 }

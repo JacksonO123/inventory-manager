@@ -1,43 +1,45 @@
 import { PageContentWrapper } from '../../../../components/PageContentWrapper';
 import { RenderClientErrors } from '../../../../components/RenderClientErrors';
 import { tsrFactory } from '../../../../server/tsr-factory';
-import { Org } from '../../../../types/types';
 import { SuperAdminContent } from './content';
+import { groupItems, tsrErrorMessage } from '../../../../utils/utils';
+import { InitOrgs } from '../../../../stores/client-helpers/InitOrgs';
+import { InitOrgPositions } from '../../../../stores/client-helpers/InitOrgPositions';
+import { InitItems } from '../../../../stores/client-helpers/InitItems';
 
 export const dynamic = 'force-dynamic';
 
 export async function SuperAdminPage() {
   const tsr = await tsrFactory();
 
-  let orgs: Org[] = [];
-  let positions: number[] = [];
   const errors: string[] = [];
 
-  const [orgsRes, orgPositionsRes] = await Promise.all([
+  const [orgsRes, orgPositionsRes, itemsRes] = await Promise.all([
     tsr.organizations.getAll.query(),
-    tsr.organizations.getPositions.query()
+    tsr.organizations.getPositions.query(),
+    tsr.item.getAll.query()
   ]);
 
   if (orgsRes.status !== 200) {
-    errors.push(orgsRes.status === 500 ? orgsRes.body.message : 'Failed to fetch orgs');
+    errors.push(tsrErrorMessage(orgsRes.body, 'Failed to fetch orgs'));
   }
 
   if (orgPositionsRes.status !== 200) {
-    errors.push(
-      orgPositionsRes.status === 500
-        ? orgPositionsRes.body.message
-        : 'Failed to fetch org positions'
-    );
+    errors.push(tsrErrorMessage(orgPositionsRes.body, 'Failed to fetch org positions'));
   }
 
-  if (orgsRes.status === 200 && orgPositionsRes.status === 200) {
-    orgs = orgsRes.body;
-    positions = orgPositionsRes.body;
-  }
+  const orgs = orgsRes.status === 200 ? orgsRes.body : [];
+  const positions = orgPositionsRes.status === 200 ? orgPositionsRes.body : [];
+  const items = itemsRes.status === 200 ? itemsRes.body : [];
+  const groupedItems = groupItems(items);
 
   return (
     <PageContentWrapper>
-      <SuperAdminContent orgs={orgs} positions={positions} />
+      <InitOrgs orgs={orgs} />
+      <InitOrgPositions positions={positions} />
+      <InitItems items={groupedItems} />
+
+      <SuperAdminContent />
       <RenderClientErrors errors={errors} />
     </PageContentWrapper>
   );

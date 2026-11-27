@@ -94,10 +94,12 @@ export function OrgContent({
                 <DialogContent>
                   <CreateOrgForm
                     defaultValues={org}
-                    onSubmit={(updatedOrg) => onUpdate({ ...updatedOrg, id: org.id })}
+                    onSubmit={(updatedOrg) => {
+                      onUpdate({ ...updatedOrg, id: org.id });
+                      setEditDialogOpen(false);
+                    }}
                     onCancel={() => setEditDialogOpen(false)}
                   />
-                  ;
                 </DialogContent>
               </Dialog>
               <Dialog>
@@ -115,7 +117,13 @@ export function OrgContent({
                   </DialogHeader>
                   <DialogFooter>
                     <DialogClose render={<Button variant="outline">Cancel</Button>} />
-                    <DialogClose render={<Button onClick={onDelete}>Delete</Button>} />
+                    <DialogClose
+                      render={
+                        <Button onClick={onDelete} variant="destructive">
+                          Delete
+                        </Button>
+                      }
+                    />
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

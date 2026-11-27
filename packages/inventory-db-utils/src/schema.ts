@@ -1,6 +1,5 @@
 import { pgTable } from 'drizzle-orm/pg-core';
 import * as t from 'drizzle-orm/pg-core';
-import { isNull } from 'drizzle-orm';
 
 export const user = pgTable('user', {
   id: t.text('id').primaryKey(),
@@ -81,30 +80,6 @@ export const itemTable = pgTable('item', {
   status: itemStatus().notNull().default('available')
 });
 
-export const checkoutTable = pgTable(
-  'checkout',
-  {
-    id: t.serial().primaryKey(),
-    itemId: t
-      .integer('item_id')
-      .notNull()
-      .references(() => itemTable.id, { onDelete: 'cascade' }),
-    borrowerId: t
-      .text('borrower_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    checkedOutAt: t
-      .timestamp('checked_out_at', { precision: 6, withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    returnedAt: t.timestamp('returned_at', { precision: 6, withTimezone: true })
-  },
-  (table) => [
-    t.uniqueIndex('checkout_open_item_idx').on(table.itemId).where(isNull(table.returnedAt)),
-    t.index('checkout_borrowerId_idx').on(table.borrowerId)
-  ]
-);
-
 export const superAdminTable = pgTable('super_admin', {
   id: t.serial().primaryKey(),
   userId: t
@@ -123,17 +98,13 @@ export const adminTable = pgTable('admin', {
     .references(() => user.id, { onDelete: 'cascade' })
 });
 
-export const orgTable = pgTable(
-  'organization',
-  {
-    id: t.serial().primaryKey(),
-    name: t.text('name').notNull(),
-    description: t.text('description').notNull(),
-    svgDataUrl: t.text('svg_data_url'),
-    path: t.text('path').notNull()
-  },
-  (table) => [t.index('organization_path_index').on(table.path)]
-);
+export const orgTable = pgTable('organization', {
+  id: t.serial().primaryKey(),
+  name: t.text('name').notNull(),
+  description: t.text('description').notNull(),
+  svgDataUrl: t.text('svg_data_url'),
+  path: t.text('path').notNull().unique()
+});
 
 export const orgPositionsTable = pgTable('org_positions', {
   id: t.serial().primaryKey(),
@@ -147,13 +118,33 @@ export const orgPositionsTable = pgTable('org_positions', {
 
 export const eventStatusPgEnum = t.pgEnum('status', ['accepted', 'pending', 'canceled']);
 
-export const reservationTable = pgTable('reservation', {
-  id: t.serial().primaryKey(),
-  status: eventStatusPgEnum().notNull(),
-  start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
-  end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
-  allDay: t.boolean('all_day').notNull()
-});
+export const reservationTable = pgTable(
+  'reservation',
+  {
+    id: t.serial().primaryKey(),
+    orgId: t
+      .integer('org_id')
+      .notNull()
+      .references(() => orgTable.id, { onDelete: 'cascade' }),
+    itemId: t
+      .integer('item_id')
+      .notNull()
+      .references(() => itemTable.id, { onDelete: 'cascade' }),
+    borrower: t
+      .text()
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    status: eventStatusPgEnum().notNull(),
+    start: t.timestamp('start', { precision: 6, withTimezone: true }).notNull(),
+    end: t.timestamp('end', { precision: 6, withTimezone: true }).notNull(),
+    allDay: t.boolean('all_day').notNull()
+  },
+  (table) => [
+    t.index('reservation_item_start_idx').on(table.itemId, table.start),
+    t.index('reservation_org_start_idx').on(table.orgId, table.start),
+    t.index('reservation_borrower_idx').on(table.borrower)
+  ]
+);
 
 export const orgItemTable = pgTable(
   'org_item',
@@ -168,10 +159,7 @@ export const orgItemTable = pgTable(
       .notNull()
       .references(() => itemTable.id, { onDelete: 'cascade' })
   },
-  (table) => [
-    t.unique('org_item_org_item_unique').on(table.orgId, table.itemId),
-    t.index('org_item_item_id_idx').on(table.itemId)
-  ]
+  (table) => [t.unique('org_item_item_id_unique').on(table.itemId)]
 );
 
 export const orgMemberTable = pgTable(

@@ -36,6 +36,13 @@
       "when": 1795068802372,
       "tag": "0004_elite_zarek",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795743552018,
+      "tag": "0005_lucky_fenris",
+      "breakpoints": true
     }
   ]
 }

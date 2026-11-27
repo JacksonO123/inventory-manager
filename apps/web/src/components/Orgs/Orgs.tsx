@@ -4,10 +4,9 @@ import { Org, OrgProps } from './Org';
 import { OrgDragGhost } from './OrgDragGhost';
 import { DraggableItems } from '../../components/DraggableItems';
 import { useDragging } from '../../hooks/use-dragging';
+import { useOrgPositions, useOrgs } from '../../stores/orgs';
 
 type DraggableLinkEntryListProps = {
-  orgs: OrgType[];
-  positions: number[];
   managing: boolean;
 
   onUpdate: (org: OrgType) => void;
@@ -15,14 +14,10 @@ type DraggableLinkEntryListProps = {
   onReorder: (newPositions: number[]) => void;
 };
 
-export function Orgs({
-  orgs,
-  positions,
-  managing,
-  onUpdate,
-  onDelete,
-  onReorder
-}: DraggableLinkEntryListProps) {
+export function Orgs({ managing, onUpdate, onDelete, onReorder }: DraggableLinkEntryListProps) {
+  const { orgs } = useOrgs();
+  const { positions } = useOrgPositions();
+
   const dragId = useId();
 
   const sortedEntries = useMemo(

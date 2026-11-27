@@ -13,6 +13,7 @@ export function Items({ items, org }: ItemsProps) {
 
   return (
     <div className="flex gap-6 flex-wrap">
+      {items.length === 0 && <span className="text-muted-foreground mt-8">No Items</span>}
       {items.map((item, index) => (
         <Item item={item} org={org} key={`item-${index}-${listId}`} />
       ))}

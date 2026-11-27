@@ -29,7 +29,8 @@ export class Admin {
 
   static async getByUserId(userId: string) {
     const [res] = await db.select().from(adminTable).where(eq(adminTable.userId, userId));
-    return res;
+    if (res === undefined) return undefined;
+    return new Admin(res);
   }
 
   static async isAdminByEmail(email: string) {
@@ -44,10 +45,11 @@ export class Admin {
 
   static async getByUserEmail(email: string) {
     const [res] = await db
-      .select()
+      .select({ admin: adminTable })
       .from(adminTable)
       .innerJoin(user, and(eq(user.id, adminTable.userId), eq(user.email, email)));
-    return res;
+    if (res === undefined) return undefined;
+    return new Admin(res.admin);
   }
 }
 

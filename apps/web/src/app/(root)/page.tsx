@@ -7,7 +7,7 @@ import { auth } from '../../server/auth';
 import { tsrFactory } from '../../server/tsr-factory';
 import { ErrorCardPage } from '../../components/ErrorCardPage';
 import { SuperAdminPage } from './components/super-admin/SuperAdminPage';
-import { AdminPage } from './components/admin/AdminPage';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,12 +41,14 @@ export default async function Index() {
     );
   }
 
-  const adminStatus = adminStatusRes.body;
+  if (adminStatusRes.body.admin && !adminStatusRes.body.superAdmin) {
+    redirect('/orgs');
+  }
 
   return (
     <PageWrapper>
       <PageHeader />
-      {adminStatus.superAdmin ? <SuperAdminPage /> : adminStatus.admin ? <AdminPage /> : <></>}
+      <SuperAdminPage />
     </PageWrapper>
   );
 }

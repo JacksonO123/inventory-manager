@@ -10,5 +10,5 @@ type AdminContentProps = {
 };
 
 export function AdminContent({ orgInfo }: AdminContentProps) {
-  return <div className="w-full h-full"></div>;
+  return <div className="w-full h-full">{orgInfo.length}</div>;
 }
