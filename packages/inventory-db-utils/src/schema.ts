@@ -123,17 +123,13 @@ export const adminTable = pgTable('admin', {
     .references(() => user.id, { onDelete: 'cascade' })
 });
 
-export const orgTable = pgTable(
-  'organization',
-  {
-    id: t.serial().primaryKey(),
-    name: t.text('name').notNull(),
-    description: t.text('description').notNull(),
-    svgDataUrl: t.text('svg_data_url'),
-    path: t.text('path').notNull()
-  },
-  (table) => [t.index('organization_path_index').on(table.path)]
-);
+export const orgTable = pgTable('organization', {
+  id: t.serial().primaryKey(),
+  name: t.text('name').notNull(),
+  description: t.text('description').notNull(),
+  svgDataUrl: t.text('svg_data_url'),
+  path: t.text('path').notNull().unique()
+});
 
 export const orgPositionsTable = pgTable('org_positions', {
   id: t.serial().primaryKey(),
@@ -188,10 +184,7 @@ export const orgItemTable = pgTable(
       .notNull()
       .references(() => itemTable.id, { onDelete: 'cascade' })
   },
-  (table) => [
-    t.unique('org_item_org_item_unique').on(table.orgId, table.itemId),
-    t.index('org_item_item_id_idx').on(table.itemId)
-  ]
+  (table) => [t.unique('org_item_item_id_unique').on(table.itemId)]
 );
 
 export const orgMemberTable = pgTable(
