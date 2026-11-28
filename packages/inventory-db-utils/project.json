@@ -40,6 +40,13 @@
         "commands": ["oxfmt {projectRoot} --write"],
         "cwd": "{workspaceRoot}"
       }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "command": "jest"
+      }
     }
   }
 }
