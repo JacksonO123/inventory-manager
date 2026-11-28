@@ -1,7 +1,7 @@
 import { itemTable, orgItemTable, orgMemberTable, orgTable } from '@invm/inventory-db-utils';
 import { Org as OrgType, PartialOrg, Item as ItemType } from '../../types/types';
 import { db } from '../db';
-import { and, count, eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { HttpError } from '../errors';
 import { Item } from './Item';
 
@@ -19,12 +19,7 @@ export class Org {
 
   static async create(partialOrg: PartialOrg) {
     return await db.transaction(async (tx) => {
-      const [orgCount] = await tx.select({ count: count() }).from(orgTable);
-      if (orgCount === undefined) {
-        throw new Error('Failed to count orgs');
-      }
-
-      const [table] = await db.insert(orgTable).values(partialOrg).returning();
+      const [table] = await tx.insert(orgTable).values(partialOrg).returning();
       return new Org(table!);
     });
   }

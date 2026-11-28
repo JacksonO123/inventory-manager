@@ -47,6 +47,7 @@ describe('validateSuperAdminEmail', () => {
 
   it.each([
     [{ status: 500, body: {} }, 'Validation error'],
+    [{ status: 500, body: { message: 'server said no' } }, 'server said no'],
     [{ status: 200, body: { status: 'no_user_exists' } }, 'Given email is not an existing user'],
     [{ status: 200, body: { status: 'super_admin_exists' } }, 'Already a super admin'],
     [{ status: 200, body: { status: 'valid' } }, true]
@@ -70,6 +71,7 @@ describe('validateAdminEmail', () => {
 
   it.each([
     [{ status: 500, body: {} }, 'Validation error'],
+    [{ status: 500, body: { message: 'server said no' } }, 'server said no'],
     [{ status: 200, body: { status: 'no_user_exists' } }, 'Given email is not an existing user'],
     [{ status: 200, body: { status: 'admin_exists' } }, 'Already an admin'],
     [{ status: 200, body: { status: 'valid' } }, true]
